@@ -1,5 +1,5 @@
 export interface DecisionModel {
-	decision_type: string;
+	doc_type: string;
 	grand_prix: string;
 	weekend: string;
 	heading: {
