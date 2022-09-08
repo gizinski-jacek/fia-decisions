@@ -5,7 +5,7 @@ const Schema = mongoose.Schema;
 
 const DecisionSchema = new Schema<DecisionModel>(
 	{
-		decision_type: {
+		doc_type: {
 			type: String,
 			trim: true,
 			required: true,
