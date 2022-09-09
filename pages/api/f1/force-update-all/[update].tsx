@@ -7,88 +7,134 @@ import axios, { AxiosError } from 'axios';
 import { transformPDFData } from '../../../../lib/transformPDFData';
 import connectMongo from '../../../../lib/mongo';
 import Decision from '../../../../models/decision';
+import { TransformedPDFData } from '../../../../types/myTypes';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 	if (req.method === 'GET') {
-		try {
-			const fiaF1PageUrl =
-				'https://www.fia.com/documents/season/season-2022-2005/championships/fia-formula-one-world-championship-14';
-			const fiaDomain = 'https://www.fia.com';
-			const responseSite = await axios.get(fiaF1PageUrl);
-			const { document } = new JSDOM(responseSite.data).window;
-			const listView = document.getElementById('list-view');
-			if (!listView) {
-				const error = new Error('Error getting page');
-				return res.status(401).json(error);
-			}
-			const mainDoc = listView.querySelector('.decision-document-list');
-			const allGPList = mainDoc!.querySelectorAll('.event-wrapper');
-			const pdfParser = new PDFParser();
-			pdfParser.on('pdfParser_dataError', (errData) =>
-				console.error(errData.parserError)
-			);
-			pdfParser.on('pdfParser_dataReady', async (pdfData) => {
-				const transformed = transformPDFData(pdfData);
-				const newDecision = new Decision({
-					doc_type: 'decision', // Temporary
-					grand_prix: gpName,
-					...transformed,
+		if (req.query.update === 'decisions-offences') {
+			try {
+				const fiaF1PageUrl =
+					'https://www.fia.com/documents/championships/fia-formula-one-world-championship-14/season/season-2022-2005';
+				const fiaDomain = 'https://www.fia.com';
+				const responseSite = await axios.get(fiaF1PageUrl);
+				const { document } = new JSDOM(responseSite.data).window;
+				const listView: HTMLElement | null =
+					document.getElementById('list-view');
+				if (!listView) {
+					return res.status(404).json('Error getting main page');
+				}
+				const mainDoc: HTMLDivElement | null = listView.querySelector(
+					'.decision-document-list'
+				);
+				if (!mainDoc) {
+					return res.status(404).json('Error getting list');
+				}
+				const allDocAnchors: NodeList = mainDoc.querySelectorAll('a');
+				const allDocsHref: string[] = [];
+				allDocAnchors.forEach((link: HTMLAnchorElement) => {
+					const fileName = link.href
+						.slice(link.href.lastIndexOf('/') + 1)
+						.trim()
+						.toLowerCase();
+					if (
+						!fileName.includes('reprimand') &&
+						(fileName.includes('decision') || fileName.includes('offence'))
+					) {
+						allDocsHref.push(link.href);
+					}
 				});
-				try {
-					await connectMongo();
-					await newDecision.save();
-					fs.unlink(
-						'./pdf2json/gpPDFDocs/' +
-							fileURL?.slice(fileURL.lastIndexOf('/') + 1),
-						(error) => {
-							if (error) throw error;
+				await connectMongo();
+				await new Promise((resolve, reject) => {
+					allDocsHref.forEach(async (href) => {
+						const fileName = href.slice(href.lastIndexOf('/') + 1).slice(0, -4);
+						const docType = fileName
+							.slice(
+								fileName.indexOf('-') + 1,
+								fileName.indexOf('-', fileName.indexOf('-') + 1)
+							)
+							.trim();
+						const gpName = fileName.slice(0, fileName.indexOf('-')).trim();
+						try {
+							const responseFile = await axios.get(fiaDomain + href, {
+								responseType: 'stream',
+							});
+							const file = await responseFile.data.pipe(
+								fs.createWriteStream('./pdf2json/gpPDFDocs/' + fileName),
+								(error) => {
+									if (error) {
+										fs.unlink('./pdf2json/gpPDFDocs/' + fileName, (error) => {
+											if (error) {
+												throw error;
+											}
+										});
+									}
+								}
+							);
+							responseFile.data.on('end', () => pdfParser.loadPDF(file.path));
+							const pdfParser = new PDFParser();
+							pdfParser.on('pdfParser_dataError', (errData) =>
+								console.error(errData.parserError)
+							);
+							const transformedData: TransformedPDFData = await new Promise(
+								(res, rej) =>
+									pdfParser.on('pdfParser_dataReady', (pdfData) => {
+										res(transformPDFData(pdfData));
+									})
+							);
+							const penaltiesArray = [
+								'time',
+								'grid',
+								'fine',
+								'disqualified',
+								'warning',
+								'drive through',
+								'pit lane',
+								'reprimand',
+							];
+							let penalty = 'none';
+							penaltiesArray.forEach((v) => {
+								if (
+									transformedData.content.Decision[0].toLowerCase().includes(v)
+								) {
+									penalty = v;
+									return;
+								}
+							});
+							const newDecision = {
+								doc_type: docType,
+								doc_name: fileName,
+								grand_prix: gpName,
+								penalty: penalty,
+								...transformedData,
+							};
+							await Decision.findOneAndUpdate(
+								{ doc_type: docType, doc_name: fileName, grand_prix: gpName },
+								{ $setOnInsert: { ...newDecision } },
+								{ timestamps: false, upsert: true }
+							);
+							fs.unlink('./pdf2json/gpPDFDocs/' + fileName, (error) => {
+								if (error) {
+									throw error;
+								}
+							});
+							resolve(null);
+						} catch (error) {
+							reject(error);
 						}
-					);
-					return res.status(200).json({ success: true });
-				} catch (error) {
-					console.log(error);
+					});
+				});
+				return res.status(200).json({ success: true });
+			} catch (error) {
+				if (error instanceof AxiosError) {
+					return res
+						.status(error?.response?.status || 404)
+						.json(error?.response?.data || 'Unknown error');
+				} else {
 					return res.status(404).json('Unknown error');
 				}
-			});
-			const fileURL = allGPList[1].querySelectorAll('a')[3]?.href;
-			const responseFile = await axios.get(fiaDomain + fileURL, {
-				responseType: 'stream',
-			});
-			const writeStream = fs.createWriteStream(
-				'./pdf2json/gpPDFDocs/' + fileURL?.slice(fileURL.lastIndexOf('/') + 1)
-			);
-			writeStream.on('error', (error) => {
-				console.log(error);
-			});
-			const file = responseFile.data.pipe(writeStream, (error) => {
-				if (error) {
-					fs.unlink(
-						'./pdf2json/gpPDFDocs/' +
-							fileURL?.slice(fileURL.lastIndexOf('/') + 1),
-						(error) => {
-							if (error) throw error;
-						}
-					);
-				}
-			});
-			const gpName = file.path
-				.slice(file.path.lastIndexOf('/') + 1, file.path.indexOf('-'))
-				.trim();
-			responseFile.data.on('end', () => pdfParser.loadPDF(file.path));
-			// allGPList!.forEach(async (gp) => {
-			// 	const pdfParser = new PDFParser();
-			// 	const gpDocURL = fiaDomain + gp.querySelector('a')?.href;
-			// 	const pdfPipe = pdfParser.loadPDF(gpDocURL);
-			// 	console.log(pdfPipe);
-			// });
-		} catch (error) {
-			if (error instanceof AxiosError) {
-				return res
-					.status(error?.response?.status || 404)
-					.json(error?.response?.data || 'Unknown error');
-			} else {
-				return res.status(404).json('Unknown error');
 			}
+		}
+		if (req.query.update === 'other') {
 		}
 	}
 	return res.status(404);
