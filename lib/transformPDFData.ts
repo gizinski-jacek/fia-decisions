@@ -1,68 +1,74 @@
+import { escape } from 'querystring';
+
 export const transformPDFData = (pagesArray) => {
 	const stringsArray = pagesArray.Pages.map((p) => {
-		const textList = p.Texts.map((t) =>
-			t.R[0].T.replace(/%C2%A0/gi, ' ')
-				.replace(/%2C/gi, ',')
-				.replace(/%2F/gi, '/')
-				.replace(/%3A/gi, ':')
-				.replace(/%20/gi, '')
-				.trim()
-		);
+		const textList: string[] = p.Texts.map((t) => {
+			return decodeURIComponent(t.R[0].T).trim();
+		});
 		// Needs major refactoring
-		let skip = false;
+		const skipIndexes: number[] = [];
 		const modifiedTextList = textList
-			.map((x, index) => {
-				if (!x) {
+			.map((text, index) => {
+				if (skipIndexes.indexOf(index) !== -1) {
 					return;
 				}
-				if (skip) {
-					skip = false;
-					return;
-				}
-				if (x === 'No / Driver') {
-					skip = false;
+				if (text === 'No / Driver') {
 					return 'Driver';
 				}
-				if (x.length === 1) {
-					skip = false;
+				if (text.length === 1) {
 					return;
 				}
-				if (x.charAt(x.length - 1) === ',') {
-					skip = true;
-					return x + ' ' + textList[index + 1];
+				if (textList[index - 1] === 'Fact') {
+					const arr: string[] = [];
+					let i = index;
+					while (textList[i] !== 'Offence') {
+						if (textList[i].length < 6) {
+							break;
+						}
+						if (textList[i + 1].length < 6) {
+							arr.push(textList[i] + ' ' + textList[i + 1]);
+							skipIndexes.push(i, i + 1);
+						} else {
+							arr.push(textList[i]);
+							skipIndexes.push(i);
+						}
+						i++;
+					}
+					return arr;
 				}
-				if (x.length > 64 && x.charAt(x.length - 1) !== '.') {
-					skip = true;
-					return x + ' ' + textList[index + 1];
+				if (text.charAt(text.length - 1) === ',') {
+					skipIndexes.push(index + 1);
+					return text + ' ' + textList[index + 1];
 				}
-				skip = false;
-				return x;
+				if (text.length > 64 && text.charAt(text.length - 1) !== '.') {
+					skipIndexes.push(index + 1);
+					return text + ' ' + textList[index + 1];
+				}
+				return text;
 			})
 			.filter((u) => u !== undefined);
 		modifiedTextList.splice(10, 1);
 		modifiedTextList.splice(11, 1);
 		return modifiedTextList;
-	});
+	})[0];
 	// Needs major refactoring
-	const headingString = stringsArray[0].slice(0, 10);
+	const headingStrings = stringsArray.slice(0, 10);
 	const headingData = {};
-	for (let i = 0; i < headingString.length; i += 2) {
-		headingData[headingString[i]] = headingString[i + 1] || '';
+	for (let i = 0; i < headingStrings.length; i += 2) {
+		headingData[headingStrings[i]] = headingStrings[i + 1] || '';
 	}
-	const contentString = stringsArray[0].slice(12, 26);
+	const contentStrings = stringsArray.slice(12, 26);
 	const contentData = {};
-	for (let i = 0; i < contentString.length; i += 2) {
-		contentData[contentString[i]] = contentString[i + 1] || '';
+	for (let i = 0; i < contentStrings.length; i += 2) {
+		contentData[contentStrings[i]] = contentStrings[i + 1] || '';
 	}
-	contentData.Headline = stringsArray[0][11];
-	contentData.Reason = stringsArray[0]
-		.slice(27, stringsArray.length - 5)
+	contentData.Headline = stringsArray[11];
+	contentData.Reason = stringsArray
+		.slice(27, stringsArray.length - 4)
 		.join(' ');
-	const stewardsData = stringsArray[0].slice(stringsArray.length - 5);
+	const stewardsData = stringsArray.slice(stringsArray.length - 4);
 	const data = {
-		// doc_type: 'decision', // Temporary
-		// grand_prix: gpName,
-		weekend: stringsArray[0][10],
+		weekend: stringsArray[10],
 		heading: headingData,
 		content: contentData,
 		stewards: stewardsData,
