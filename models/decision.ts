@@ -10,7 +10,17 @@ const DecisionSchema = new Schema<DecisionModel>(
 			trim: true,
 			required: true,
 		},
+		doc_name: {
+			type: String,
+			trim: true,
+			required: true,
+		},
 		grand_prix: {
+			type: String,
+			trim: true,
+			required: true,
+		},
+		penalty: {
 			type: String,
 			trim: true,
 			required: true,
@@ -73,11 +83,13 @@ const DecisionSchema = new Schema<DecisionModel>(
 				trim: true,
 				required: true,
 			},
-			Fact: {
-				type: String,
-				trim: true,
-				required: true,
-			},
+			Fact: [
+				{
+					type: String,
+					trim: true,
+					required: true,
+				},
+			],
 			Offence: {
 				type: String,
 				trim: true,
