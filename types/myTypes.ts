@@ -1,6 +1,4 @@
-export interface DecisionModel {
-	doc_type: string;
-	grand_prix: string;
+export interface TransformedPDFData {
 	weekend: string;
 	heading: {
 		From: string;
@@ -16,9 +14,20 @@ export interface DecisionModel {
 		Time: string;
 		Session: string;
 		Fact: string;
-		Iffence: string;
+		Offence: string[];
 		Decision: string;
 		Reason: string;
 	};
 	stewards: string[];
+}
+
+export interface DecisionModel extends TransformedPDFData {
+	doc_type: string;
+	doc_name: string;
+	grand_prix: string;
+	penalty: string;
+}
+
+export interface DecisionMongoDBModel extends DecisionModel {
+	_id: string;
 }
