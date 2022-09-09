@@ -36,6 +36,24 @@ export const transformPDFData = (pagesArray) => {
 					}
 					return arr;
 				}
+				if (textList[index - 1] === 'Decision') {
+					const arr: string[] = [];
+					let i = index;
+					while (textList[i] !== 'Reason') {
+						if (textList[i].length < 6) {
+							break;
+						}
+						if (textList[i + 1].length < 6) {
+							arr.push(textList[i] + ' ' + textList[i + 1]);
+							skipIndexes.push(i, i + 1);
+						} else {
+							arr.push(textList[i]);
+							skipIndexes.push(i);
+						}
+						i++;
+					}
+					return arr;
+				}
 				if (text.charAt(text.length - 1) === ',') {
 					skipIndexes.push(index + 1);
 					return text + ' ' + textList[index + 1];
