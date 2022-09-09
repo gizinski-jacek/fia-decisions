@@ -15,7 +15,7 @@ export interface TransformedPDFData {
 		Session: string;
 		Fact: string;
 		Offence: string[];
-		Decision: string;
+		Decision: string[];
 		Reason: string;
 	};
 	stewards: string[];
