@@ -46,7 +46,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 				await connectMongo();
 				await new Promise((resolve, reject) => {
 					allDocsHref.forEach(async (href) => {
-						const fileName = href.slice(href.lastIndexOf('/') + 1).slice(0, -4);
+						let fileName = href.slice(href.lastIndexOf('/') + 1).slice(0, -4);
+						if (
+							fileName.charAt(fileName.length - 3) === '_' &&
+							fileName.charAt(fileName.length - 2) === '0'
+						) {
+							fileName = fileName.slice(fileName.length - 3);
+						}
 						const docType = fileName
 							.slice(
 								fileName.indexOf('-') + 1,
