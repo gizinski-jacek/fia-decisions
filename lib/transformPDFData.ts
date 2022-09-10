@@ -71,25 +71,25 @@ export const transformPDFData = (pagesArray) => {
 	});
 	// Needs major refactoring
 	const stringsArray = [].concat.apply([], stringsArrayList);
-	const headingStrings = stringsArray.slice(0, 10);
-	const headingData = {};
-	for (let i = 0; i < headingStrings.length; i += 2) {
-		headingData[headingStrings[i]] = headingStrings[i + 1] || '';
+	const documentInfoStrings = stringsArray.slice(0, 10);
+	const documentInfoData = {};
+	for (let i = 0; i < documentInfoStrings.length; i += 2) {
+		documentInfoData[documentInfoStrings[i]] = documentInfoStrings[i + 1] || '';
 	}
-	const contentStrings = stringsArray.slice(12, 26);
-	const contentData = {};
-	for (let i = 0; i < contentStrings.length; i += 2) {
-		contentData[contentStrings[i]] = contentStrings[i + 1] || '';
+	const incidentInfoStrings = stringsArray.slice(12, 26);
+	const incidentInfoData = {};
+	for (let i = 0; i < incidentInfoStrings.length; i += 2) {
+		incidentInfoData[incidentInfoStrings[i]] = incidentInfoStrings[i + 1] || '';
 	}
-	contentData.Headline = stringsArray[11];
-	contentData.Reason = stringsArray
+	incidentInfoData.Headline = stringsArray[11];
+	incidentInfoData.Reason = stringsArray
 		.slice(27, stringsArray.length - 4)
 		.join(' ');
 	const stewardsData = stringsArray.slice(stringsArray.length - 4);
 	const data = {
 		weekend: stringsArray[10],
-		heading: headingData,
-		content: contentData,
+		document_info: documentInfoData,
+		incident_info: incidentInfoData,
 		stewards: stewardsData,
 	};
 	return data;
