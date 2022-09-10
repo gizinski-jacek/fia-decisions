@@ -3,18 +3,19 @@ import axios from 'axios';
 import connectMongo from '../../lib/mongo';
 import Decision from '../../models/decision';
 import { useState } from 'react';
-import { DecisionModel } from '../../types/myTypes';
+import { DecisionMongoDBModel } from '../../types/myTypes';
+import F1DocWrapper from '../../components/wrappers/F1DocWrapper';
 
 interface Props {
-	data: DecisionModel[];
+	data: DecisionMongoDBModel[];
 }
 
 const F1: NextPage<Props> = ({ data }) => {
-	const [pageData, setPageData] = useState<DecisionModel[]>(data);
-
 	const testFetch = async () => {
 		try {
-			const res = await axios.get('/api/f1/update');
+			const res = await axios.get(
+				'/api/f1/force-update-all/decisions-offences'
+			);
 			console.log(res.data);
 		} catch (error) {
 			console.log(error);
@@ -23,7 +24,18 @@ const F1: NextPage<Props> = ({ data }) => {
 
 	return (
 		<div>
-			<button onClick={testFetch}>testFetch</button>
+			<button onClick={testFetch}>Test Fetch - Dont Abuse</button>
+			<div className='m-2'>
+				{data
+					.sort((a, b) => {
+						const dateB = new Date(`${b.heading.Date} ${b.heading.Time}`);
+						const dateA = new Date(`${a.heading.Date} ${a.heading.Time}`);
+						return dateB - dateA;
+					})
+					.map((d) => (
+						<F1DocWrapper key={d._id} data={d} />
+					))}
+			</div>
 		</div>
 	);
 };
@@ -33,7 +45,7 @@ export const getServerSideProps = async (
 ) => {
 	try {
 		await connectMongo();
-		const decisionList: DecisionModel[] = await Decision.find().exec();
+		const decisionList: DecisionMongoDBModel[] = await Decision.find().exec();
 		return {
 			props: { data: JSON.parse(JSON.stringify(decisionList)) },
 		};
