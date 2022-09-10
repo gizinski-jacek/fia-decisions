@@ -1,9 +1,8 @@
-import { escape } from 'querystring';
-
 export const transformPDFData = (pagesArray) => {
-	const stringsArray = pagesArray.Pages.map((p) => {
+	const stringsArrayList: string[][] = pagesArray.Pages.map((p) => {
 		const textList: string[] = p.Texts.map((t) => {
-			return decodeURIComponent(t.R[0].T).trim();
+			const string = t.R[0].T.replace(/%C2%A0/gi, ' ').trim();
+			return decodeURIComponent(string).trim();
 		});
 		// Needs major refactoring
 		const skipIndexes: number[] = [];
@@ -12,7 +11,8 @@ export const transformPDFData = (pagesArray) => {
 				if (skipIndexes.indexOf(index) !== -1) {
 					return;
 				}
-				if (text === 'No / Driver') {
+				// Needs checking/fixing
+				if (text.length === 11 && text.includes('Driver')) {
 					return 'Driver';
 				}
 				if (text.length === 1) {
@@ -68,8 +68,9 @@ export const transformPDFData = (pagesArray) => {
 		modifiedTextList.splice(10, 1);
 		modifiedTextList.splice(11, 1);
 		return modifiedTextList;
-	})[0];
+	});
 	// Needs major refactoring
+	const stringsArray = [].concat.apply([], stringsArrayList);
 	const headingStrings = stringsArray.slice(0, 10);
 	const headingData = {};
 	for (let i = 0; i < headingStrings.length; i += 2) {
