@@ -1,13 +1,13 @@
 export interface TransformedPDFData {
 	weekend: string;
-	heading: {
+	document_info: {
 		From: string;
 		To: string;
 		Document: string;
 		Date: string;
 		Time: string;
 	};
-	content: {
+	incident_info: {
 		Headline: string;
 		Driver: string;
 		Competitor: string;
@@ -24,8 +24,9 @@ export interface TransformedPDFData {
 export interface DecisionModel extends TransformedPDFData {
 	doc_type: string;
 	doc_name: string;
+	doc_date: Date;
 	grand_prix: string;
-	penalty: string;
+	penalty_type: string;
 }
 
 export interface DecisionMongoDBModel extends DecisionModel {

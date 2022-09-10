@@ -7,17 +7,18 @@ const DecisionSchema = new Schema<DecisionModel>(
 	{
 		doc_type: { type: String, trim: true, required: true },
 		doc_name: { type: String, trim: true, required: true },
+		doc_date: { type: Date, required: true },
 		grand_prix: { type: String, trim: true, required: true },
-		penalty: { type: String, trim: true, required: true },
+		penalty_type: { type: String, trim: true, required: true },
 		weekend: { type: String, trim: true, required: true },
-		heading: {
+		document_info: {
 			From: { type: String, trim: true, required: true },
 			To: { type: String, trim: true, required: true },
 			Document: { type: String, trim: true, required: true },
 			Date: { type: String, trim: true, required: true },
 			Time: { type: String, trim: true, required: true },
 		},
-		content: {
+		incident_info: {
 			Headline: { type: String, trim: true, required: true },
 			Driver: { type: String, trim: true, required: true },
 			Competitor: { type: String, trim: true, required: true },
