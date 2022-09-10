@@ -6,7 +6,7 @@ interface Props {
 	data: DecisionMongoDBModel;
 }
 
-const penaltyColors = {
+const penaltyTypeColors = {
 	time: { color: 'black', backgroundColor: 'lime' },
 	grid: { color: 'black', backgroundColor: 'red' },
 	fine: { color: 'black', backgroundColor: 'pink' },
@@ -31,25 +31,25 @@ const F1DocWrapper = ({ data }: Props) => {
 
 	const modalDataRender = (obj: DecisionMongoDBModel) => {
 		const content = [];
-		for (const [key, value] of Object.entries(obj.heading)) {
+		for (const [key, value] of Object.entries(obj.document_info)) {
 			content.push(
-				<div key={`heading-${key}`} className='my-1'>
+				<div key={`document_info-${key}`} className='my-1'>
 					{key}: {value}
 				</div>
 			);
 		}
 		content.push(
 			<div key={'headline'} className='my-2 mt-3'>
-				{obj.content.Headline}
+				{obj.incident_info.Headline}
 			</div>
 		);
-		for (const [key, value] of Object.entries(obj.content)) {
+		for (const [key, value] of Object.entries(obj.incident_info)) {
 			if (key === 'Headline') {
 				break;
 			}
 			if (key === 'Fact' || key === 'Decision') {
 				content.push(
-					<div key={`content-${key}`} className='my-2'>
+					<div key={`incident_info-${key}`} className='my-2'>
 						<div>{`${key}:`}</div>
 						<div>
 							{(value as string[]).map((s, i) => (
@@ -70,7 +70,7 @@ const F1DocWrapper = ({ data }: Props) => {
 		}
 		content.push(
 			<div key={'reason'} className='my-2'>
-				Reason: {obj.content.Reason}
+				Reason: {obj.incident_info.Reason}
 			</div>
 		);
 		return content;
@@ -87,15 +87,18 @@ const F1DocWrapper = ({ data }: Props) => {
 						>
 							<div
 								className='border rounded p-1 me-2 text-uppercase w-100px text-center'
-								style={{ width: '170px', ...penaltyColors[data.penalty] }}
+								style={{
+									width: '170px',
+									...penaltyTypeColors[data.penalty_type],
+								}}
 							>
-								{data.penalty}
+								{data.penalty_type}
 							</div>
 							<div
 								className='m-2 text-center text-sm-start'
 								style={{ width: '200px' }}
 							>
-								{data.content.Driver}
+								{data.incident_info.Driver}
 							</div>
 							<div className='m-2 d-none d-lg-block' style={{ width: '200px' }}>
 								{data.weekend}
@@ -115,11 +118,11 @@ const F1DocWrapper = ({ data }: Props) => {
 							</div>
 							<div className='my-0 mx-md-2 mx-lg-0 me-lg-4'>
 								<p>
-									Date: {data.heading.Date} {data.heading.Time}
+									Date: {data.document_info.Date} {data.document_info.Time}
 								</p>
 							</div>
 							<div className='my-2 m-md-0 mx-md-2 mx-lg-4'>
-								{data.content.Decision.map((s, i) => {
+								{data.incident_info.Decision.map((s, i) => {
 									if (i === 0) {
 										return (
 											<p className='m-0' key={i}>
