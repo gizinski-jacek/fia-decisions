@@ -97,26 +97,34 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 								'pit lane',
 								'reprimand',
 							];
-							let penalty = 'none';
+							let penalty_type = 'none';
 							penaltiesArray.forEach((v) => {
 								if (
-									transformedData.content.Decision[0].toLowerCase().includes(v)
+									transformedData.incident_info.Decision[0]
+										.toLowerCase()
+										.includes(v)
 								) {
-									penalty = v;
+									penalty_type = v;
 									return;
 								}
 							});
+							const docDate = new Date(
+								transformedData.document_info.Date +
+									' ' +
+									transformedData.document_info.Time
+							);
 							const newDecision = {
 								doc_type: docType,
 								doc_name: fileName,
+								doc_date: docDate,
 								grand_prix: gpName,
-								penalty: penalty,
+								penalty_type: penalty_type,
 								...transformedData,
 							};
 							await Decision.findOneAndUpdate(
 								{ doc_type: docType, doc_name: fileName, grand_prix: gpName },
 								{ $setOnInsert: { ...newDecision } },
-								{ timestamps: false, upsert: true }
+								{ timestamps: true, upsert: true }
 							);
 							fs.unlink('./pdf2json/gpPDFDocs/' + fileName, (error) => {
 								if (error) {
