@@ -113,14 +113,14 @@ const F1DocWrapper = ({ data }: Props) => {
 					</Accordion.Header>
 					<Accordion.Body className='mx-2 mx-sm-0 d-flex flex-column flex-sm-row justify-content-between'>
 						<div className='d-flex flex-grow-1 flex-column flex-md-row'>
-							<div className='my-0 me-md-2 d-block d-lg-none'>
-								<p>Weekend: {data.weekend}</p>
+							<div className='me-md-2 d-block d-lg-none'>
+								<p className='mb-2 mb-md-0'>Weekend: {data.weekend}</p>
 							</div>
-							<div className='my-0 me-md-2 d-block d-md-none'>
-								<p>Title: {data.doc_name}</p>
+							<div className='me-md-2 d-block d-md-none'>
+								<p className='mb-2 mb-md-0'>Title: {data.doc_name}</p>
 							</div>
-							<div className='my-0 mx-md-2 mx-lg-0 me-lg-4'>
-								<p>
+							<div className='mx-md-2 mx-lg-0 me-lg-4'>
+								<p className='mb-2 mb-md-0'>
 									Date: {data.document_info.Date} {data.document_info.Time}
 								</p>
 							</div>
@@ -128,13 +128,13 @@ const F1DocWrapper = ({ data }: Props) => {
 								{data.incident_info.Decision.map((s, i) => {
 									if (i === 0) {
 										return (
-											<p className='m-0' key={i}>
+											<p className='mb-2 mb-md-0' key={i}>
 												Penalty: {s}
 											</p>
 										);
 									}
 									return (
-										<p className='m-0' key={i}>
+										<p className='mb-2 mb-md-0' key={i}>
 											{s}
 										</p>
 									);
