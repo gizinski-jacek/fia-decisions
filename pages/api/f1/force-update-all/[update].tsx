@@ -78,9 +78,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 							);
 							responseFile.data.on('end', () => pdfParser.loadPDF(file.path));
 							const pdfParser = new PDFParser();
-							pdfParser.on('pdfParser_dataError', (errData: any) =>
-								console.error(errData.parserError)
-							);
+							pdfParser.on('pdfParser_dataError', (errData: any) => {
+								console.error(errData.parserError);
+								fs.unlink('./pdf2json/gpPDFDocs/' + fileName, (error) => {
+									if (error) {
+										throw error;
+									}
+								});
+							});
 							const pdfData = await new Promise((res, rej) =>
 								pdfParser.on('pdfParser_dataReady', (pdfData: any) => {
 									res(pdfData);
@@ -133,6 +138,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 							});
 							resolve(null);
 						} catch (error) {
+							fs.unlink('./pdf2json/gpPDFDocs/' + fileName, (error) => {
+								if (error) {
+									throw error;
+								}
+							});
 							reject(error);
 						}
 					});
@@ -151,7 +161,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 		if (req.query.update === 'other') {
 		}
 	}
-	return res.status(404);
+	return res.status(404).json({ success: false });
 };
 
 export default handler;
