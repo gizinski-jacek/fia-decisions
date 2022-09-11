@@ -15,7 +15,7 @@ const Layout = ({ children }: Props) => {
 				<meta name='description' content='FIA Decisions' />
 				<link rel='icon' href='/favicon.ico' />
 			</Head>
-			<Drawer />
+			{/* <Drawer /> */}
 			<main>{children}</main>
 			{/* <Footer /> */}
 		</ThemeContextProvider>
