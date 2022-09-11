@@ -52,7 +52,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 				}
 				const allDocAnchors: NodeList = mainDoc.querySelectorAll('a');
 				const allDocsHref: string[] = [];
-				allDocAnchors.forEach((link: HTMLAnchorElement) => {
+				allDocAnchors.forEach((link: any) => {
 					const fileName = link.href
 						.slice(link.href.lastIndexOf('/') + 1)
 						.trim()
@@ -108,7 +108,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 							});
 							const file = await responseFile.data.pipe(
 								fs.createWriteStream('./pdf2json/gpPDFDocs/' + fileName),
-								(error) => {
+								(error: any) => {
 									if (error) {
 										fs.unlink('./pdf2json/gpPDFDocs/' + fileName, (error) => {
 											if (error) {
@@ -120,15 +120,15 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 							);
 							responseFile.data.on('end', () => pdfParser.loadPDF(file.path));
 							const pdfParser = new PDFParser();
-							pdfParser.on('pdfParser_dataError', (errData) =>
+							pdfParser.on('pdfParser_dataError', (errData: any) =>
 								console.error(errData.parserError)
 							);
-							const transformedData: TransformedPDFData = await new Promise(
-								(res, rej) =>
-									pdfParser.on('pdfParser_dataReady', (pdfData) => {
-										res(transformPDFData(pdfData));
-									})
+							const pdfData = await new Promise((res, rej) =>
+								pdfParser.on('pdfParser_dataReady', (pdfData: any) => {
+									res(pdfData);
+								})
 							);
+							const transformedData: any = transformPDFData(pdfData);
 							const penaltiesArray = [
 								'time',
 								'grid',
