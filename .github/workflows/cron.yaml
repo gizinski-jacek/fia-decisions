@@ -6,8 +6,8 @@ jobs:
   cron:
     runs-on: ubuntu-latest
     steps:
-      - name: Call our API route
+      - name: Call API route fetching new documents
         run: |
-          curl --request POST \
+          curl --request GET \
           --url '${{ process.env.MY_APP_URI }}' \
           --header 'Authorization: Bearer ${{ process.env.CRON_JOB_SECRET }}'
