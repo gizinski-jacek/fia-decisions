@@ -17,7 +17,7 @@ const Layout = ({ children }: Props) => {
 			</Head>
 			<Drawer />
 			<main>{children}</main>
-			<Footer />
+			{/* <Footer /> */}
 		</ThemeContextProvider>
 	);
 };
