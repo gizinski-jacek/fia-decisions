@@ -1,4 +1,4 @@
-name: every-10m-cron-job
+name: every-15m-cron-job
 on:
   schedule:
     - cron: '*/15 * * * *'
