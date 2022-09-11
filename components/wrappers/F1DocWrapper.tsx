@@ -19,7 +19,6 @@ const penaltyTypeColors = {
 } as const;
 
 type PTCkey = keyof typeof penaltyTypeColors;
-type PTCval = typeof penaltyTypeColors[PTCkey];
 
 const F1DocWrapper = ({ data }: Props) => {
 	const [showModal, setShowModal] = useState(false);
