@@ -13,6 +13,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 	if (req.method === 'GET') {
 		if (req.query.update === 'decisions-offences') {
 			try {
+				const { authorization } = req.headers;
+				if (authorization !== `Bearer ${process.env.CRON_JOB_SECRET}`) {
+					return res.status(401).json({ success: false });
+				}
 				const docList = await Decision.find({})
 					.sort({ doc_date: -1 })
 					.limit(1)
