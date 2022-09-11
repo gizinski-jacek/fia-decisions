@@ -9,5 +9,5 @@ jobs:
       - name: Call API route fetching new documents
         run: |
           curl --request GET \
-          --url '${{ process.env.MY_APP_URI }}' \
-          --header 'Authorization: Bearer ${{ process.env.CRON_JOB_SECRET }}'
+          --url '${{ secrets.MY_APP_URI }}' \
+          --header 'Authorization: Bearer ${{ secrets.CRON_JOB_SECRET }}'
