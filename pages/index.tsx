@@ -1,7 +1,18 @@
-import type { NextPage } from 'next';
+import type { GetServerSidePropsContext, NextPage } from 'next';
 
 const Home: NextPage = () => {
-	return <div>Welcome to home page</div>;
+	return <div></div>;
+};
+
+export const getServerSideProps = async (
+	context: GetServerSidePropsContext
+) => {
+	return {
+		redirect: {
+			destination: '/f1',
+			permanent: false,
+		},
+	};
 };
 
 export default Home;
