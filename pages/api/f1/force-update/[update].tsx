@@ -2,12 +2,12 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { JSDOM } from 'jsdom';
 import fs from 'fs';
-import PDFParser from 'pdf2json';
+// import PDFParser from 'pdf2json';
+const PDFParser = require('pdf2json');
 import axios, { AxiosError } from 'axios';
 import { transformPDFData } from '../../../../lib/transformPDFData';
 import connectMongo from '../../../../lib/mongo';
 import Decision from '../../../../models/decision';
-import { TransformedPDFData } from '../../../../types/myTypes';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 	if (req.method === 'GET') {
@@ -19,9 +19,20 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 					.exec();
 				if (docList.length === 0) {
 					try {
+						if (
+							!process.env.node_env &&
+							!process.env.MY_APP_URI &&
+							!process.env.MY_APP_URI_DEV
+						) {
+							throw new Error(
+								'Please define node_env, MY_APP_URI and MY_APP_URI_DEV environment variables inside .env.local'
+							);
+						}
 						await axios.get(
-							process.env.MY_APP_URI +
-								'/api/f1/force-update-all/decisions-offences'
+							(process.env.node_env as string) === 'production'
+								? (process.env.MY_APP_URI as string)
+								: (process.env.MY_APP_URI_DEV as string) +
+										'/api/f1/force-update-all/decisions-offences'
 						);
 						return res.status(200).json({ success: true });
 					} catch (error) {
@@ -103,6 +114,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 							.trim();
 						const gpName = fileName.slice(0, fileName.indexOf('-')).trim();
 						try {
+							// Slow down downloading to avoid PDF errors.
 							const responseFile = await axios.get(fiaDomain + href, {
 								responseType: 'stream',
 							});

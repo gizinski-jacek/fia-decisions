@@ -2,12 +2,12 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { JSDOM } from 'jsdom';
 import fs from 'fs';
-import PDFParser from 'pdf2json';
+// import PDFParser from 'pdf2json';
+const PDFParser = require('pdf2json');
 import axios, { AxiosError } from 'axios';
 import { transformPDFData } from '../../../../lib/transformPDFData';
 import connectMongo from '../../../../lib/mongo';
 import Decision from '../../../../models/decision';
-import { TransformedPDFData } from '../../../../types/myTypes';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 	if (req.method === 'GET') {
