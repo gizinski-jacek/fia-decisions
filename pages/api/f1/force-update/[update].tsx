@@ -30,14 +30,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 									'Please define node_env, MY_APP_URI and MY_APP_URI_DEV environment variables inside .env.local'
 								);
 							}
-							res.status(200).json({ success: true });
 							await axios.get(
 								(process.env.node_env as string) === 'production'
 									? (process.env.MY_APP_URI as string)
 									: (process.env.MY_APP_URI_DEV as string) +
 											'/api/f1/force-update-all/decisions-offences'
 							);
-							return;
+							return res.status(200).json({ success: true });
 						} catch (error) {
 							if (error instanceof AxiosError) {
 								return res
@@ -100,104 +99,100 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 						}
 					});
 					await connectMongo();
-					await new Promise((resolve, reject) => {
-						allDocsHref.forEach(async (href) => {
-							let fileName = href.slice(href.lastIndexOf('/') + 1).slice(0, -4);
-							if (
-								fileName.charAt(fileName.length - 3) === '_' &&
-								fileName.charAt(fileName.length - 2) === '0'
-							) {
-								fileName = fileName.slice(fileName.length - 3);
-							}
-							const docType = fileName
-								.slice(
-									fileName.indexOf('-') + 1,
-									fileName.indexOf('-', fileName.indexOf('-') + 1)
-								)
-								.trim();
-							const gpName = fileName.slice(0, fileName.indexOf('-')).trim();
-							try {
-								// Slow down downloading to avoid PDF file saving errors.
-								const responseFile = await axios.get(fiaDomain + href, {
-									responseType: 'stream',
-								});
-								const file = await responseFile.data.pipe(
-									fs.createWriteStream('./pdf2json/gpPDFDocs/' + fileName),
-									(error: any) => {
-										if (error) {
-											fs.unlink('./pdf2json/gpPDFDocs/' + fileName, (error) => {
-												if (error) {
-													throw error;
-												}
-											});
-										}
-									}
-								);
-								responseFile.data.on('end', () => pdfParser.loadPDF(file.path));
-								const pdfParser = new PDFParser();
-								pdfParser.on('pdfParser_dataError', (errData: any) =>
-									console.error(errData.parserError)
-								);
-								const pdfData = await new Promise((res, rej) =>
-									pdfParser.on('pdfParser_dataReady', (pdfData: any) => {
-										res(pdfData);
-									})
-								);
-								const transformedData: any = transformPDFData(pdfData);
-								const penaltiesArray = [
-									'time',
-									'grid',
-									'fine',
-									'disqualified',
-									'warning',
-									'drive through',
-									'pit lane',
-									'reprimand',
-								];
-								let penalty_type = 'none';
-								penaltiesArray.forEach((v) => {
-									if (
-										transformedData.incident_info.Decision[0]
-											.toLowerCase()
-											.includes(v)
-									) {
-										penalty_type = v;
-										return;
-									}
-								});
-								const docDate = new Date(
-									transformedData.document_info.Date +
-										' ' +
-										transformedData.document_info.Time
-								);
-								const newDecision = {
-									doc_type: docType,
-									doc_name: fileName,
-									doc_date: docDate,
-									grand_prix: gpName,
-									penalty_type: penalty_type,
-									...transformedData,
-								};
-								await Decision.findOneAndUpdate(
-									{ doc_type: docType, doc_name: fileName, grand_prix: gpName },
-									{ $setOnInsert: { ...newDecision } },
-									{ timestamps: true, upsert: true }
-								);
-								fs.unlink('./pdf2json/gpPDFDocs/' + fileName, (error) => {
+					allDocsHref.forEach(async (href) => {
+						let fileName = href.slice(href.lastIndexOf('/') + 1).slice(0, -4);
+						if (
+							fileName.charAt(fileName.length - 3) === '_' &&
+							fileName.charAt(fileName.length - 2) === '0'
+						) {
+							fileName = fileName.slice(fileName.length - 3);
+						}
+						const docType = fileName
+							.slice(
+								fileName.indexOf('-') + 1,
+								fileName.indexOf('-', fileName.indexOf('-') + 1)
+							)
+							.trim();
+						const gpName = fileName.slice(0, fileName.indexOf('-')).trim();
+						try {
+							// Slow down downloading to avoid PDF file saving errors.
+							const responseFile = await axios.get(fiaDomain + href, {
+								responseType: 'stream',
+							});
+							const file = await responseFile.data.pipe(
+								fs.createWriteStream('./pdf2json/gpPDFDocs/' + fileName),
+								(error: any) => {
 									if (error) {
-										throw error;
+										fs.unlink('./pdf2json/gpPDFDocs/' + fileName, (error) => {
+											if (error) {
+												throw error;
+											}
+										});
 									}
-								});
-								resolve(null);
-							} catch (error) {
-								fs.unlink('./pdf2json/gpPDFDocs/' + fileName, (error) => {
-									if (error) {
-										throw error;
-									}
-								});
-								reject(error);
-							}
-						});
+								}
+							);
+							responseFile.data.on('end', () => pdfParser.loadPDF(file.path));
+							const pdfParser = new PDFParser();
+							pdfParser.on('pdfParser_dataError', (errData: any) =>
+								console.error(errData.parserError)
+							);
+							const pdfData = await new Promise((res, rej) =>
+								pdfParser.on('pdfParser_dataReady', (pdfData: any) => {
+									res(pdfData);
+								})
+							);
+							const transformedData: any = transformPDFData(pdfData);
+							const penaltiesArray = [
+								'time',
+								'grid',
+								'fine',
+								'disqualified',
+								'warning',
+								'drive through',
+								'pit lane',
+								'reprimand',
+							];
+							let penalty_type = 'none';
+							penaltiesArray.forEach((v) => {
+								if (
+									transformedData.incident_info.Decision[0]
+										.toLowerCase()
+										.includes(v)
+								) {
+									penalty_type = v;
+									return;
+								}
+							});
+							const docDate = new Date(
+								transformedData.document_info.Date +
+									' ' +
+									transformedData.document_info.Time
+							);
+							const newDecision = {
+								doc_type: docType,
+								doc_name: fileName,
+								doc_date: docDate,
+								grand_prix: gpName,
+								penalty_type: penalty_type,
+								...transformedData,
+							};
+							await Decision.findOneAndUpdate(
+								{ doc_type: docType, doc_name: fileName, grand_prix: gpName },
+								{ $setOnInsert: { ...newDecision } },
+								{ timestamps: true, upsert: true }
+							);
+							fs.unlink('./pdf2json/gpPDFDocs/' + fileName, (error) => {
+								if (error) {
+									throw error;
+								}
+							});
+						} catch (error) {
+							fs.unlink('./pdf2json/gpPDFDocs/' + fileName, (error) => {
+								if (error) {
+									throw error;
+								}
+							});
+						}
 					});
 					return res.status(200).json({ success: true });
 				} else {
