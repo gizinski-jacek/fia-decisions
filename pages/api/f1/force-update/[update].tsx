@@ -15,6 +15,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 			try {
 				const { authorization } = req.headers;
 				if (authorization === `Bearer ${process.env.CRON_JOB_SECRET}`) {
+					await connectMongo();
 					const docList = await Decision.find({})
 						.sort({ doc_date: -1 })
 						.limit(1)
@@ -99,7 +100,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 							}
 						}
 					});
-					await connectMongo();
 					await new Promise((resolve, reject) => {
 						allDocsHref.forEach(async (href) => {
 							let fileName = href.slice(href.lastIndexOf('/') + 1).slice(0, -4);
