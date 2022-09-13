@@ -15,7 +15,7 @@ jobs:
 name: daily-midnight-cleanup
 on:
   schedule:
-    - cron: '0 0 * * *'
+    - cron: '5 0 * * *'
 jobs:
   cron:
     runs-on: ubuntu-latest
