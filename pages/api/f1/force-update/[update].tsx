@@ -1,13 +1,12 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { JSDOM } from 'jsdom';
-import fs from 'fs';
-// import PDFParser from 'pdf2json';
-const PDFParser = require('pdf2json');
+const { PdfReader } = require('pdfreader');
 import axios, { AxiosError } from 'axios';
-import { transformPDFData } from '../../../../lib/transformPDFData';
 import connectMongo from '../../../../lib/mongo';
 import Decision from '../../../../models/decision';
+import { Stream } from 'stream';
+import { transformDataToDecisionObj } from '../../../../lib/transformDataToDecisionObj';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 	if (req.method === 'GET') {
@@ -31,14 +30,18 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 									'Please define node_env, MY_APP_URI and MY_APP_URI_DEV environment variables inside .env.local'
 								);
 							}
-							res.status(200).json({ success: true });
 							await axios.get(
 								(process.env.node_env as string) === 'production'
 									? (process.env.MY_APP_URI as string)
 									: (process.env.MY_APP_URI_DEV as string) +
-											'/api/f1/force-update-all/decisions-offences'
+											'/api/f1/force-update-all/decisions-offences',
+								{
+									headers: {
+										authorization: `Bearer ${process.env.CRON_JOB_UPDATE_ALL_DOCS_SECRET}`,
+									},
+								}
 							);
-							return;
+							return res.status(200).json({ success: true });
 						} catch (error) {
 							if (error instanceof AxiosError) {
 								return res
@@ -49,6 +52,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 							}
 						}
 					}
+
 					const fiaF1PageUrl =
 						'https://www.fia.com/documents/championships/fia-formula-one-world-championship-14/season/season-2022-2005';
 					const fiaDomain = 'https://www.fia.com';
@@ -65,6 +69,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 					if (!mainDoc) {
 						return res.status(404).json('Error getting list');
 					}
+
 					const allDocAnchors: NodeList = mainDoc.querySelectorAll('a');
 					const allDocsHref: string[] = [];
 					allDocAnchors.forEach((link: any) => {
@@ -72,9 +77,26 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 							.slice(link.href.lastIndexOf('/') + 1)
 							.trim()
 							.toLowerCase();
+
+						// Tried doing this check with regex match but it would sometimes hang up.
+						// Maybe my regex was wrong, will check again later.
+						const disallowedWordsInDocName = [
+							'reprimand',
+							'withdrawal',
+							'schedule',
+							'set a time',
+							'permission to start',
+							'protest lodged',
+							'cover',
+						];
+						const disallowedDoc = disallowedWordsInDocName.some((str) =>
+							fileName.includes(str)
+						);
+
 						if (
-							!fileName.includes('reprimand') &&
-							(fileName.includes('decision') || fileName.includes('offence'))
+							!disallowedDoc &&
+							((fileName.includes('decision') && fileName.includes('car')) ||
+								(fileName.includes('offence') && fileName.includes('car')))
 						) {
 							const published = link.querySelector(
 								'.date-display-single'
@@ -100,101 +122,56 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 							}
 						}
 					});
+
+					const streamToBuffer = async (stream: Stream): Promise<Buffer> => {
+						return new Promise<Buffer>((resolve, reject) => {
+							const buffer = Array<any>();
+							stream.on('data', (chunk) => buffer.push(chunk));
+							stream.on('end', () => resolve(Buffer.concat(buffer)));
+							stream.on('error', (err) =>
+								reject(`Error converting stream - ${err}`)
+							);
+						});
+					};
+
+					const readPDFPages = (buffer: Buffer) => {
+						const reader = new PdfReader();
+						return new Promise((resolve, reject) => {
+							const stringsArray: string[] = [];
+							reader.parseBuffer(buffer, (err: any, item: any) => {
+								if (err) {
+									reject(err);
+								} else if (!item) {
+									resolve(stringsArray);
+								} else if (item.text) {
+									stringsArray.push(item.text.normalize('NFKD'));
+								}
+							});
+						});
+					};
+
 					await new Promise((resolve, reject) => {
 						allDocsHref.forEach(async (href) => {
-							let fileName = href.slice(href.lastIndexOf('/') + 1).slice(0, -4);
-							if (
-								fileName.charAt(fileName.length - 3) === '_' &&
-								fileName.charAt(fileName.length - 2) === '0'
-							) {
-								fileName = fileName.slice(fileName.length - 3);
-							}
-							const docType = fileName
-								.slice(
-									fileName.indexOf('-') + 1,
-									fileName.indexOf('-', fileName.indexOf('-') + 1)
-								)
-								.trim();
-							const gpName = fileName.slice(0, fileName.indexOf('-')).trim();
+							const responseFile = await axios.get(fiaDomain + href, {
+								responseType: 'stream',
+							});
+							const fileBuffer = await streamToBuffer(responseFile.data);
+							const readPDF = await readPDFPages(fileBuffer);
+							const transformed = transformDataToDecisionObj(href, readPDF);
 							try {
-								// Slow down downloading to avoid PDF file saving errors.
-								const responseFile = await axios.get(fiaDomain + href, {
-									responseType: 'stream',
-								});
-								const file = await responseFile.data.pipe(
-									fs.createWriteStream('./pdf2json/gpPDFDocs/' + fileName),
-									(error: any) => {
-										if (error) {
-											fs.unlink('./pdf2json/gpPDFDocs/' + fileName, (error) => {
-												if (error) {
-													throw error;
-												}
-											});
-										}
-									}
-								);
-								responseFile.data.on('end', () => pdfParser.loadPDF(file.path));
-								const pdfParser = new PDFParser();
-								pdfParser.on('pdfParser_dataError', (errData: any) =>
-									console.error(errData.parserError)
-								);
-								const pdfData = await new Promise((res, rej) =>
-									pdfParser.on('pdfParser_dataReady', (pdfData: any) => {
-										res(pdfData);
-									})
-								);
-								const transformedData: any = transformPDFData(pdfData);
-								const penaltiesArray = [
-									'time',
-									'grid',
-									'fine',
-									'disqualified',
-									'warning',
-									'drive through',
-									'pit lane',
-									'reprimand',
-								];
-								let penalty_type = 'none';
-								penaltiesArray.forEach((v) => {
-									if (
-										transformedData.incident_info.Decision[0]
-											.toLowerCase()
-											.includes(v)
-									) {
-										penalty_type = v;
-										return;
-									}
-								});
-								const docDate = new Date(
-									transformedData.document_info.Date +
-										' ' +
-										transformedData.document_info.Time
-								);
-								const newDecision = {
-									doc_type: docType,
-									doc_name: fileName,
-									doc_date: docDate,
-									grand_prix: gpName,
-									penalty_type: penalty_type,
-									...transformedData,
-								};
 								await Decision.findOneAndUpdate(
-									{ doc_type: docType, doc_name: fileName, grand_prix: gpName },
-									{ $setOnInsert: { ...newDecision } },
+									{
+										doc_type: transformed.doc_type,
+										doc_name: transformed.doc_name,
+										doc_date: transformed.doc_date,
+										penalty_type: transformed.penalty_type,
+										grand_prix: transformed.grand_prix,
+									},
+									{ $setOnInsert: { ...transformed } },
 									{ timestamps: true, upsert: true }
 								);
-								fs.unlink('./pdf2json/gpPDFDocs/' + fileName, (error) => {
-									if (error) {
-										throw error;
-									}
-								});
 								resolve(null);
 							} catch (error) {
-								fs.unlink('./pdf2json/gpPDFDocs/' + fileName, (error) => {
-									if (error) {
-										throw error;
-									}
-								});
 								reject(error);
 							}
 						});
@@ -212,8 +189,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 					return res.status(404).json('Unknown error');
 				}
 			}
-		}
-		if (req.query.update === 'other') {
 		}
 	}
 	return res.status(404).json({ success: false });
