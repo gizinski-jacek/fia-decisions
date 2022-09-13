@@ -1,96 +1,189 @@
-export const transformPDFData = (pagesArray) => {
-	const stringsArrayList: string[][] = pagesArray.Pages.map((p) => {
-		const textList: string[] = p.Texts.map((t) => {
-			const string = t.R[0].T.replace(/%C2%A0/gi, ' ').trim();
-			return decodeURIComponent(string).trim();
-		});
-		// Needs major refactoring
-		const skipIndexes: number[] = [];
-		const modifiedTextList = textList
-			.map((text, index) => {
-				if (skipIndexes.indexOf(index) !== -1) {
-					return;
-				}
-				// Needs checking/fixing
-				if (text.length === 11 && text.includes('Driver')) {
+import {
+	DocumentInfo,
+	IncidentInfo,
+	TransformedPDFData,
+} from '../types/myTypes';
+
+export const transformDataToDecisionObj = (
+	// Value from anchor href property to decompose into file name, doc type and grand prix name
+	string: string,
+	// Array of strings parsed from FIA Decision or Offence, but not Reprimand, documents parsed with pdfReader
+	array: string[]
+): TransformedPDFData => {
+	let fileName = string.slice(string.lastIndexOf('/') + 1).slice(0, -4);
+	if (
+		fileName.charAt(fileName.length - 3) === '_' &&
+		fileName.charAt(fileName.length - 2) === '0'
+	) {
+		fileName = fileName.slice(fileName.length - 3);
+	}
+	const docType = fileName
+		.slice(
+			fileName.indexOf('-') + 1,
+			fileName.indexOf('-', fileName.indexOf('-') + 1)
+		)
+		.trim();
+	const gpName = fileName.slice(0, fileName.indexOf('-')).trim();
+
+	const documentInfoStrings = array.slice(0, array.indexOf('Time') + 2);
+
+	const documentSkipIndexes: number[] = [];
+	const documentInfoFormatted = documentInfoStrings
+		.map((str, i) => {
+			if (documentSkipIndexes.indexOf(i) !== -1) {
+				return;
+			}
+
+			if (str.charAt(str.length - 1) === ',') {
+				documentSkipIndexes.push(i + 1);
+				return str + ' ' + documentInfoStrings[i + 1];
+			} else {
+				return str;
+			}
+		})
+		.filter((u) => u !== undefined) as string[];
+
+	const documentInfo = {} as DocumentInfo;
+	for (let i = 0; i < documentInfoFormatted.length; i += 2) {
+		documentInfo[documentInfoFormatted[i]] = documentInfoFormatted[i + 1] || '';
+	}
+
+	const incidentInfoStrings = array
+		.slice(array.indexOf('Time') + 2, array.lastIndexOf('Reason'))
+		.map((str, i) => {
+			if (i !== 0 && str.length > 3) {
+				if (str.includes('Driver')) {
 					return 'Driver';
-				}
-				if (text.length === 1) {
+				} else if (str === 'The Stewards') {
 					return;
+				} else {
+					return str;
 				}
-				if (textList[index - 1] === 'Fact') {
-					const arr: string[] = [];
-					let i = index;
-					while (textList[i] !== 'Offence') {
-						if (textList[i].length < 6) {
-							break;
-						}
-						if (textList[i + 1].length < 6) {
-							arr.push(textList[i] + ' ' + textList[i + 1]);
-							skipIndexes.push(i, i + 1);
-						} else {
-							arr.push(textList[i]);
-							skipIndexes.push(i);
-						}
-						i++;
-					}
-					return arr;
-				}
-				if (textList[index - 1] === 'Decision') {
-					const arr: string[] = [];
-					let i = index;
-					while (textList[i] !== 'Reason') {
-						if (textList[i].length < 6) {
-							break;
-						}
-						if (textList[i + 1].length < 6) {
-							arr.push(textList[i] + ' ' + textList[i + 1]);
-							skipIndexes.push(i, i + 1);
-						} else {
-							arr.push(textList[i]);
-							skipIndexes.push(i);
-						}
-						i++;
-					}
-					return arr;
-				}
-				if (text.charAt(text.length - 1) === ',') {
-					skipIndexes.push(index + 1);
-					return text + ' ' + textList[index + 1];
-				}
-				if (text.length > 64 && text.charAt(text.length - 1) !== '.') {
-					skipIndexes.push(index + 1);
-					return text + ' ' + textList[index + 1];
-				}
-				return text;
-			})
-			.filter((u) => u !== undefined);
-		modifiedTextList.splice(10, 1);
-		modifiedTextList.splice(11, 1);
-		return modifiedTextList;
-	});
-	// Needs major refactoring
-	const stringsArray = [].concat.apply([], stringsArrayList);
-	const documentInfoStrings = stringsArray.slice(0, 10);
-	const documentInfoData = {};
-	for (let i = 0; i < documentInfoStrings.length; i += 2) {
-		documentInfoData[documentInfoStrings[i]] = documentInfoStrings[i + 1] || '';
-	}
-	const incidentInfoStrings = stringsArray.slice(12, 26);
-	const incidentInfoData = {};
-	for (let i = 0; i < incidentInfoStrings.length; i += 2) {
-		incidentInfoData[incidentInfoStrings[i]] = incidentInfoStrings[i + 1] || '';
-	}
-	incidentInfoData.Headline = stringsArray[11];
-	incidentInfoData.Reason = stringsArray
-		.slice(27, stringsArray.length - 4)
+			}
+		})
+		.filter((u) => u !== undefined);
+
+	const weekend = incidentInfoStrings[0] as string;
+	const incidentInfoStringsWithoutWeekend = incidentInfoStrings.slice(1);
+
+	const incidentInfo = {} as IncidentInfo;
+	incidentInfo.Headline = incidentInfoStringsWithoutWeekend
+		.slice(0, incidentInfoStringsWithoutWeekend.indexOf('Driver'))
 		.join(' ');
-	const stewardsData = stringsArray.slice(stringsArray.length - 4);
+
+	const incidentSkipIndexes: number[] = [];
+	const incidentInfoStringsWithoutHeadline =
+		incidentInfoStringsWithoutWeekend.slice(
+			incidentInfoStringsWithoutWeekend.indexOf('Driver')
+		);
+
+	const incidentInfoFormatted = incidentInfoStringsWithoutHeadline
+		.map((str, index) => {
+			if (incidentSkipIndexes.indexOf(index) !== -1) {
+				return;
+			}
+
+			if (incidentInfoStringsWithoutHeadline[index - 1] === 'Fact') {
+				const arr: string[] = [];
+				let i = index;
+				while (incidentInfoStringsWithoutHeadline[i] !== 'Offence') {
+					if (incidentInfoStringsWithoutHeadline[i + 1].length < 6) {
+						arr.push(
+							incidentInfoStringsWithoutHeadline[i] +
+								' ' +
+								incidentInfoStringsWithoutHeadline[i + 1]
+						);
+						incidentSkipIndexes.push(i, i + 1);
+					} else {
+						arr.push(incidentInfoStringsWithoutHeadline[i]);
+						incidentSkipIndexes.push(i);
+					}
+					i++;
+				}
+				return arr;
+			} else if (incidentInfoStringsWithoutHeadline[index - 1] === 'Offence') {
+				const arr: string[] = [];
+				let i = index;
+				while (incidentInfoStringsWithoutHeadline[i] !== 'Decision') {
+					arr.push(incidentInfoStringsWithoutHeadline[i]);
+					incidentSkipIndexes.push(i);
+					i++;
+				}
+				return arr.join(' ');
+			} else if (incidentInfoStringsWithoutHeadline[index - 1] === 'Decision') {
+				const arr: string[] = [];
+				let i = index;
+				while (incidentInfoStringsWithoutHeadline[i]) {
+					arr.push(incidentInfoStringsWithoutHeadline[i]);
+					incidentSkipIndexes.push(i);
+					i++;
+				}
+				return arr;
+			} else {
+				return str;
+			}
+		})
+		.filter((u) => u !== undefined);
+
+	for (let i = 0; i < incidentInfoFormatted.length; i += 2) {
+		incidentInfo[incidentInfoFormatted[i]] = incidentInfoFormatted[i + 1] || '';
+	}
+
+	const stewards = array.slice(array.length - 4);
+
+	const reasonStrings = array
+		.slice(array.lastIndexOf('Reason'))
+		.filter((str) => str !== 'The Stewards')
+		.slice(0, array.length - 5);
+	const reasonSkipIndexes: number[] = [];
+	const reason = reasonStrings
+		.map((str, i) => {
+			if (reasonSkipIndexes.indexOf(i) !== -1) {
+				return;
+			} else if (str.charAt(str.length - 1) === ',') {
+				reasonSkipIndexes.push(i + 1);
+				return str + ' ' + reasonStrings[i + 1];
+			} else if (str.length > 64 && str.charAt(str.length - 1) !== '.') {
+				reasonSkipIndexes.push(i + 1);
+				return str + ' ' + reasonStrings[i + 1];
+			} else {
+				return str;
+			}
+		})
+		.filter((u) => u !== undefined)
+		.join(' ');
+
+	const penaltiesArray = [
+		'time',
+		'grid',
+		'fine',
+		'disqualified',
+		'warning',
+		'drive through',
+		'pit lane',
+		'reprimand',
+	];
+	let penaltyType = 'none';
+	penaltiesArray.forEach((value) => {
+		if (incidentInfo.Decision[0].toLowerCase().includes(value)) {
+			penaltyType = value;
+			return;
+		}
+	});
+
+	const docDate = new Date(documentInfo.Date + ' ' + documentInfo.Time);
+
 	const data = {
-		weekend: stringsArray[10],
-		document_info: documentInfoData,
-		incident_info: incidentInfoData,
-		stewards: stewardsData,
+		doc_type: docType,
+		doc_name: fileName,
+		doc_date: docDate,
+		grand_prix: gpName,
+		penalty_type: penaltyType,
+		weekend: weekend,
+		document_info: documentInfo,
+		incident_info: { ...incidentInfo, Reason: reason },
+		stewards: stewards,
 	};
+
 	return data;
 };
