@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Accordion, Button, Modal } from 'react-bootstrap';
-import { DecisionMongoDBModel } from '../../types/myTypes';
+import { DecisionModel } from '../../types/myTypes';
 
 interface Props {
-	data: DecisionMongoDBModel;
+	data: DecisionModel;
 }
 
 const penaltyTypeColors = {
@@ -31,7 +31,7 @@ const F1DocWrapper = ({ data }: Props) => {
 		setShowModal(false);
 	};
 
-	const modalDataRender = (obj: DecisionMongoDBModel) => {
+	const modalDataRender = (obj: DecisionModel) => {
 		const content = [];
 		for (const [key, value] of Object.entries(obj.document_info)) {
 			content.push(
