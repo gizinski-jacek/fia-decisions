@@ -1,11 +1,11 @@
 import type { GetServerSidePropsContext, NextPage } from 'next';
 import connectMongo from '../../lib/mongo';
 import Decision from '../../models/decision';
-import { DecisionMongoDBModel } from '../../types/myTypes';
+import { DecisionModel } from '../../types/myTypes';
 import F1DocWrapper from '../../components/wrappers/F1DocWrapper';
 
 interface Props {
-	data: DecisionMongoDBModel[];
+	data: DecisionModel[];
 }
 
 const F1: NextPage<Props> = ({ data }) => {
@@ -25,7 +25,7 @@ export const getServerSideProps = async (
 ) => {
 	try {
 		await connectMongo();
-		const decisionList: DecisionMongoDBModel[] = await Decision.find()
+		const decisionList: DecisionModel[] = await Decision.find()
 			.sort({ doc_date: -1 })
 			.exec();
 		return {
