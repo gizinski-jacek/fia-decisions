@@ -1,10 +1,7 @@
-//@ts-nocheck
-
 export const transformPDFData = (pagesArray) => {
 	const stringsArrayList: string[][] = pagesArray.Pages.map((p) => {
 		const textList: string[] = p.Texts.map((t) => {
 			const string = t.R[0].T.replace(/%C2%A0/gi, ' ').trim();
-
 			return decodeURIComponent(string).trim();
 		});
 		// Needs major refactoring
