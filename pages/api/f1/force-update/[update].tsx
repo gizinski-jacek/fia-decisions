@@ -156,8 +156,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 								responseType: 'stream',
 							});
 							const fileBuffer = await streamToBuffer(responseFile.data);
-							const readPDF = await readPDFPages(fileBuffer);
-							const transformed = transformDataToDecisionObj(href, readPDF);
+							const pdfData = await readPDFPages(fileBuffer);
+							const transformed = transformDataToDecisionObj(
+								href,
+								pdfData as any
+							);
 							try {
 								await Decision.findOneAndUpdate(
 									{
