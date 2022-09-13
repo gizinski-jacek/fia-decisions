@@ -8,11 +8,11 @@ import {
 
 export const transformDataToDecisionObj = (
 	// Value from anchor href property to decompose into file name, doc type and grand prix name
-	string: string,
+	hrefString: string,
 	// Array of strings parsed from FIA Decision or Offence, but not Reprimand, documents parsed with pdfReader
-	array: string[]
+	pdfDataArray: string[]
 ): TransformedPDFData => {
-	let fileName = string.slice(string.lastIndexOf('/') + 1).slice(0, -4);
+	let fileName = hrefString.slice(hrefString.lastIndexOf('/') + 1).slice(0, -4);
 	if (
 		fileName.charAt(fileName.length - 3) === '_' &&
 		fileName.charAt(fileName.length - 2) === '0'
@@ -27,7 +27,10 @@ export const transformDataToDecisionObj = (
 		.trim();
 	const gpName = fileName.slice(0, fileName.indexOf('-')).trim();
 
-	const documentInfoStrings = array.slice(0, array.indexOf('Time') + 2);
+	const documentInfoStrings = pdfDataArray.slice(
+		0,
+		pdfDataArray.indexOf('Time') + 2
+	);
 
 	const documentSkipIndexes: number[] = [];
 	const documentInfoFormatted = documentInfoStrings
@@ -51,8 +54,8 @@ export const transformDataToDecisionObj = (
 			documentInfoFormatted[i + 1] || '';
 	}
 
-	const incidentInfoStrings = array
-		.slice(array.indexOf('Time') + 2, array.lastIndexOf('Reason'))
+	const incidentInfoStrings = pdfDataArray
+		.slice(pdfDataArray.indexOf('Time') + 2, pdfDataArray.lastIndexOf('Reason'))
 		.map((str, i) => {
 			if (i !== 0 && str.length > 3) {
 				if (str.includes('Driver')) {
@@ -135,12 +138,12 @@ export const transformDataToDecisionObj = (
 		incidentInfo[incidentInfoFormatted[i]] = incidentInfoFormatted[i + 1] || '';
 	}
 
-	const stewards = array.slice(array.length - 4);
+	const stewards = pdfDataArray.slice(pdfDataArray.length - 4);
 
-	const reasonStrings = array
-		.slice(array.lastIndexOf('Reason'))
+	const reasonStrings = pdfDataArray
+		.slice(pdfDataArray.lastIndexOf('Reason'))
 		.filter((str) => str !== 'The Stewards')
-		.slice(0, array.length - 5);
+		.slice(0, pdfDataArray.length - 5);
 	const reasonSkipIndexes: number[] = [];
 	const reason = reasonStrings
 		.map((str, i) => {
