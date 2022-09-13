@@ -14,7 +14,7 @@
     "jsdom": "^20.0.0",
     "mongoose": "^6.5.5",
     "next": "12.2.5",
-    "pdf2json": "^2.0.1",
+    "pdfreader": "^2.0.0",
     "react": "18.2.0",
     "react-bootstrap": "^2.5.0",
     "react-dom": "18.2.0",
