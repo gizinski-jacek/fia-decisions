@@ -180,7 +180,9 @@ export const transformDataToDecisionObj = (
 		}
 	});
 
-	const docDate = new Date(documentInfo.Date + ' ' + documentInfo.Time);
+	const docDate = new Date(
+		documentInfo.Date + ' ' + documentInfo.Time
+	).toUTCString();
 
 	const data = {
 		doc_type: docType,
