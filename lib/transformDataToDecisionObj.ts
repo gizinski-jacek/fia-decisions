@@ -173,6 +173,9 @@ export const transformDataToDecisionObj = (
 		'reprimand',
 	];
 	let penaltyType = 'none';
+	if (!incidentInfo.Decision) {
+		console.log(incidentInfo.Decision);
+	}
 	penaltiesArray.forEach((value) => {
 		if (incidentInfo.Decision[0].toLowerCase().includes(value)) {
 			penaltyType = value;
@@ -180,9 +183,10 @@ export const transformDataToDecisionObj = (
 		}
 	});
 
+	// Fix different timestamps between localhost and vercel/others
 	const docDate = new Date(
 		documentInfo.Date + ' ' + documentInfo.Time
-	).toUTCString();
+	).toISOString();
 
 	const data = {
 		doc_type: docType,
