@@ -3,18 +3,19 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { JSDOM } from 'jsdom';
 const { PdfReader } = require('pdfreader');
 import axios, { AxiosError } from 'axios';
-import connectMongo from '../../../../lib/mongo';
-import Decision from '../../../../models/decision';
+import connectMongo from '../../../../../lib/mongo';
+import Decision from '../../../../../models/decision';
 import { Stream } from 'stream';
-import { transformDataToDecisionObj } from '../../../../lib/transformDataToDecisionObj';
+import { transformDataToDecisionObj } from '../../../../../lib/transformDataToDecisionObj';
+import { dbNameList } from '../../../../../lib/myData';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 	if (req.method === 'GET') {
-		if (req.query.update === 'decisions-offences') {
+		if (req.query.series === 'formula1') {
 			try {
 				const { authorization } = req.headers;
 				if (authorization === `Bearer ${process.env.CRON_JOB_SECRET}`) {
-					await connectMongo();
+					await connectMongo(dbNameList.f1_2022_db);
 					const docList = await Decision.find({})
 						.sort({ doc_date: -1 })
 						.limit(1)
@@ -192,6 +193,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 					return res.status(404).json('Unknown error');
 				}
 			}
+		}
+		if (req.query.series === 'formula2') {
+		}
+		if (req.query.series === 'formula3') {
 		}
 	}
 	return res.status(404).json({ success: false });
