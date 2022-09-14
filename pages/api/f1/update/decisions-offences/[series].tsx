@@ -93,7 +93,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 						const disallowedDoc = disallowedWordsInDocName.some((str) =>
 							fileName.includes(str)
 						);
-
 						if (
 							!disallowedDoc &&
 							((fileName.includes('decision') && fileName.includes('car')) ||
@@ -117,12 +116,19 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 								dateStrings[0] +
 								' ' +
 								dateAndTime[1];
-							if (new Date(reformattedDate) >= docList[0].doc_date) {
+							if (
+								new Date(reformattedDate).toISOString() >=
+								new Date(docList[0].doc_date).toISOString()
+							) {
 								allDocsHref.push(link.href);
 								return;
 							}
 						}
 					});
+
+					if (allDocsHref.length === 0) {
+						return res.status(200).json({ success: true });
+					}
 
 					const streamToBuffer = async (stream: Stream): Promise<Buffer> => {
 						return new Promise<Buffer>((resolve, reject) => {
