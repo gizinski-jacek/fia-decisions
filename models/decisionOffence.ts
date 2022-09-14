@@ -34,5 +34,5 @@ const DecisionOffenceSchema = new Schema<DecisionOffenceModel>(
 	{ timestamps: true }
 );
 
-export default mongoose.models.DecisionOffence ||
-	mongoose.model('DecisionOffence', DecisionOffenceSchema);
+export default mongoose.models.Decision_Offence ||
+	mongoose.model('Decision_Offence', DecisionOffenceSchema);

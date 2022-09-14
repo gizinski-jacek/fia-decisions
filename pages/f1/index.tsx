@@ -1,6 +1,6 @@
 import type { GetServerSidePropsContext, NextPage } from 'next';
 import connectMongo from '../../lib/mongo';
-import DecisionOffence from '../../models/decisionOffence';
+import Decision_Offence from '../../models/decisionOffence';
 import { DecisionOffenceModel } from '../../types/myTypes';
 import F1DocWrapper from '../../components/wrappers/F1DocWrapper';
 import { dbNameList } from '../../lib/myData';
@@ -26,7 +26,7 @@ export const getServerSideProps = async (
 ) => {
 	try {
 		await connectMongo(dbNameList.f1_2022_db);
-		const decisionList: DecisionOffenceModel[] = await DecisionOffence.find()
+		const decisionList: DecisionOffenceModel[] = await Decision_Offence.find()
 			.sort({ doc_date: -1 })
 			.exec();
 		return {

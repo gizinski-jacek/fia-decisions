@@ -4,7 +4,7 @@ import { JSDOM } from 'jsdom';
 const { PdfReader } = require('pdfreader');
 import axios, { AxiosError } from 'axios';
 import connectMongo from '../../../../../lib/mongo';
-import DecisionOffence from '../../../../../models/decisionOffence';
+import Decision_Offence from '../../../../../models/decisionOffence';
 import { Stream } from 'stream';
 import { transformDataToDecisionObj } from '../../../../../lib/transformDataToDecisionObj';
 import { dbNameList, fiaDomain, fiaPageList } from '../../../../../lib/myData';
@@ -21,7 +21,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 			if (req.query.series === 'formula1') {
 				try {
 					await connectMongo(dbNameList.f1_2022_db);
-					const docList = await DecisionOffence.find({})
+					const docList = await Decision_Offence.find({})
 						.sort({ doc_date: -1 })
 						.limit(1)
 						.exec();
@@ -35,7 +35,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 									'Please define node_env, MY_APP_URI and MY_APP_URI_DEV environment variables inside .env.local as needed'
 								);
 							}
-							await axios.get(
+							axios.get(
 								(process.env.node_env as string) === 'production'
 									? (process.env.MY_APP_URI as string)
 									: (process.env.MY_APP_URI_DEV as string) +
@@ -163,7 +163,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 								pdfData as any
 							);
 							try {
-								await DecisionOffence.findOneAndUpdate(
+								await Decision_Offence.findOneAndUpdate(
 									{
 										doc_type: transformed.doc_type,
 										doc_name: transformed.doc_name,

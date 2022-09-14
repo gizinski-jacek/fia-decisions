@@ -4,7 +4,7 @@ import { JSDOM } from 'jsdom';
 const { PdfReader } = require('pdfreader');
 import axios, { AxiosError } from 'axios';
 import connectMongo from '../../../../../lib/mongo';
-import DecisionOffence from '../../../../../models/decisionOffence';
+import Decision_Offence from '../../../../../models/decisionOffence';
 import { Stream } from 'stream';
 import { transformDataToDecisionObj } from '../../../../../lib/transformDataToDecisionObj';
 import { dbNameList, fiaDomain, fiaPageList } from '../../../../../lib/myData';
@@ -106,7 +106,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 								readPDF as any
 							);
 							try {
-								await DecisionOffence.findOneAndUpdate(
+								await Decision_Offence.findOneAndUpdate(
 									{
 										doc_type: transformed.doc_type,
 										doc_name: transformed.doc_name,
