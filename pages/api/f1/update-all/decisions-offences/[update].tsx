@@ -3,10 +3,10 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { JSDOM } from 'jsdom';
 const { PdfReader } = require('pdfreader');
 import axios, { AxiosError } from 'axios';
-import connectMongo from '../../../../lib/mongo';
-import Decision from '../../../../models/decision';
+import connectMongo from '../../../../../lib/mongo';
+import Decision from '../../../../../models/decision';
 import { Stream } from 'stream';
-import { transformDataToDecisionObj } from '../../../../lib/transformDataToDecisionObj';
+import { transformDataToDecisionObj } from '../../../../../lib/transformDataToDecisionObj';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 	if (req.method === 'GET') {
