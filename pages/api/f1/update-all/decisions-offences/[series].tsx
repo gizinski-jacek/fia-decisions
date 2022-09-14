@@ -66,6 +66,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 						}
 					});
 
+					if (allDocsHref.length === 0) {
+						return res.status(200).json({ success: true });
+					}
+
 					const streamToBuffer = async (stream: Stream): Promise<Buffer> => {
 						return new Promise<Buffer>((resolve, reject) => {
 							const buffer = Array<any>();
