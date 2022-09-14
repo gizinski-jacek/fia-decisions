@@ -4,23 +4,25 @@ import { JSDOM } from 'jsdom';
 const { PdfReader } = require('pdfreader');
 import axios, { AxiosError } from 'axios';
 import connectMongo from '../../../../../lib/mongo';
-import Decision from '../../../../../models/decision';
+import DecisionOffence from '../../../../../models/decisionOffence';
 import { Stream } from 'stream';
 import { transformDataToDecisionObj } from '../../../../../lib/transformDataToDecisionObj';
+import { dbNameList, fiaDomain, fiaPageList } from '../../../../../lib/myData';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 	if (req.method === 'GET') {
-		if (req.query.update === 'decisions-offences') {
-			try {
-				const { authorization } = req.headers;
-				if (
-					authorization ===
-					`Bearer ${process.env.CRON_JOB_UPDATE_ALL_DOCS_SECRET}`
-				) {
-					const fiaF1PageUrl =
-						'https://www.fia.com/documents/championships/fia-formula-one-world-championship-14/season/season-2022-2005';
-					const fiaDomain = 'https://www.fia.com';
-					const responseSite = await axios.get(fiaF1PageUrl);
+		if (!process.env.CRON_JOB_UPDATE_ALL_DOCS_SECRET) {
+			throw new Error(
+				'Please define CRON_JOB_UPDATE_ALL_DOCS_SECRET environment variables inside .env.local'
+			);
+		}
+		const { authorization } = req.headers;
+		if (
+			authorization === `Bearer ${process.env.CRON_JOB_UPDATE_ALL_DOCS_SECRET}`
+		) {
+			if (req.query.series === 'formula1') {
+				try {
+					const responseSite = await axios.get(fiaPageList.f1_2022_page);
 					const { document } = new JSDOM(responseSite.data).window;
 					const listView: HTMLElement | null =
 						document.getElementById('list-view');
@@ -91,8 +93,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 						});
 					};
 
-					await connectMongo();
-
+					await connectMongo(dbNameList.f1_2022_db);
 					await new Promise((resolve, reject) => {
 						allDocsHref.forEach(async (href) => {
 							const responseFile = await axios.get(fiaDomain + href, {
@@ -105,7 +106,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 								readPDF as any
 							);
 							try {
-								await Decision.findOneAndUpdate(
+								await DecisionOffence.findOneAndUpdate(
 									{
 										doc_type: transformed.doc_type,
 										doc_name: transformed.doc_name,
@@ -123,20 +124,22 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 						});
 					});
 					return res.status(200).json({ success: true });
-				} else {
-					return res.status(401).json({ success: false });
-				}
-			} catch (error) {
-				if (error instanceof AxiosError) {
-					return res
-						.status(error?.response?.status || 404)
-						.json(error?.response?.data || 'Unknown error');
-				} else {
-					return res.status(404).json('Unknown error');
+				} catch (error) {
+					if (error instanceof AxiosError) {
+						return res
+							.status(error?.response?.status || 404)
+							.json(error?.response?.data || 'Unknown error');
+					} else {
+						return res.status(404).json('Unknown error');
+					}
 				}
 			}
-		}
-		if (req.query.update === 'other') {
+			if (req.query.series === 'formula2') {
+			}
+			if (req.query.series === 'formula3') {
+			}
+		} else {
+			return res.status(401).json({ success: false });
 		}
 	}
 	return res.status(404).json({ success: false });
