@@ -49,3 +49,15 @@ export interface IncidentInfo {
 export interface DecisionModel extends TransformedPDFData {
 	_id: string;
 }
+
+export interface DatabaseNameList {
+	f1_2022_db: string;
+	f2_2022_db: string;
+	f3_2022_db: string;
+}
+
+export interface FiaPageList {
+	f1_2022_page: string;
+	f2_2022_page: string;
+	f3_2022_page: string;
+}
