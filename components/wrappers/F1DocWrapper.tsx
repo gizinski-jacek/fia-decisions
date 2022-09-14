@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Accordion, Button, Modal } from 'react-bootstrap';
-import { DecisionModel } from '../../types/myTypes';
+import { DecisionOffenceModel } from '../../types/myTypes';
 
 interface Props {
-	data: DecisionModel;
+	data: DecisionOffenceModel;
 }
 
 const penaltyTypeColors = {
@@ -31,7 +31,7 @@ const F1DocWrapper = ({ data }: Props) => {
 		setShowModal(false);
 	};
 
-	const modalDataRender = (obj: DecisionModel) => {
+	const modalDataRender = (obj: DecisionOffenceModel) => {
 		const content = [];
 		for (const [key, value] of Object.entries(obj.document_info)) {
 			content.push(
