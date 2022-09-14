@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose, { MongooseOptions } from 'mongoose';
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
@@ -19,19 +19,21 @@ if (!cached) {
 	cached = global.mongoose = { conn: null, promise: null };
 }
 
-const connectMongo = async () => {
+const connectMongo = async (dbName: string) => {
 	if (cached.conn) {
 		return cached.conn;
 	}
 
 	if (!cached.promise) {
-		const opts = {
+		const opts: MongooseOptions = {
 			bufferCommands: false,
 		};
 
-		cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
-			return mongoose;
-		});
+		cached.promise = mongoose
+			.connect(MONGODB_URI + dbName + '?retryWrites=true&w=majority', opts)
+			.then((mongoose) => {
+				return mongoose;
+			});
 	}
 	cached.conn = await cached.promise;
 	return cached.conn;
