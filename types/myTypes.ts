@@ -46,7 +46,7 @@ export interface IncidentInfo {
 	Reason: string;
 }
 
-export interface DecisionModel extends TransformedPDFData {
+export interface DecisionOffenceModel extends TransformedPDFData {
 	_id: string;
 }
 

@@ -1,9 +1,9 @@
 import mongoose from 'mongoose';
-import { DecisionModel } from '../types/myTypes';
+import { DecisionOffenceModel } from '../types/myTypes';
 
 const Schema = mongoose.Schema;
 
-const DecisionSchema = new Schema<DecisionModel>(
+const DecisionOffenceSchema = new Schema<DecisionOffenceModel>(
 	{
 		doc_type: { type: String, trim: true, required: true },
 		doc_name: { type: String, trim: true, required: true },
@@ -34,5 +34,5 @@ const DecisionSchema = new Schema<DecisionModel>(
 	{ timestamps: true }
 );
 
-export default mongoose.models.Decision ||
-	mongoose.model('Decision', DecisionSchema);
+export default mongoose.models.DecisionOffence ||
+	mongoose.model('DecisionOffence', DecisionOffenceSchema);
