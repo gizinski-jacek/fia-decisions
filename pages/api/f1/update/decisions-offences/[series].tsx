@@ -116,10 +116,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 								dateStrings[0] +
 								' ' +
 								dateAndTime[1];
-							if (
-								new Date(reformattedDate).toISOString() >=
-								new Date(docList[0].doc_date).toISOString()
-							) {
+							if (new Date(reformattedDate) >= new Date(docList[0].doc_date)) {
 								allDocsHref.push(link.href);
 								return;
 							}
