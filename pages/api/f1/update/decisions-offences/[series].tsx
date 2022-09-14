@@ -4,38 +4,42 @@ import { JSDOM } from 'jsdom';
 const { PdfReader } = require('pdfreader');
 import axios, { AxiosError } from 'axios';
 import connectMongo from '../../../../../lib/mongo';
-import Decision from '../../../../../models/decision';
+import DecisionOffence from '../../../../../models/decisionOffence';
 import { Stream } from 'stream';
 import { transformDataToDecisionObj } from '../../../../../lib/transformDataToDecisionObj';
-import { dbNameList } from '../../../../../lib/myData';
+import { dbNameList, fiaDomain, fiaPageList } from '../../../../../lib/myData';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 	if (req.method === 'GET') {
-		if (req.query.series === 'formula1') {
-			try {
-				const { authorization } = req.headers;
-				if (authorization === `Bearer ${process.env.CRON_JOB_SECRET}`) {
+		if (!process.env.CRON_JOB_SECRET) {
+			throw new Error(
+				'Please define CRON_JOB_SECRET environment variables inside .env.local'
+			);
+		}
+		const { authorization } = req.headers;
+		if (authorization === `Bearer ${process.env.CRON_JOB_SECRET}`) {
+			if (req.query.series === 'formula1') {
+				try {
 					await connectMongo(dbNameList.f1_2022_db);
-					const docList = await Decision.find({})
+					const docList = await DecisionOffence.find({})
 						.sort({ doc_date: -1 })
 						.limit(1)
 						.exec();
 					if (docList.length === 0) {
 						try {
 							if (
-								!process.env.node_env &&
-								!process.env.MY_APP_URI &&
-								!process.env.MY_APP_URI_DEV
+								!process.env.MY_APP_URI_DEV ||
+								(!process.env.MY_APP_URI && !process.env.node_env)
 							) {
 								throw new Error(
-									'Please define node_env, MY_APP_URI and MY_APP_URI_DEV environment variables inside .env.local'
+									'Please define node_env, MY_APP_URI and MY_APP_URI_DEV environment variables inside .env.local as needed'
 								);
 							}
 							await axios.get(
 								(process.env.node_env as string) === 'production'
 									? (process.env.MY_APP_URI as string)
 									: (process.env.MY_APP_URI_DEV as string) +
-											'/api/f1/force-update-all/decisions-offences',
+											'/api/f1/update-all/decisions-offences/formula1',
 								{
 									headers: {
 										authorization: `Bearer ${process.env.CRON_JOB_UPDATE_ALL_DOCS_SECRET}`,
@@ -53,11 +57,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 							}
 						}
 					}
-
-					const fiaF1PageUrl =
-						'https://www.fia.com/documents/championships/fia-formula-one-world-championship-14/season/season-2022-2005';
-					const fiaDomain = 'https://www.fia.com';
-					const responseSite = await axios.get(fiaF1PageUrl);
+					const responseSite = await axios.get(fiaPageList.f1_2022_page);
 					const { document } = new JSDOM(responseSite.data).window;
 					const listView: HTMLElement | null =
 						document.getElementById('list-view');
@@ -163,7 +163,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 								pdfData as any
 							);
 							try {
-								await Decision.findOneAndUpdate(
+								await DecisionOffence.findOneAndUpdate(
 									{
 										doc_type: transformed.doc_type,
 										doc_name: transformed.doc_name,
@@ -181,22 +181,22 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 						});
 					});
 					return res.status(200).json({ success: true });
-				} else {
-					return res.status(401).json({ success: false });
-				}
-			} catch (error) {
-				if (error instanceof AxiosError) {
-					return res
-						.status(error?.response?.status || 404)
-						.json(error?.response?.data || 'Unknown error');
-				} else {
-					return res.status(404).json('Unknown error');
+				} catch (error) {
+					if (error instanceof AxiosError) {
+						return res
+							.status(error?.response?.status || 404)
+							.json(error?.response?.data || 'Unknown error');
+					} else {
+						return res.status(404).json('Unknown error');
+					}
 				}
 			}
-		}
-		if (req.query.series === 'formula2') {
-		}
-		if (req.query.series === 'formula3') {
+			if (req.query.series === 'formula2') {
+			}
+			if (req.query.series === 'formula3') {
+			}
+		} else {
+			return res.status(401).json({ success: false });
 		}
 	}
 	return res.status(404).json({ success: false });
