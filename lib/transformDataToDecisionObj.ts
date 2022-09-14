@@ -183,10 +183,10 @@ export const transformDataToDecisionObj = (
 		}
 	});
 
-	// Fix different timestamps between localhost and vercel/others
-	const docDate = new Date(
-		documentInfo.Date + ' ' + documentInfo.Time
-	).toISOString();
+	const dateString = documentInfo.Date + ' ' + documentInfo.Time;
+	const timeOffset = new Date().getTimezoneOffset() * 60000;
+	const dateUTC = new Date(dateString).getTime() - timeOffset;
+	const docDate = new Date(dateUTC);
 
 	const data = {
 		doc_type: docType,
