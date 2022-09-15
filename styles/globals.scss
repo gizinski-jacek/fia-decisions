@@ -6,41 +6,47 @@ body {
 		Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
 }
 
-a {
-	color: inherit;
-	text-decoration: none;
-}
-
 * {
 	box-sizing: border-box;
 }
 
+nav {
+	li {
+		max-width: 80px;
+
+		a {
+			color: unset !important;
+			text-decoration: unset !important;
+		}
+	}
+}
+
 h1 {
-	font-size: 2.5rem;
+	font-size: 2rem !important;
 }
 
 h2 {
-	font-size: 2rem;
+	font-size: 1.75rem !important;
 }
 
 h3 {
-	font-size: 1.5rem;
+	font-size: 1.5rem !important;
 }
 
 h4 {
-	font-size: 1.25rem;
+	font-size: 1.25rem !important;
 }
 
 h5 {
-	font-size: 0.9rem;
+	font-size: 1rem !important;
 }
 
 h6 {
-	font-size: 0.8rem;
+	font-size: 0.85rem !important;
 }
 
 p {
-	font-size: 1rem;
+	font-size: 1rem !important;
 	line-height: 1.25rem;
 	margin: 0.5rem 0;
 }
@@ -55,8 +61,17 @@ h6 {
 	margin: 0;
 }
 
+body {
+	min-width: 360px;
+}
+
 .accordion-button {
 	padding: 0.5rem !important;
+
+	h4,
+	h5 {
+		flex: 1 1 0;
+	}
 }
 
 .accordion-body {
