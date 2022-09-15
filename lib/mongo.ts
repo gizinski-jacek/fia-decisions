@@ -1,4 +1,4 @@
-import mongoose, { MongooseOptions } from 'mongoose';
+import mongoose, { Mongoose, MongooseOptions } from 'mongoose';
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
@@ -16,27 +16,43 @@ if (!MONGODB_URI) {
 let cached = global.mongoose;
 
 if (!cached) {
-	cached = global.mongoose = { conn: null, promise: null };
+	cached = global.mongoose = { client: null };
 }
 
 const connectMongo = async (dbName: string) => {
-	if (cached.conn) {
-		return cached.conn;
+	const opts: MongooseOptions = {
+		bufferCommands: true,
+	};
+
+	if (!cached.client) {
+		const client = await mongoose.connect(
+			MONGODB_URI + dbName + '?retryWrites=true&w=majority',
+			opts
+		);
+		if (!client.models.Decision_Offence) {
+			client.model('Decision_Offence', require('../models/decisionOffence'));
+		}
+		cached.client = client;
+		return cached.client.connections[0];
 	}
 
-	if (!cached.promise) {
-		const opts: MongooseOptions = {
-			bufferCommands: false,
-		};
-
-		cached.promise = mongoose
-			.connect(MONGODB_URI + dbName + '?retryWrites=true&w=majority', opts)
-			.then((mongoose) => {
-				return mongoose;
-			});
+	const conn = cached.client.connections.find((conn) => conn.name === dbName);
+	if (!conn) {
+		const conn = cached.client.createConnection(
+			MONGODB_URI + dbName + '?retryWrites=true&w=majority',
+			opts
+		);
+		if (!conn.models.Decision_Offence) {
+			conn.model('Decision_Offence', require('../models/decisionOffence'));
+		}
+		return conn;
 	}
-	cached.conn = await cached.promise;
-	return cached.conn;
+	return conn;
+
+	// cached.client.connection.useDb(dbName, {
+	// 	useCache: true,
+	// 	noListener: true,
+	// });
 };
 
 export default connectMongo;
