@@ -1,55 +1,52 @@
-import axios from 'axios';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { useContext } from 'react';
 import { Button } from 'react-bootstrap';
 import { ThemeContext } from '../hooks/ThemeProvider';
 
 const Drawer = () => {
 	const { toggleTheme } = useContext(ThemeContext);
+	const router = useRouter();
 
 	const handleToggleTheme = () => {
 		toggleTheme();
 	};
 
-	const handleRequestUpdate = async () => {
-		try {
-			const res = await axios.get('/api/f1/force-update/decisions-offences');
-			console.log(res.data);
-		} catch (error) {
-			console.log(error);
-		}
-	};
-
 	return (
 		<nav>
-			<ul className='nav nav-pills nav-fill'>
+			<ul className='nav nav-tabs nav-fill p-2 gap-5'>
 				{/* <li className='nav-item'>
-					<button
-						type='button'
-						className='nav-link active'
-						onClick={handleToggleTheme}
-					>
+					<Button variant='secondary' onClick={handleToggleTheme}>
 						Toggle Theme
-					</button>
-				</li> */}
-				<li className='nav-item'>
-					<Button
-						variant='outline-dark'
-						size='sm'
-						onClick={handleRequestUpdate}
-					>
-						Request Update
 					</Button>
+				</li> */}
+				<li
+					className={`nav-item btn btn-sm btn-success ${
+						router.pathname === '/' ? 'active' : ''
+					}`}
+				>
+					<Link href={'/'}>Home</Link>
 				</li>
-				<li className='nav-item'>
-					<Link href={'/'} className='nav-link'>
-						Home
-					</Link>
+				<li
+					className={`nav-item btn btn-sm btn-danger ${
+						router.pathname === '/f1' ? 'active' : ''
+					}`}
+				>
+					<Link href={'/f1'}>F1</Link>
 				</li>
-				<li className='nav-item'>
-					<Link href={'/f1'} className='nav-link'>
-						F1
-					</Link>
+				<li
+					className={`nav-item btn btn-sm btn-primary ${
+						router.pathname === '/f2' ? 'active' : ''
+					}`}
+				>
+					<Link href={'/f2'}>F2</Link>
+				</li>
+				<li
+					className={`nav-item btn btn-sm btn-secondary ${
+						router.pathname === '/f3' ? 'active' : ''
+					}`}
+				>
+					<Link href={'/f3'}>F3</Link>
 				</li>
 			</ul>
 		</nav>
