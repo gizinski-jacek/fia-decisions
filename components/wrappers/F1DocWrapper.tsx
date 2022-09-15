@@ -45,9 +45,10 @@ const F1DocWrapper = ({ data }: Props) => {
 				{obj.incident_info.Headline}
 			</div>
 		);
+
 		for (const [key, value] of Object.entries(obj.incident_info)) {
 			if (key === 'Headline') {
-				break;
+				continue;
 			}
 			if (key === 'Fact' || key === 'Decision') {
 				content.push(
@@ -70,27 +71,20 @@ const F1DocWrapper = ({ data }: Props) => {
 				</div>
 			);
 		}
-		content.push(
-			<div key={'reason'} className='my-2'>
-				Reason: {obj.incident_info.Reason}
-			</div>
-		);
+
 		return content;
 	};
 
 	return (
 		<>
-			<Accordion id={data._id}>
+			<Accordion id={data._id} className='my-1'>
 				<Accordion.Item eventKey='0'>
 					<Accordion.Header className='p-0 m-0'>
-						<div
-							className='d-flex flex-column flex-sm-row align-items-center'
-							style={{ width: '1fr' }}
-						>
+						<div className='d-flex flex-column w-100 flex-sm-row align-items-center'>
 							<div
-								className='border rounded p-1 me-2 text-uppercase w-100px text-center'
+								className='border rounded p-1 me-2 text-uppercase text-center'
 								style={{
-									width: '170px',
+									width: '180px',
 									...penaltyTypeColors[data.penalty_type as PTCkey],
 								}}
 							>
@@ -98,12 +92,9 @@ const F1DocWrapper = ({ data }: Props) => {
 							</div>
 							<div
 								className='m-2 text-center text-sm-start'
-								style={{ width: '200px' }}
+								style={{ width: '220px' }}
 							>
 								{data.incident_info.Driver}
-							</div>
-							<div className='m-2 d-none d-lg-block' style={{ width: '200px' }}>
-								{data.weekend}
 							</div>
 							<div className='m-2 d-none d-md-block' style={{ flex: 1 }}>
 								{data.doc_name}
