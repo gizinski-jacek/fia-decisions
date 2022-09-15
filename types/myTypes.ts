@@ -50,6 +50,10 @@ export interface DecisionOffenceModel extends TransformedPDFData {
 	_id: string;
 }
 
+export interface GroupedByGP {
+	[key: string]: DecisionOffenceModel[];
+}
+
 export interface DatabaseNameList {
 	f1_2022_db: string;
 	f2_2022_db: string;
