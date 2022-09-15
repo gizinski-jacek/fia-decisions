@@ -15,38 +15,59 @@ const Drawer = () => {
 	return (
 		<nav>
 			<ul className='nav nav-tabs nav-fill p-2 gap-5'>
-				{/* <li className='nav-item'>
-					<Button variant='secondary' onClick={handleToggleTheme}>
-						Toggle Theme
+				<li className='nav-item '>
+					<Button
+						variant='secondary'
+						size='sm'
+						className='w-100'
+						onClick={handleToggleTheme}
+					>
+						Mode
 					</Button>
-				</li> */}
-				<li
-					className={`nav-item btn btn-sm btn-success ${
-						router.pathname === '/' ? 'active' : ''
-					}`}
-				>
-					<Link href={'/'}>Home</Link>
 				</li>
-				<li
-					className={`nav-item btn btn-sm btn-danger ${
-						router.pathname === '/f1' ? 'active' : ''
-					}`}
-				>
-					<Link href={'/f1'}>F1</Link>
+				<li className='nav-item'>
+					<Link href='/'>
+						<a
+							className={`w-100 btn btn-sm btn-success ${
+								router.pathname === '/' ? 'active' : ''
+							}`}
+						>
+							Home
+						</a>
+					</Link>
 				</li>
-				<li
-					className={`nav-item btn btn-sm btn-primary ${
-						router.pathname === '/f2' ? 'active' : ''
-					}`}
-				>
-					<Link href={'/f2'}>F2</Link>
+				<li className='nav-item'>
+					<Link href={'/f1'}>
+						<a
+							className={`w-100 btn btn-sm btn-danger ${
+								router.query.series === 'f1' ? 'active' : ''
+							}`}
+						>
+							F1
+						</a>
+					</Link>
 				</li>
-				<li
-					className={`nav-item btn btn-sm btn-secondary ${
-						router.pathname === '/f3' ? 'active' : ''
-					}`}
-				>
-					<Link href={'/f3'}>F3</Link>
+				<li className='nav-item'>
+					<Link href={'/f2'}>
+						<a
+							className={`w-100 btn btn-sm btn-primary ${
+								router.query.series === 'f2' ? 'active' : ''
+							}`}
+						>
+							F2
+						</a>
+					</Link>
+				</li>
+				<li className='nav-item'>
+					<Link href={'/f3'}>
+						<a
+							className={`w-100 btn btn-sm btn-secondary ${
+								router.query.series === 'f3' ? 'active' : ''
+							}`}
+						>
+							F3
+						</a>
+					</Link>
 				</li>
 			</ul>
 		</nav>
