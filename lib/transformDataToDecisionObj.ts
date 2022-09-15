@@ -56,10 +56,16 @@ export const transformDataToDecisionObj = (
 
 	const incidentInfoStrings = pdfDataArray
 		.slice(pdfDataArray.indexOf('Time') + 2, pdfDataArray.lastIndexOf('Reason'))
-		.map((str, i) => {
+		.map((str, i, arr) => {
 			if (i !== 0 && str.length > 3) {
-				if (str.includes('Driver')) {
+				if (str.toLowerCase().includes('driver')) {
 					return 'Driver';
+				} else if (
+					i + 1 !== arr.length &&
+					str.toLowerCase().includes('team') &&
+					arr[i + 1].toLowerCase().includes('manager')
+				) {
+					return 'Team Manager';
 				} else if (str === 'The Stewards') {
 					return;
 				} else {
@@ -80,7 +86,7 @@ export const transformDataToDecisionObj = (
 	const incidentSkipIndexes: number[] = [];
 	const incidentInfoStringsWithoutHeadline =
 		incidentInfoStringsWithoutWeekend.slice(
-			incidentInfoStringsWithoutWeekend.indexOf('Driver')
+			incidentInfoStringsWithoutWeekend.indexOf('Competitor') - 2
 		);
 
 	const incidentInfoFormatted = incidentInfoStringsWithoutHeadline
@@ -173,9 +179,6 @@ export const transformDataToDecisionObj = (
 		'reprimand',
 	];
 	let penaltyType = 'none';
-	if (!incidentInfo.Decision) {
-		console.log(incidentInfo.Decision);
-	}
 	penaltiesArray.forEach((value) => {
 		if (incidentInfo.Decision[0].toLowerCase().includes(value)) {
 			penaltyType = value;
