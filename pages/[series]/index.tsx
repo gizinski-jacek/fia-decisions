@@ -46,7 +46,19 @@ export const getServerSideProps = async (
 	context: GetServerSidePropsContext
 ) => {
 	try {
-		const conn = await connectMongo(dbNameList.f1_2022_db);
+		let seriesDB = '';
+		if (context.params?.series === 'f1') {
+			seriesDB = dbNameList.f1_2022_db;
+		} else if (context.params?.series === 'f2') {
+			seriesDB = dbNameList.f2_2022_db;
+		} else if (context.params?.series === 'f3') {
+			seriesDB = dbNameList.f3_2022_db;
+		} else {
+			return {
+				props: { data: [] },
+			};
+		}
+		const conn = await connectMongo(seriesDB);
 		const docsList: DecisionOffenceModel[] =
 			await conn.models.Decision_Offence.find({}).sort({ doc_date: -1 }).exec();
 		const groupedByGP: GroupedByGP = docsList.reduce((prev, curr) => {
