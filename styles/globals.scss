@@ -10,12 +10,6 @@ body {
 	box-sizing: border-box;
 }
 
-nav {
-	li {
-		max-width: 80px;
-	}
-}
-
 h1 {
 	font-size: 2rem !important;
 }
@@ -40,12 +34,6 @@ h6 {
 	font-size: 0.85rem !important;
 }
 
-p {
-	font-size: 1rem !important;
-	line-height: 1.25rem;
-	margin: 0.5rem 0;
-}
-
 h1,
 h2,
 h3,
@@ -60,15 +48,7 @@ body {
 	min-width: 360px;
 }
 
-.accordion-button {
-	padding: 0.5rem !important;
-
-	h4,
-	h5 {
-		flex: 1 1 0;
-	}
-}
-
-.accordion-body {
-	padding: 0.5rem !important;
+main {
+	max-width: 992px;
+	margin: 0 auto;
 }
