@@ -35,11 +35,7 @@ const F1: NextPage<Props> = ({ data }) => {
 		return gpDocsArray;
 	};
 
-	return (
-		<div>
-			<div className='m-2'>{renderDocs(data)}</div>
-		</div>
-	);
+	return <div className='m-2'>{renderDocs(data)}</div>;
 };
 
 export const getServerSideProps = async (
