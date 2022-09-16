@@ -29,9 +29,16 @@ const connectMongo = async (dbName: string) => {
 			MONGODB_URI + dbName + '?retryWrites=true&w=majority',
 			opts
 		);
-		if (!client.models.Decision_Offence) {
-			client.model('Decision_Offence', require('../models/decisionOffence'));
+		if (dbName === 'missingDocs') {
+			if (!client.models.Missing_Doc) {
+				client.model('Missing_Doc', require('../models/missingDoc'));
+			}
+		} else {
+			if (!client.models.Decision_Offence) {
+				client.model('Decision_Offence', require('../models/decisionOffence'));
+			}
 		}
+
 		cached.client = client;
 		return cached.client.connections[0];
 	}
@@ -42,8 +49,14 @@ const connectMongo = async (dbName: string) => {
 			MONGODB_URI + dbName + '?retryWrites=true&w=majority',
 			opts
 		);
-		if (!conn.models.Decision_Offence) {
-			conn.model('Decision_Offence', require('../models/decisionOffence'));
+		if (dbName === 'missingDocs') {
+			if (!conn.models.Missing_Doc) {
+				conn.model('Missing_Doc', require('../models/missingDoc'));
+			}
+		} else {
+			if (!conn.models.Decision_Offence) {
+				conn.model('Decision_Offence', require('../models/decisionOffence'));
+			}
 		}
 		return conn;
 	}
