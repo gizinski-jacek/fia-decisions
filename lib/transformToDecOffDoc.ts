@@ -8,20 +8,26 @@ import {
 
 export const transformToDecOffDoc = (
 	// Value from anchor href property to decompose into file name, doc type and grand prix name
-	hrefString: string,
+	string: string,
 	// Array of strings parsed from FIA Decision or Offence, but not Reprimand, documents parsed with pdfReader
 	pdfDataArray: string[],
 	// Info to determine number of strings to slice off, F1 has 4 stewards, F2 and F3 has 3 stewards
 	series: 'formula1' | 'formula2' | 'formula3'
 ): TransformedPDFData => {
-	const stewardCount = series === 'formula1' ? 4 : 3;
-	let fileName = hrefString.slice(hrefString.lastIndexOf('/') + 1).slice(0, -4);
+	let fileName: string;
+	if (string.lastIndexOf('/') === -1) {
+		fileName = string.slice(0, -4);
+	} else {
+		fileName = string.slice(string.lastIndexOf('/') + 1).slice(0, -4);
+	}
 	if (
 		fileName.charAt(fileName.length - 3) === '_' &&
 		fileName.charAt(fileName.length - 2) === '0'
 	) {
 		fileName = fileName.slice(fileName.length - 3);
 	}
+	fileName.trim();
+
 	const docType = fileName
 		.slice(
 			fileName.indexOf('-') + 1,
@@ -30,9 +36,10 @@ export const transformToDecOffDoc = (
 		.trim();
 	const gpName = fileName.slice(0, fileName.indexOf('-')).trim();
 
-	const documentInfoStrings = pdfDataArray.slice(
+	const trimmedStringsArray = pdfDataArray.map((str) => str.trim());
+	const documentInfoStrings = trimmedStringsArray.slice(
 		0,
-		pdfDataArray.indexOf('Time') + 2
+		trimmedStringsArray.indexOf('Time') + 2
 	);
 
 	const documentSkipIndexes: number[] = [];
@@ -57,8 +64,11 @@ export const transformToDecOffDoc = (
 			documentInfoFormatted[i + 1] || '';
 	}
 
-	const incidentInfoStrings = pdfDataArray
-		.slice(pdfDataArray.indexOf('Time') + 2, pdfDataArray.lastIndexOf('Reason'))
+	const incidentInfoStrings = trimmedStringsArray
+		.slice(
+			trimmedStringsArray.indexOf('Time') + 2,
+			trimmedStringsArray.lastIndexOf('Reason')
+		)
 		.map((str, i, arr) => {
 			if (i !== 0 && str.length > 3) {
 				if (str.includes('No') && str.includes('Driver')) {
@@ -132,7 +142,9 @@ export const transformToDecOffDoc = (
 					}
 					return arr;
 				}
-			} else if (incidentInfoStringsWithoutHeadline[index - 1] === 'Offence') {
+			}
+
+			if (incidentInfoStringsWithoutHeadline[index - 1] === 'Offence') {
 				const arr: string[] = [];
 				let i = index;
 				while (incidentInfoStringsWithoutHeadline[i] !== 'Decision') {
@@ -141,7 +153,9 @@ export const transformToDecOffDoc = (
 					i++;
 				}
 				return arr.join(' ');
-			} else if (incidentInfoStringsWithoutHeadline[index - 1] === 'Decision') {
+			}
+
+			if (incidentInfoStringsWithoutHeadline[index - 1] === 'Decision') {
 				const arr: string[] = [];
 				let i = index;
 				while (incidentInfoStringsWithoutHeadline[i]) {
@@ -150,9 +164,9 @@ export const transformToDecOffDoc = (
 					i++;
 				}
 				return arr;
-			} else {
-				return str;
 			}
+
+			return str;
 		})
 		.filter((u) => u !== undefined);
 
@@ -161,12 +175,16 @@ export const transformToDecOffDoc = (
 		incidentInfo[incidentInfoFormatted[i]] = incidentInfoFormatted[i + 1] || '';
 	}
 
-	const stewards = pdfDataArray.slice(pdfDataArray.length - stewardCount);
-
-	const reasonStrings = pdfDataArray
-		.slice(pdfDataArray.lastIndexOf('Reason') + 1)
+	const stewardCount = series === 'formula1' ? 4 : 3;
+	const stewards = trimmedStringsArray
 		.filter((str) => str !== 'The Stewards')
-		.slice(0, pdfDataArray.length - (stewardCount + 1));
+		.slice(stewardCount - stewardCount * 2);
+
+	const reasonStrings = trimmedStringsArray
+		.slice(trimmedStringsArray.lastIndexOf('Reason') + 1)
+		.filter((str) => str !== 'The Stewards')
+		.slice(0, stewardCount - stewardCount * 2);
+
 	const reasonSkipIndexes: number[] = [];
 	const reasonText = reasonStrings
 		.map((str, i) => {
