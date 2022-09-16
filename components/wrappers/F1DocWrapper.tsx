@@ -125,10 +125,10 @@ const F1DocWrapper = ({ data }: Props) => {
 								{data.incident_info.Decision.map((s, i) => {
 									if (i === 0) {
 										return (
-											<>
+											<div key={i}>
 												<p className='fw-bold m-0 d-inline'>Penalty: </p>
 												<p className='d-inline'>{s}</p>
-											</>
+											</div>
 										);
 									} else {
 										return (
