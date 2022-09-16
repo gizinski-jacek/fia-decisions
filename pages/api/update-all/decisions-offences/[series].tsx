@@ -19,19 +19,20 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 		if (
 			authorization === `Bearer ${process.env.CRON_JOB_UPDATE_ALL_DOCS_SECRET}`
 		) {
+			const { series } = req.query;
 			let seriesDB = '';
 			let seriesPageURL = '';
-			if (req.query.series === 'formula1') {
+			if (series === 'formula1') {
 				seriesDB = dbNameList.f1_2022_db;
 				seriesPageURL = fiaPageList.f1_2022_page;
-			} else if (req.query.series === 'formula2') {
+			} else if (series === 'formula2') {
 				seriesDB = dbNameList.f2_2022_db;
 				seriesPageURL = fiaPageList.f2_2022_page;
-			} else if (req.query.series === 'formula3') {
+			} else if (series === 'formula3') {
 				seriesDB = dbNameList.f3_2022_db;
 				seriesPageURL = fiaPageList.f3_2022_page;
 			} else {
-				return res.status(401).json({ success: false });
+				return res.status(401).json('Unsupported series');
 			}
 			try {
 				const responseSite = await axios.get(seriesPageURL);
@@ -123,7 +124,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 						const transformed = transformToDecOffDoc(
 							href,
 							readPDF as any,
-							req.query.series as 'formula1' | 'formula2' | 'formula3'
+							series as 'formula1' | 'formula2' | 'formula3'
 						);
 						try {
 							await conn.models.Decision_Offence.findOneAndUpdate(
@@ -148,9 +149,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 				if (error instanceof AxiosError) {
 					return res
 						.status(error?.response?.status || 404)
-						.json(error?.response?.data || 'Unknown error');
+						.json(error?.response?.data || 'Unknown server error');
 				} else {
-					return res.status(404).json('Unknown error');
+					return res.status(404).json('Unknown server error');
 				}
 			}
 		} else {
