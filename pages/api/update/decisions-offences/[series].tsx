@@ -5,7 +5,7 @@ const { PdfReader } = require('pdfreader');
 import axios, { AxiosError } from 'axios';
 import connectMongo from '../../../../lib/mongo';
 import { Stream } from 'stream';
-import { transformDataToDecisionObj } from '../../../../lib/transformDataToDecisionObj';
+import { transformToDecOffDoc } from '../../../../lib/transformToDecOffDoc';
 import { dbNameList, fiaDomain, fiaPageList } from '../../../../lib/myData';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -176,7 +176,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 						});
 						const fileBuffer = await streamToBuffer(responseFile.data);
 						const pdfData = await readPDFPages(fileBuffer);
-						const transformed = transformDataToDecisionObj(
+						const transformed = transformToDecOffDoc(
 							href,
 							pdfData as any,
 							req.query.series as 'formula1' | 'formula2' | 'formula3'
