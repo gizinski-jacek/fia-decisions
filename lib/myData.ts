@@ -1,4 +1,4 @@
-import { DatabaseNameList, FiaPageList } from '../types/myTypes';
+import { DatabaseNameList, FiaPageList, FormTextData } from '../types/myTypes';
 
 export const fiaDomain: string = 'https://www.fia.com';
 
@@ -15,4 +15,10 @@ export const fiaPageList: FiaPageList = {
 		'https://www.fia.com/documents/championships/formula-2-championship-44/season/season-2022-2005',
 	f3_2022_page:
 		'https://www.fia.com/documents/championships/fia-formula-3-championship-1012/season/season-2022-2005',
+};
+
+export const defaultTextData: FormTextData = {
+	doc_series: '',
+	doc_title: '',
+	doc_link: '',
 };
