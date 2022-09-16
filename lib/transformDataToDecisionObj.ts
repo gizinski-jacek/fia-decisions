@@ -10,8 +10,11 @@ export const transformDataToDecisionObj = (
 	// Value from anchor href property to decompose into file name, doc type and grand prix name
 	hrefString: string,
 	// Array of strings parsed from FIA Decision or Offence, but not Reprimand, documents parsed with pdfReader
-	pdfDataArray: string[]
+	pdfDataArray: string[],
+	// Info to determine number of strings to slice off, F1 has 4 stewards, F2 and F3 has 3 stewards
+	series: 'formula1' | 'formula2' | 'formula3'
 ): TransformedPDFData => {
+	const stewardCount = series === 'formula1' ? 4 : 3;
 	let fileName = hrefString.slice(hrefString.lastIndexOf('/') + 1).slice(0, -4);
 	if (
 		fileName.charAt(fileName.length - 3) === '_' &&
@@ -58,7 +61,7 @@ export const transformDataToDecisionObj = (
 		.slice(pdfDataArray.indexOf('Time') + 2, pdfDataArray.lastIndexOf('Reason'))
 		.map((str, i, arr) => {
 			if (i !== 0 && str.length > 3) {
-				if (str.toLowerCase().includes('driver')) {
+				if (str.includes('No') && str.includes('Driver')) {
 					return 'Driver';
 				} else if (
 					i + 1 !== arr.length &&
@@ -98,23 +101,37 @@ export const transformDataToDecisionObj = (
 			if (incidentInfoStringsWithoutHeadline[index - 1] === 'Fact') {
 				const arr: string[] = [];
 				let i = index;
-				while (incidentInfoStringsWithoutHeadline[i] !== 'Offence') {
-					if (
-						(incidentInfoStringsWithoutHeadline[i + 1] as string).length < 6
-					) {
-						arr.push(
-							incidentInfoStringsWithoutHeadline[i] +
-								' ' +
-								incidentInfoStringsWithoutHeadline[i + 1]
-						);
-						incidentSkipIndexes.push(i, i + 1);
-					} else {
+				if (
+					i === index &&
+					incidentInfoStringsWithoutHeadline[i]?.charAt(
+						incidentInfoStringsWithoutHeadline[i]?.length - 1
+					) !== ':'
+				) {
+					while (incidentInfoStringsWithoutHeadline[i] !== 'Offence') {
 						arr.push(incidentInfoStringsWithoutHeadline[i] as string);
 						incidentSkipIndexes.push(i);
+						i++;
 					}
-					i++;
+					return arr.join(' ');
+				} else {
+					while (incidentInfoStringsWithoutHeadline[i] !== 'Offence') {
+						if (
+							(incidentInfoStringsWithoutHeadline[i + 1] as string).length < 6
+						) {
+							arr.push(
+								incidentInfoStringsWithoutHeadline[i] +
+									' ' +
+									incidentInfoStringsWithoutHeadline[i + 1]
+							);
+							incidentSkipIndexes.push(i, i + 1);
+						} else {
+							arr.push(incidentInfoStringsWithoutHeadline[i] as string);
+							incidentSkipIndexes.push(i);
+						}
+						i++;
+					}
+					return arr;
 				}
-				return arr;
 			} else if (incidentInfoStringsWithoutHeadline[index - 1] === 'Offence') {
 				const arr: string[] = [];
 				let i = index;
@@ -144,14 +161,14 @@ export const transformDataToDecisionObj = (
 		incidentInfo[incidentInfoFormatted[i]] = incidentInfoFormatted[i + 1] || '';
 	}
 
-	const stewards = pdfDataArray.slice(pdfDataArray.length - 4);
+	const stewards = pdfDataArray.slice(pdfDataArray.length - stewardCount);
 
 	const reasonStrings = pdfDataArray
-		.slice(pdfDataArray.lastIndexOf('Reason'))
+		.slice(pdfDataArray.lastIndexOf('Reason') + 1)
 		.filter((str) => str !== 'The Stewards')
-		.slice(0, pdfDataArray.length - 5);
+		.slice(0, pdfDataArray.length - (stewardCount + 1));
 	const reasonSkipIndexes: number[] = [];
-	const reason = reasonStrings
+	const reasonText = reasonStrings
 		.map((str, i) => {
 			if (reasonSkipIndexes.indexOf(i) !== -1) {
 				return;
@@ -199,7 +216,7 @@ export const transformDataToDecisionObj = (
 		penalty_type: penaltyType,
 		weekend: weekend,
 		document_info: documentInfo,
-		incident_info: { ...incidentInfo, Reason: reason },
+		incident_info: { ...incidentInfo, Reason: reasonText },
 		stewards: stewards,
 	};
 
