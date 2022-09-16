@@ -1,0 +1,22 @@
+nav {
+	li {
+		max-width: 80px;
+	}
+}
+
+.accordion-button {
+	padding: 0.5rem !important;
+
+	h4,
+	h5 {
+		flex: 1 1 0;
+	}
+}
+
+.accordion-button.collapsed {
+	background-color: rgba(100, 0, 255, 0.1);
+}
+
+.accordion-body {
+	padding: 0.5rem !important;
+}
