@@ -4,6 +4,18 @@ nav {
 	}
 }
 
+.outline-success {
+	outline: 1px solid rgb(50, 150, 0);
+}
+
+.outline-warning {
+	outline: 1px solid rgb(255, 150, 0);
+}
+
+.outline-error {
+	outline: 2px solid rgb(255, 0, 0);
+}
+
 .accordion-button {
 	padding: 0.5rem !important;
 
