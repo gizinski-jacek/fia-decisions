@@ -7,6 +7,8 @@ import connectMongo from '../../../../lib/mongo';
 import { Stream } from 'stream';
 import { transformToDecOffDoc } from '../../../../lib/transformToDecOffDoc';
 import { dbNameList, fiaDomain, fiaPageList } from '../../../../lib/myData';
+import { streamToBuffer } from '../../../../lib/streamToBuffer';
+import { readPDFPages } from '../../../../lib/readPDFPages';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 	if (req.method === 'GET') {
@@ -142,33 +144,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 				if (allDocsHref.length === 0) {
 					return res.status(200).json({ success: true });
 				}
-
-				const streamToBuffer = async (stream: Stream): Promise<Buffer> => {
-					return new Promise<Buffer>((resolve, reject) => {
-						const buffer = Array<any>();
-						stream.on('data', (chunk) => buffer.push(chunk));
-						stream.on('end', () => resolve(Buffer.concat(buffer)));
-						stream.on('error', (err) =>
-							reject(`Error converting stream - ${err}`)
-						);
-					});
-				};
-
-				const readPDFPages = (buffer: Buffer) => {
-					const reader = new PdfReader();
-					return new Promise((resolve, reject) => {
-						const stringsArray: string[] = [];
-						reader.parseBuffer(buffer, (err: any, item: any) => {
-							if (err) {
-								reject(err);
-							} else if (!item) {
-								resolve(stringsArray);
-							} else if (item.text) {
-								stringsArray.push(item.text.normalize('NFKD'));
-							}
-						});
-					});
-				};
 
 				await new Promise((resolve, reject) => {
 					allDocsHref.forEach(async (href) => {
