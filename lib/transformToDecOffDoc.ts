@@ -6,7 +6,7 @@ import {
 	TransformedPDFData,
 } from '../types/myTypes';
 
-export const transformDataToDecisionObj = (
+export const transformToDecOffDoc = (
 	// Value from anchor href property to decompose into file name, doc type and grand prix name
 	hrefString: string,
 	// Array of strings parsed from FIA Decision or Offence, but not Reprimand, documents parsed with pdfReader
