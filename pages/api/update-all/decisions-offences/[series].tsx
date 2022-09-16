@@ -122,7 +122,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 						const readPDF = await readPDFPages(fileBuffer);
 						const transformed = transformDataToDecisionObj(
 							href,
-							readPDF as any
+							readPDF as any,
+							req.query.series as 'formula1' | 'formula2' | 'formula3'
 						);
 						try {
 							await conn.models.Decision_Offence.findOneAndUpdate(
