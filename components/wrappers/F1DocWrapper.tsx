@@ -15,20 +15,20 @@ const penaltyTypeColors = {
 	'drive through': { color: 'white', backgroundColor: 'purple' },
 	'pit lane': { color: 'white', backgroundColor: 'brown' },
 	reprimand: { color: 'white', backgroundColor: 'green' },
-	none: { color: 'black', backgroundColor: 'white' },
+	none: { color: 'black', backgroundColor: 'beige' },
 } as const;
 
 type PTCkey = keyof typeof penaltyTypeColors;
 
 const F1DocWrapper = ({ data }: Props) => {
-	const [showModal, setShowModal] = useState(false);
+	const [showDocModal, setShowDocModal] = useState(false);
 
-	const handleShowModal = () => {
-		setShowModal(true);
+	const handleOpenModal = () => {
+		setShowDocModal(true);
 	};
 
 	const handleCloseModal = () => {
-		setShowModal(false);
+		setShowDocModal(false);
 	};
 
 	const modalDataRender = (obj: DecisionOffenceModel) => {
@@ -36,7 +36,7 @@ const F1DocWrapper = ({ data }: Props) => {
 		for (const [key, value] of Object.entries(obj.document_info)) {
 			content.push(
 				<div key={`document_info-${key}`} className='my-1'>
-					{key}: {value}
+					<p className='fw-bold m-0 d-inline'>{key}:</p> {value}
 				</div>
 			);
 		}
@@ -53,21 +53,29 @@ const F1DocWrapper = ({ data }: Props) => {
 			if (key === 'Fact' || key === 'Decision') {
 				content.push(
 					<div key={`incident_info-${key}`} className='my-2'>
-						<div>{`${key}:`}</div>
-						<div>
-							{(value as string[]).map((s, i) => (
-								<p key={i} className='m-0'>
-									{s + '\n'}
-								</p>
-							))}
-						</div>
+						<p className='fw-bold m-0 d-inline'>{key}: </p>
+						{(value as string[]).map((s, i) => {
+							if (i === 0) {
+								return (
+									<p key={i} className='m-0 d-inline'>
+										{s + '\n'}
+									</p>
+								);
+							} else {
+								return (
+									<p key={i} className='m-0'>
+										{s + '\n'}
+									</p>
+								);
+							}
+						})}
 					</div>
 				);
 				continue;
 			}
 			content.push(
 				<div key={key} className='my-2'>
-					{`${key}:`} {value}
+					<p className='fw-bold m-0 d-inline'>{key}:</p> {value}
 				</div>
 			);
 		}
@@ -101,33 +109,34 @@ const F1DocWrapper = ({ data }: Props) => {
 							</div>
 						</div>
 					</Accordion.Header>
-					<Accordion.Body className='mx-2 mx-sm-0 d-flex flex-column flex-sm-row justify-content-between'>
+					<Accordion.Body className='d-flex flex-column flex-sm-row justify-content-between'>
 						<div className='d-flex flex-grow-1 flex-column flex-md-row'>
-							<div className='me-md-2 d-block d-lg-none'>
-								<p className='mb-2 mb-md-0'>Weekend: {data.weekend}</p>
+							<div className='d-block d-md-none'>
+								<p className='fw-bold d-inline'>Title: </p>
+								<p className='d-inline'>{data.doc_name}</p>
 							</div>
-							<div className='me-md-2 d-block d-md-none'>
-								<p className='mb-2 mb-md-0'>Title: {data.doc_name}</p>
-							</div>
-							<div className='mx-md-2 mx-lg-0 me-lg-4'>
-								<p className='mb-2 mb-md-0'>
-									Date: {data.document_info.Date} {data.document_info.Time}
+							<div className='me-md-3 mx-lg-0 me-lg-4'>
+								<p className='fw-bold d-inline'>Date: </p>
+								<p className='d-inline'>
+									{data.document_info.Date} {data.document_info.Time}
 								</p>
 							</div>
-							<div className='my-2 m-md-0 mx-md-2 mx-lg-4'>
+							<div className='mx-md-3'>
 								{data.incident_info.Decision.map((s, i) => {
 									if (i === 0) {
 										return (
-											<p className='mb-2 mb-md-0' key={i}>
-												Penalty: {s}
+											<>
+												<p className='fw-bold m-0 d-inline'>Penalty: </p>
+												<p className='d-inline'>{s}</p>
+											</>
+										);
+									} else {
+										return (
+											<p className='' key={i}>
+												{s}
 											</p>
 										);
 									}
-									return (
-										<p className='mb-2 mb-md-0' key={i}>
-											{s}
-										</p>
-									);
 								})}
 							</div>
 						</div>
@@ -135,7 +144,7 @@ const F1DocWrapper = ({ data }: Props) => {
 							style={{ width: 'fit-content', height: 'fit-content' }}
 							size='sm'
 							variant='info'
-							onClick={handleShowModal}
+							onClick={handleOpenModal}
 						>
 							Details
 						</Button>
@@ -143,7 +152,7 @@ const F1DocWrapper = ({ data }: Props) => {
 				</Accordion.Item>
 			</Accordion>
 			<Modal
-				show={showModal}
+				show={showDocModal}
 				onHide={handleCloseModal}
 				dialogClassName='modal-lg'
 			>
@@ -154,7 +163,10 @@ const F1DocWrapper = ({ data }: Props) => {
 					<div className='text-break'>{modalDataRender(data)}</div>
 				</Modal.Body>
 				<Modal.Footer className='d-flex flex-row'>
-					<div className='me-auto'>Stewards: {data.stewards.join(', ')}</div>
+					<div className='me-auto'>
+						<p className='fw-bold m-0 d-inline'>Stewards: </p>
+						{data.stewards.join(', ')}
+					</div>
 				</Modal.Footer>
 			</Modal>
 		</>
