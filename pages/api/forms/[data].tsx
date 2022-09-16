@@ -35,6 +35,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 					series === 'formula2' ||
 					series === 'formula3'
 				) {
+					// Currently not working when imported, looking for fix...
+					//
+					// const file = await parseFile(req);
+
 					const form = new multiparty.Form();
 
 					// Errors may be emitted
