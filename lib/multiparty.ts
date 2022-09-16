@@ -1,9 +1,8 @@
 import multiparty from 'multiparty';
 import { NextApiRequest } from 'next';
-import { PassThrough } from 'stream';
 import { FormTextData } from './../types/myTypes';
 
-export const parseFile = (req: NextApiRequest): Promise<PassThrough> => {
+export const parseFile = (req: NextApiRequest) => {
 	// Currently not working when imported, looking for fix...
 	//
 	const form = new multiparty.Form();
