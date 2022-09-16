@@ -16,7 +16,7 @@ const Layout = ({ children }: Props) => {
 				<link rel='icon' href='/favicon.ico' />
 			</Head>
 			<Drawer />
-			<main className='m-2 my-4 m-sm-4'>{children}</main>
+			<main>{children}</main>
 			{/* <Footer /> */}
 		</ThemeContextProvider>
 	);
