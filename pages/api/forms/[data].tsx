@@ -114,7 +114,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 		}
 		if (req.query.data === 'doc-data') {
 			try {
-				const fields = (await parseFields(req)) as FormDocData;
+				const fields = await parseFields(req);
 				if (!fields.series && !fields.title && !fields.url) {
 					return res
 						.status(40)
@@ -131,12 +131,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 		}
 		if (req.query.data === 'contact') {
 			try {
-				const fields = (await parseFields(req)) as FormContactData;
+				const fields = await parseFields(req);
 				if (!fields.email && !fields.message) {
 					return res.status(422).json('Must provide an Email and a Message');
 				}
 				const conn = await connectMongo('otherDocs');
-				const newReport = new conn.models.ContactDoc(fields);
+				const newReport = new conn.models.Contact_Doc(fields);
 				await newReport.save();
 				return res.status(200).json('Document saved');
 			} catch (error) {
