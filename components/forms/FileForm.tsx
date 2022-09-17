@@ -2,10 +2,11 @@ import { useRef, useState } from 'react';
 import { Button, Form } from 'react-bootstrap';
 import axios, { AxiosError } from 'axios';
 import Link from 'next/link';
+import { FormFileData } from '../../types/myTypes';
+import { defaultFileData } from '../../lib/myData';
 
 const FileForm = () => {
-	const [formSeries, setFormSeries] = useState('');
-	const [formFile, setFormFile] = useState<File | null>(null);
+	const [formData, setFormData] = useState<FormFileData>(defaultFileData);
 	const [formErrors, setFormErrors] = useState<string[]>([]);
 	const formRef = useRef<HTMLFormElement>(null);
 
@@ -13,7 +14,8 @@ const FileForm = () => {
 		e: React.ChangeEvent<HTMLSelectElement>
 	) => {
 		setFormErrors([]);
-		setFormSeries(e.target.value);
+		const { name, value } = e.target;
+		setFormData((prevState) => ({ ...prevState, [name]: value }));
 	};
 
 	const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -28,25 +30,23 @@ const FileForm = () => {
 			setFormErrors(['Only images PDF files are allowed']);
 			return;
 		}
-		setFormFile(file);
+		setFormData((prevState) => ({ ...prevState, file: file }));
 	};
 
 	const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
 		e.preventDefault();
 		try {
-			if (!formSeries) {
-				setFormErrors(['Must choose Formula series']);
-				return;
-			}
-			if (!formFile) {
-				setFormErrors(['Must choose a PDF file']);
+			if (!formData.series && !formData.file) {
+				setFormErrors(['Must choose series and PDF file']);
 				return;
 			}
 			const uploadData = new FormData();
-			uploadData.append('file', formFile);
-			await axios.post(`/api/forms/doc-file?series=${formSeries}`, uploadData);
-			setFormSeries('');
-			setFormFile(null);
+			uploadData.append('file', formData.file as File);
+			await axios.post(
+				`/api/forms/doc-file?series=${formData.series}`,
+				uploadData
+			);
+			setFormData(defaultFileData);
 			setFormErrors([]);
 			formRef.current?.reset();
 		} catch (error) {
@@ -78,16 +78,16 @@ const FileForm = () => {
 				<Form.Label htmlFor='series'>Select series</Form.Label>
 				<Form.Select
 					className={`mb-2 ${
-						formErrors.length && !formSeries
+						formErrors.length && !formData.series
 							? 'outline-error'
-							: !formSeries
+							: !formData.series
 							? 'outline-warning'
 							: 'outline-success'
 					}`}
 					name='series'
 					id='series'
 					onChange={handleSelectChange}
-					value={formSeries}
+					value={formData.series}
 				>
 					<option value=''>Choose Formula series</option>
 					<option value='formula1'>Formula 1</option>
@@ -97,9 +97,9 @@ const FileForm = () => {
 				<Form.Label htmlFor='file'>Select file</Form.Label>
 				<Form.Control
 					className={`mb-2 ${
-						formErrors.length && !formFile
+						formErrors.length && !formData.file
 							? 'outline-error'
-							: !formFile
+							: !formData.file
 							? 'outline-warning'
 							: 'outline-success'
 					}`}
