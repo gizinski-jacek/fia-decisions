@@ -22,7 +22,7 @@ export const transformToDecOffDoc = (
 	}
 	if (
 		fileName.charAt(fileName.length - 3) === '_' &&
-		fileName.charAt(fileName.length - 2) === '0'
+		fileName.charAt(fileName.length - 2).match(/[0-9]/)
 	) {
 		fileName = fileName.slice(fileName.length - 3);
 	}
@@ -227,6 +227,7 @@ export const transformToDecOffDoc = (
 	const docDate = new Date(dateUTC);
 
 	const data = {
+		series: series,
 		doc_type: docType,
 		doc_name: fileName,
 		doc_date: docDate,
