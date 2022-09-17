@@ -131,6 +131,7 @@ const FileForm = () => {
 				<Button
 					variant='primary'
 					type='submit'
+					className='fw-bolder'
 					disabled={sending}
 					onClick={handleSubmit}
 				>
