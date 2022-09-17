@@ -66,6 +66,11 @@ export interface FiaPageList {
 	f3_2022_page: string;
 }
 
+export interface FormFileData {
+	series: string;
+	file: File | null;
+}
+
 export interface FormDocData {
 	series: string;
 	title?: string;
