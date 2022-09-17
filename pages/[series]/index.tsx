@@ -4,12 +4,15 @@ import { DecisionOffenceModel, GroupedByGP } from '../../types/myTypes';
 import F1DocWrapper from '../../components/wrappers/F1DocWrapper';
 import { dbNameList } from '../../lib/myData';
 import { Accordion } from 'react-bootstrap';
+import { useRouter } from 'next/router';
 
 interface Props {
 	data: GroupedByGP;
 }
 
 const F1: NextPage<Props> = ({ data }) => {
+	const router = useRouter();
+
 	const renderDocs = (data: GroupedByGP) => {
 		const gpDocsArray = [];
 		for (const [key, array] of Object.entries(data)) {
@@ -35,7 +38,14 @@ const F1: NextPage<Props> = ({ data }) => {
 		return gpDocsArray;
 	};
 
-	return <div className='m-2'>{renderDocs(data)}</div>;
+	return (
+		<div className='m-2'>
+			<h2 className='text-center text-capitalize fw-bolder fst-italic '>{`Formula ${router.query.series?.slice(
+				-1
+			)} Penalties`}</h2>
+			{renderDocs(data)}
+		</div>
+	);
 };
 
 export const getServerSideProps = async (
@@ -49,6 +59,34 @@ export const getServerSideProps = async (
 			seriesDB = dbNameList.f2_2022_db;
 		} else if (context.params?.series === 'f3') {
 			seriesDB = dbNameList.f3_2022_db;
+		} else if (context.params?.series === 'formula') {
+			return {
+				redirect: {
+					destination: '/f1',
+					permanent: false,
+				},
+			};
+		} else if (context.params?.series === 'formula1') {
+			return {
+				redirect: {
+					destination: '/f1',
+					permanent: false,
+				},
+			};
+		} else if (context.params?.series === 'formula2') {
+			return {
+				redirect: {
+					destination: '/f2',
+					permanent: false,
+				},
+			};
+		} else if (context.params?.series === 'formula3') {
+			return {
+				redirect: {
+					destination: '/f3',
+					permanent: false,
+				},
+			};
 		} else {
 			return {
 				props: { data: [] },
