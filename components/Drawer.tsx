@@ -47,7 +47,7 @@ const Drawer = () => {
 					{/* <li className='nav-item'>
 						<Link href='/'>
 							<a
-								className={`w-100 btn btn-sm btn-success ${
+								className={`w-100 btn btn-sm btn-success fw-bolder ${
 									router.pathname === '/' ? 'active' : ''
 								}`}
 							>
@@ -58,7 +58,7 @@ const Drawer = () => {
 					<li className='nav-item'>
 						<Link href={'/f1'}>
 							<a
-								className={`w-100 btn btn-sm btn-danger ${
+								className={`w-100 btn btn-sm btn-danger fw-bolder ${
 									router.query.series === 'f1' ? 'active' : ''
 								}`}
 							>
@@ -69,7 +69,7 @@ const Drawer = () => {
 					<li className='nav-item'>
 						<Link href={'/f2'}>
 							<a
-								className={`w-100 btn btn-sm btn-primary ${
+								className={`w-100 btn btn-sm btn-primary fw-bolder ${
 									router.query.series === 'f2' ? 'active' : ''
 								}`}
 							>
@@ -80,7 +80,7 @@ const Drawer = () => {
 					<li className='nav-item '>
 						<Link href={'/f3'}>
 							<a
-								className={`w-100 btn btn-sm btn-secondary ${
+								className={`w-100 btn btn-sm btn-secondary fw-bolder ${
 									router.query.series === 'f3' ? 'active' : ''
 								}`}
 							>
@@ -94,6 +94,7 @@ const Drawer = () => {
 						<Button
 							variant='warning'
 							size='sm'
+							className='fw-bolder'
 							onClick={handleOpenCalendarModal}
 						>
 							Calendar
@@ -103,6 +104,7 @@ const Drawer = () => {
 						<Button
 							variant='dark'
 							size='sm'
+							className='fw-bolder'
 							onClick={handleToggleTheme}
 						>
 							Mode
@@ -112,7 +114,7 @@ const Drawer = () => {
 						<Button
 							variant='info'
 							size='sm'
-							className='text-white'
+							className='fw-bolder text-white'
 							onClick={handleOpenFormModal}
 						>
 							Contact
@@ -130,7 +132,7 @@ const Drawer = () => {
 						<Button
 							variant={`success ${displayedForm === 'file' ? 'active' : ''}`}
 							type='submit'
-							className='me-auto'
+							className='fw-bolder'
 							onClick={() => handleChangeForm('file')}
 						>
 							Send File
@@ -138,7 +140,7 @@ const Drawer = () => {
 						<Button
 							variant={`success ${displayedForm === 'data' ? 'active' : ''}`}
 							type='submit'
-							className='me-auto'
+							className='fw-bolder'
 							onClick={() => handleChangeForm('data')}
 						>
 							Send Data
@@ -146,7 +148,7 @@ const Drawer = () => {
 						<Button
 							variant={`success ${displayedForm === 'contact' ? 'active' : ''}`}
 							type='submit'
-							className='me-auto'
+							className='fw-bolder'
 							onClick={() => handleChangeForm('contact')}
 						>
 							Contact
