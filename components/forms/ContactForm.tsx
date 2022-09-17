@@ -50,7 +50,7 @@ const ContactForm = () => {
 				Use this form to report something or contact me about any other matter.
 			</h4>
 			<Form.Group className='p-3 my-3 rounded-2 bg-light'>
-				<Form.Label htmlFor='email'>Email</Form.Label>
+				<Form.Label htmlFor='email' className='fw-bolder'>Email</Form.Label>
 				<Form.Control
 					className={`mb-2 ${
 						formErrors.length && !formData.email
@@ -69,7 +69,7 @@ const ContactForm = () => {
 					placeholder='Email'
 					disabled={sending}
 				/>
-				<Form.Label htmlFor='message'>Message</Form.Label>
+				<Form.Label htmlFor='message' className='fw-bolder'>Message</Form.Label>
 				<Form.Control
 					as='textarea'
 					className={`mb-2 ${
