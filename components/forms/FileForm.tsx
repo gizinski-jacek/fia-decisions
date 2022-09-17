@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Button, Form } from 'react-bootstrap';
 import axios, { AxiosError } from 'axios';
 import Link from 'next/link';
@@ -7,6 +7,7 @@ const FileForm = () => {
 	const [formSeries, setFormSeries] = useState('');
 	const [formFile, setFormFile] = useState<File | null>(null);
 	const [formErrors, setFormErrors] = useState<string[]>([]);
+	const formRef = useRef<HTMLFormElement>(null);
 
 	const handleSelectChange = async (
 		e: React.ChangeEvent<HTMLSelectElement>
@@ -30,7 +31,8 @@ const FileForm = () => {
 		setFormFile(file);
 	};
 
-	const handleSubmit = async () => {
+	const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
+		e.preventDefault();
 		try {
 			if (!formSeries) {
 				setFormErrors(['Must choose Formula series']);
@@ -46,6 +48,7 @@ const FileForm = () => {
 			setFormSeries('');
 			setFormFile(null);
 			setFormErrors([]);
+			formRef.current?.reset();
 		} catch (error) {
 			if (error instanceof AxiosError) {
 				setFormErrors([error?.response?.data || 'Unknown server error']);
@@ -56,7 +59,7 @@ const FileForm = () => {
 	};
 
 	return (
-		<Form>
+		<Form ref={formRef}>
 			<h4>
 				Use this form to send a PDF file of a penalty You believe is missing
 				from the list.
@@ -83,7 +86,6 @@ const FileForm = () => {
 					}`}
 					name='series'
 					id='series'
-					defaultValue=''
 					onChange={handleSelectChange}
 					value={formSeries}
 				>

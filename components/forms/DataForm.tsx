@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Button, Form } from 'react-bootstrap';
 import axios, { AxiosError } from 'axios';
 import { FormDocData } from '../../types/myTypes';
@@ -7,6 +7,7 @@ import { defaultDocData } from '../../lib/myData';
 const DataForm = () => {
 	const [formData, setFormData] = useState<FormDocData>(defaultDocData);
 	const [formErrors, setFormErrors] = useState<string[]>([]);
+	const formRef = useRef<HTMLFormElement>(null);
 
 	const handleInputChange = async (e: React.ChangeEvent<HTMLElement>) => {
 		setFormErrors([]);
@@ -14,10 +15,11 @@ const DataForm = () => {
 		setFormData((prevState) => ({ ...prevState, [name]: value }));
 	};
 
-	const handleSubmit = async () => {
+	const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
+		e.preventDefault();
 		try {
 			if (!formData.title && !formData.url) {
-				setFormErrors(['Must provide at least title or link']);
+				setFormErrors(['Must provide at least Title or Link / URL']);
 				return;
 			}
 			const uploadData = new FormData();
@@ -27,6 +29,7 @@ const DataForm = () => {
 			await axios.post('/api/forms/doc-data', uploadData);
 			setFormData(defaultDocData);
 			setFormErrors([]);
+			formRef.current?.reset();
 		} catch (error) {
 			if (error instanceof AxiosError) {
 				setFormErrors([error?.response?.data || 'Unknown server error']);
@@ -37,7 +40,7 @@ const DataForm = () => {
 	};
 
 	return (
-		<Form>
+		<Form ref={formRef}>
 			<h4>
 				Use this form to provide data about a penalty You believe is missing
 				from the list.
@@ -54,7 +57,6 @@ const DataForm = () => {
 					}`}
 					name='series'
 					id='series'
-					defaultValue=''
 					onChange={handleInputChange}
 					value={formData.series}
 				>

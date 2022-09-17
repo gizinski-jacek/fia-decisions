@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Button, Form } from 'react-bootstrap';
 import axios, { AxiosError } from 'axios';
 import { FormContactData } from '../../types/myTypes';
@@ -7,6 +7,7 @@ import { defaultContactData } from '../../lib/myData';
 const ContactForm = () => {
 	const [formData, setFormData] = useState<FormContactData>(defaultContactData);
 	const [formErrors, setFormErrors] = useState<string[]>([]);
+	const formRef = useRef<HTMLFormElement>(null);
 
 	const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
 		setFormErrors([]);
@@ -14,10 +15,11 @@ const ContactForm = () => {
 		setFormData((prevState) => ({ ...prevState, [name]: value }));
 	};
 
-	const handleSubmit = async () => {
+	const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
+		e.preventDefault();
 		try {
 			if (!formData.email && !formData.message) {
-				setFormErrors(['Must provide an email and a message']);
+				setFormErrors(['Must provide an Email and a Message']);
 				return;
 			}
 			const uploadData = new FormData();
@@ -27,6 +29,7 @@ const ContactForm = () => {
 			await axios.post('/api/forms/contact', uploadData);
 			setFormData(defaultContactData);
 			setFormErrors([]);
+			formRef.current?.reset();
 		} catch (error) {
 			if (error instanceof AxiosError) {
 				setFormErrors([error?.response?.data || 'Unknown server error']);
@@ -37,7 +40,7 @@ const ContactForm = () => {
 	};
 
 	return (
-		<Form>
+		<Form ref={formRef}>
 			<h4>
 				Use this form to report something or contact me about any other matter.
 			</h4>
