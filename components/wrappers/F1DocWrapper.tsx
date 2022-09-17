@@ -16,9 +16,7 @@ const penaltyTypeColors = {
 	'pit lane': { color: 'white', backgroundColor: 'brown' },
 	reprimand: { color: 'white', backgroundColor: 'green' },
 	none: { color: 'black', backgroundColor: 'beige' },
-} as const;
-
-type PTCkey = keyof typeof penaltyTypeColors;
+};
 
 const F1DocWrapper = ({ data }: Props) => {
 	const [showDocModal, setShowDocModal] = useState(false);
@@ -93,7 +91,9 @@ const F1DocWrapper = ({ data }: Props) => {
 								className='border rounded p-1 me-2 text-uppercase text-center'
 								style={{
 									width: '180px',
-									...penaltyTypeColors[data.penalty_type as PTCkey],
+									...penaltyTypeColors[
+										data.penalty_type as keyof typeof penaltyTypeColors
+									],
 								}}
 							>
 								{data.penalty_type}
