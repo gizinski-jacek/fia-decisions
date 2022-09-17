@@ -133,9 +133,9 @@ const Drawer = () => {
 
 	return (
 		<>
-			<nav className='d-flex flex-column flex-md-row justify-content-between bg-light gap-md-5'>
-				<ul className='nav flex-grow-1 nav-tabs nav-fill p-2 gap-5'>
-					<li className='nav-item'>
+			<nav className='d-flex flex-column flex-sm-row bg-light'>
+				<ul className='nav flex-grow-1 nav-tabs justify-content-between justify-content-sm-start nav-fill p-2 gap-5'>
+					{/* <li className='nav-item'>
 						<Link href='/'>
 							<a
 								className={`w-100 btn btn-sm btn-success ${
@@ -145,7 +145,7 @@ const Drawer = () => {
 								Home
 							</a>
 						</Link>
-					</li>
+					</li> */}
 					<li className='nav-item'>
 						<Link href={'/f1'}>
 							<a
@@ -168,7 +168,7 @@ const Drawer = () => {
 							</a>
 						</Link>
 					</li>
-					<li className='nav-item'>
+					<li className='nav-item '>
 						<Link href={'/f3'}>
 							<a
 								className={`w-100 btn btn-sm btn-secondary ${
@@ -193,7 +193,7 @@ const Drawer = () => {
 							</Button>
 						</Link>
 					</li>
-					<li className='nav-item ms-auto'>
+					{/* <li className='nav-item ms-auto'>
 						<Button
 							variant='dark'
 							size='sm'
@@ -202,7 +202,7 @@ const Drawer = () => {
 						>
 							Mode
 						</Button>
-					</li>
+					</li> */}
 					<li className='nav-item'>
 						<Button
 							variant='info'
@@ -210,7 +210,7 @@ const Drawer = () => {
 							className='w-100'
 							onClick={handleOpenFormModal}
 						>
-							?
+							Contact
 						</Button>
 					</li>
 				</ul>
