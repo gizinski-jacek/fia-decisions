@@ -1,14 +1,11 @@
-import axios, { AxiosError } from 'axios';
-import Link from 'next/link';
+import { useContext, useState } from 'react';
 import { useRouter } from 'next/router';
-import React, { useContext, useState } from 'react';
-import { Button, Form, Modal } from 'react-bootstrap';
+import Link from 'next/link';
+import { Button, Modal } from 'react-bootstrap';
 import { ThemeContext } from '../hooks/ThemeProvider';
-import { defaultContactData, defaultDocData } from '../lib/myData';
-import { FormContactData, FormDocData } from '../types/myTypes';
-import ContactForm from './forms/ContactForm';
-import DataForm from './forms/DataForm';
 import FileForm from './forms/FileForm';
+import DataForm from './forms/DataForm';
+import ContactForm from './forms/ContactForm';
 
 const Drawer = () => {
 	const { toggleTheme } = useContext(ThemeContext);
