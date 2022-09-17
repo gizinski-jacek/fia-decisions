@@ -66,12 +66,21 @@ export interface FiaPageList {
 	f3_2022_page: string;
 }
 
-export interface FormTextData {
-	doc_series?: string;
-	doc_title?: string;
-	doc_link?: string;
+export interface FormDocData {
+	series: string;
+	title?: string;
+	url?: string;
 }
 
-export interface MissingDocModel extends FormTextData {
+export interface MissingDocModel extends FormDocData {
+	_id: string;
+}
+
+export interface FormContactData {
+	email: string;
+	message: string;
+}
+
+export interface ContactDocModel extends FormContactData {
 	_id: string;
 }
