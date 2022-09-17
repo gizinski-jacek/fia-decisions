@@ -51,7 +51,7 @@ const DataForm = () => {
 				from the list.
 			</h4>
 			<Form.Group className='p-3 my-3 rounded-2 bg-light'>
-				<Form.Label htmlFor='series'>Select series</Form.Label>
+				<Form.Label htmlFor='series' className='fw-bolder'>Select series</Form.Label>
 				<Form.Select
 					className={`mb-2 ${
 						formErrors.length && !formData.series
@@ -71,7 +71,7 @@ const DataForm = () => {
 					<option value='formula2'>Formula 2</option>
 					<option value='formula3'>Formula 3</option>
 				</Form.Select>
-				<Form.Label htmlFor='title'>Title</Form.Label>
+				<Form.Label htmlFor='title' className='fw-bolder'>Title</Form.Label>
 				<Form.Control
 					className={`mb-2 ${
 						formErrors.length && !formData.title && !formData.url
@@ -90,7 +90,7 @@ const DataForm = () => {
 					placeholder='Title'
 					disabled={sending}
 				/>
-				<Form.Label htmlFor='url'>Link / URL</Form.Label>
+				<Form.Label htmlFor='url' className='fw-bolder'>Link / URL</Form.Label>
 				<Form.Control
 					className={`mb-2 ${
 						formErrors.length && !formData.title && !formData.url
