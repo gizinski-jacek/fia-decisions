@@ -7,19 +7,19 @@ const Schema = mongoose.Schema;
 
 const Missing_Doc = new Schema<MissingDocModel>(
 	{
-		doc_series: { type: String, trim: true },
-		doc_title: {
+		series: { type: String, trim: true },
+		title: {
 			type: String,
 			trim: true,
 			required: function () {
-				return !this.doc_link;
+				return !this.url;
 			},
 		},
-		doc_link: {
+		url: {
 			type: String,
 			trim: true,
 			required: function () {
-				return !this.doc_title;
+				return !this.title;
 			},
 		},
 	},
