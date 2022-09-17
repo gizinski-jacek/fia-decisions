@@ -21,8 +21,8 @@ export const transformToDecOffDoc = (
 		fileName = string.slice(string.lastIndexOf('/') + 1).slice(0, -4);
 	}
 	if (
-		fileName.charAt(fileName.length - 3) === '_' &&
-		fileName.charAt(fileName.length - 2).match(/[0-9]/)
+		fileName.charAt(fileName.length - 2) === '_' &&
+		fileName.charAt(fileName.length - 1).match(/[0-9]/)
 	) {
 		fileName = fileName.slice(fileName.length - 3);
 	}
