@@ -1,14 +1,12 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { JSDOM } from 'jsdom';
-const { PdfReader } = require('pdfreader');
 import axios, { AxiosError } from 'axios';
 import connectMongo from '../../../../lib/mongo';
-import { Stream } from 'stream';
-import { transformToDecOffDoc } from '../../../../lib/transformToDecOffDoc';
 import { dbNameList, fiaDomain, fiaPageList } from '../../../../lib/myData';
 import { streamToBuffer } from '../../../../lib/streamToBuffer';
 import { readPDFPages } from '../../../../lib/readPDFPages';
+import { transformToDecOffDoc } from '../../../../lib/transformToDecOffDoc';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 	if (req.method === 'GET') {
@@ -32,7 +30,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 				seriesDB = dbNameList.f3_2022_db;
 				seriesPageURL = fiaPageList.f3_2022_page;
 			} else {
-				return res.status(422).json('Unsupported series');
+				return res.status(422).json('Unsupported series.');
 			}
 			try {
 				const conn = await connectMongo(seriesDB);
@@ -59,31 +57,32 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 								headers: {
 									authorization: `Bearer ${process.env.CRON_JOB_UPDATE_ALL_DOCS_SECRET}`,
 								},
+								timeout: 15000,
 							}
 						);
-						return res.status(200).json('Request for update accepted');
+						return res.status(200).json('Request for update accepted.');
 					} catch (error) {
 						if (error instanceof AxiosError) {
 							return res
 								.status(error?.response?.status || 500)
-								.json(error?.response?.data || 'Unknown server error');
+								.json(error?.response?.data || 'Unknown server error.');
 						} else {
-							return res.status(500).json('Unknown server error');
+							return res.status(500).json('Unknown server error.');
 						}
 					}
 				}
-				const responseSite = await axios.get(seriesPageURL);
+				const responseSite = await axios.get(seriesPageURL, { timeout: 15000 });
 				const { document } = new JSDOM(responseSite.data).window;
 				const listView: HTMLElement | null =
 					document.getElementById('list-view');
 				if (!listView) {
-					return res.status(500).json('Error getting main page');
+					return res.status(500).json('Error getting main page.');
 				}
 				const mainDoc: HTMLDivElement | null = listView.querySelector(
 					'.decision-document-list'
 				);
 				if (!mainDoc) {
-					return res.status(500).json('Error getting list');
+					return res.status(500).json('Error getting list.');
 				}
 
 				const allDocAnchors: NodeList = mainDoc.querySelectorAll('a');
@@ -142,13 +141,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 				});
 
 				if (allDocsHref.length === 0) {
-					return res.status(200).json('Documents are up to date');
+					return res.status(200).json('Documents are up to date.');
 				}
 
 				await new Promise((resolve, reject) => {
 					allDocsHref.forEach(async (href) => {
 						const responseFile = await axios.get(fiaDomain + href, {
 							responseType: 'stream',
+							timeout: 15000,
 						});
 						const fileBuffer = await streamToBuffer(responseFile.data);
 						const pdfData = await readPDFPages(fileBuffer);
@@ -158,31 +158,36 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 							series as 'formula1' | 'formula2' | 'formula3'
 						);
 						try {
-							await conn.models.Decision_Offence.findOneAndUpdate(
-								{
-									doc_type: transformed.doc_type,
-									doc_name: transformed.doc_name,
-									doc_date: transformed.doc_date,
-									penalty_type: transformed.penalty_type,
-									grand_prix: transformed.grand_prix,
-								},
-								{ $setOnInsert: { ...transformed } },
-								{ timestamps: true, upsert: true }
-							);
+							const docExists = await conn.models.Decision_Offence.findOne({
+								doc_type: transformed.doc_type,
+								doc_name: transformed.doc_name,
+								doc_date: transformed.doc_date,
+								penalty_type: transformed.penalty_type,
+								grand_prix: transformed.grand_prix,
+							});
+							if (docExists) {
+								return res
+									.status(403)
+									.json('Document already exists. Skipping.');
+							}
+							await conn.models.Decision_Offence.create({
+								...transformed,
+								manual_upload: false,
+							});
 							resolve(null);
 						} catch (error) {
 							reject(error);
 						}
 					});
 				});
-				return res.status(200).json('Request for update accepted');
+				return res.status(200).json('Request for update accepted.');
 			} catch (error) {
 				if (error instanceof AxiosError) {
 					return res
 						.status(error?.response?.status || 500)
-						.json(error?.response?.data || 'Unknown server error');
+						.json(error?.response?.data || 'Unknown server error.');
 				} else {
-					return res.status(500).json('Unknown server error');
+					return res.status(500).json('Unknown server error.');
 				}
 			}
 		} else {
