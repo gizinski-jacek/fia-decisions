@@ -5,6 +5,7 @@ const Schema = mongoose.Schema;
 
 const DecisionOffenceSchema = new Schema<DecisionOffenceModel>(
 	{
+		series: { type: String, trim: true, required: true },
 		doc_type: { type: String, trim: true, required: true },
 		doc_name: { type: String, trim: true, required: true },
 		doc_date: { type: Date, trim: true, required: true },
@@ -30,6 +31,7 @@ const DecisionOffenceSchema = new Schema<DecisionOffenceModel>(
 			Reason: { type: String, trim: true, required: true },
 		},
 		stewards: [{ type: String, trim: true, required: true }],
+		manual_upload: { type: Boolean, required: true },
 	},
 	{ timestamps: true }
 );
