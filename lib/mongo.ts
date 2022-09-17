@@ -1,4 +1,4 @@
-import mongoose, { Mongoose, MongooseOptions } from 'mongoose';
+import mongoose, { MongooseOptions } from 'mongoose';
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
