@@ -34,7 +34,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 				seriesDB = dbNameList.f3_2022_db;
 				seriesPageURL = fiaPageList.f3_2022_page;
 			} else {
-				return res.status(401).json('Unsupported series');
+				return res.status(422).json('Unsupported series');
 			}
 			try {
 				const responseSite = await axios.get(seriesPageURL);
@@ -42,13 +42,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 				const listView: HTMLElement | null =
 					document.getElementById('list-view');
 				if (!listView) {
-					return res.status(404).json('Error getting main page');
+					return res.status(500).json('Error getting main page');
 				}
 				const mainDoc: HTMLDivElement | null = listView.querySelector(
 					'.decision-document-list'
 				);
 				if (!mainDoc) {
-					return res.status(404).json('Error getting list');
+					return res.status(500).json('Error getting list');
 				}
 				const allDocAnchors: NodeList = mainDoc.querySelectorAll('a');
 				const allDocsHref: string[] = [];
@@ -85,7 +85,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 				});
 
 				if (allDocsHref.length === 0) {
-					return res.status(200).json({ success: true });
+					return res.status(200).json('Documents are up to date');
 				}
 
 				const conn = await connectMongo(seriesDB);
@@ -119,21 +119,21 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 						}
 					});
 				});
-				return res.status(200).json({ success: true });
+				return res.status(200).json('Request for update accepted');
 			} catch (error) {
 				if (error instanceof AxiosError) {
 					return res
-						.status(error?.response?.status || 404)
+						.status(error?.response?.status || 500)
 						.json(error?.response?.data || 'Unknown server error');
 				} else {
-					return res.status(404).json('Unknown server error');
+					return res.status(500).json('Unknown server error');
 				}
 			}
 		} else {
-			return res.status(401).json({ success: false });
+			return res.status(401);
 		}
 	}
-	return res.status(404).json({ success: false });
+	return res.status(404);
 };
 
 export default handler;
