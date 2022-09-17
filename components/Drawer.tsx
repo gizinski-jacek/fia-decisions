@@ -91,22 +91,18 @@ const Drawer = () => {
 				</ul>
 				<ul className='nav nav-tabs nav-fill justify-content-between p-2 gap-5'>
 					{/* <li className='nav-item'>
-						<Link href={'/f2'}>
-							<Button
-								variant='warning'
-								size='sm'
-								className='w-100'
-								onClick={handleOpenCalendarModal}
-							>
-								Calendar
-							</Button>
-						</Link>
+						<Button
+							variant='warning'
+							size='sm'
+							onClick={handleOpenCalendarModal}
+						>
+							Calendar
+						</Button>
 					</li> */}
 					{/* <li className='nav-item ms-auto'>
 						<Button
 							variant='dark'
 							size='sm'
-							className='w-100'
 							onClick={handleToggleTheme}
 						>
 							Mode
@@ -116,7 +112,7 @@ const Drawer = () => {
 						<Button
 							variant='info'
 							size='sm'
-							className='w-100'
+							className='text-white'
 							onClick={handleOpenFormModal}
 						>
 							Contact
