@@ -144,6 +144,7 @@ const F1DocWrapper = ({ data }: Props) => {
 							style={{ width: 'fit-content', height: 'fit-content' }}
 							size='sm'
 							variant='info'
+							className='fw-bolder'
 							onClick={handleOpenModal}
 						>
 							Details
@@ -157,7 +158,7 @@ const F1DocWrapper = ({ data }: Props) => {
 				dialogClassName='modal-lg'
 			>
 				<Modal.Header closeButton>
-					<Modal.Title>Document Details</Modal.Title>
+					<Modal.Title className='fw-bolder'>Document Details</Modal.Title>
 				</Modal.Header>
 				<Modal.Body>
 					<div className='text-break'>{modalDataRender(data)}</div>
