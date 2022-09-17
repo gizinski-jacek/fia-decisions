@@ -88,7 +88,7 @@ const F1DocWrapper = ({ data }: Props) => {
 					<Accordion.Header className='p-0 m-0'>
 						<div className='d-flex flex-column w-100 flex-sm-row align-items-center'>
 							<div
-								className='border rounded p-1 me-2 text-uppercase text-center'
+								className='border rounded p-1 me-2 text-uppercase text-center fw-bold'
 								style={{
 									width: '180px',
 									...penaltyTypeColors[
