@@ -11,6 +11,8 @@ const Missing_Doc = new Schema<MissingDocModel>(
 		title: {
 			type: String,
 			trim: true,
+			minlength: 16,
+			maxlength: 256,
 			required: function () {
 				return !this.url;
 			},
@@ -18,6 +20,8 @@ const Missing_Doc = new Schema<MissingDocModel>(
 		url: {
 			type: String,
 			trim: true,
+			minlength: 32,
+			maxlength: 256,
 			required: function () {
 				return !this.title;
 			},

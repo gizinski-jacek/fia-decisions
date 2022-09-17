@@ -5,8 +5,20 @@ const Schema = mongoose.Schema;
 
 const Contact_Doc = new Schema<ContactDocModel>(
 	{
-		email: { type: String, trim: true, required: true },
-		message: { type: String, trim: true, required: true },
+		email: {
+			type: String,
+			trim: true,
+			minlength: 16,
+			maxlength: 64,
+			required: true,
+		},
+		message: {
+			type: String,
+			trim: true,
+			minlength: 16,
+			maxlength: 512,
+			required: true,
+		},
 	},
 	{ timestamps: true }
 );
