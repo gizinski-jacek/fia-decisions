@@ -1,28 +1,13 @@
 export interface TransformedPDFData {
+	series: string;
 	doc_type: string;
 	doc_name: string;
 	doc_date: Date;
 	penalty_type: string;
 	grand_prix: string;
 	weekend: string;
-	document_info: {
-		From: string;
-		To: string;
-		Document: string;
-		Date: string;
-		Time: string;
-	};
-	incident_info: {
-		Headline: string;
-		Driver: string;
-		Competitor: string;
-		Time: string;
-		Session: string;
-		Fact: string;
-		Offence: string[];
-		Decision: string[];
-		Reason: string;
-	};
+	document_info: DocumentInfo;
+	incident_info: IncidentInfo;
 	stewards: string[];
 }
 
@@ -48,6 +33,7 @@ export interface IncidentInfo {
 
 export interface DecisionOffenceModel extends TransformedPDFData {
 	_id: string;
+	manual_upload: boolean;
 }
 
 export interface GroupedByGP {
