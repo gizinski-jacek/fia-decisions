@@ -62,7 +62,7 @@ const Drawer = () => {
 									router.query.series === 'f1' ? 'active' : ''
 								}`}
 							>
-								F1
+								Formula 1
 							</a>
 						</Link>
 					</li>
@@ -73,7 +73,7 @@ const Drawer = () => {
 									router.query.series === 'f2' ? 'active' : ''
 								}`}
 							>
-								F2
+								Formula 2
 							</a>
 						</Link>
 					</li>
@@ -84,13 +84,13 @@ const Drawer = () => {
 									router.query.series === 'f3' ? 'active' : ''
 								}`}
 							>
-								F3
+								Formula 3
 							</a>
 						</Link>
 					</li>
 				</ul>
 				<ul className='nav nav-tabs nav-fill justify-content-between p-2 gap-5'>
-					<li className='nav-item'>
+					{/* <li className='nav-item'>
 						<Link href={'/f2'}>
 							<Button
 								variant='warning'
@@ -101,7 +101,7 @@ const Drawer = () => {
 								Calendar
 							</Button>
 						</Link>
-					</li>
+					</li> */}
 					{/* <li className='nav-item ms-auto'>
 						<Button
 							variant='dark'
