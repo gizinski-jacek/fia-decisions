@@ -3,10 +3,12 @@ import { Button, Form } from 'react-bootstrap';
 import axios, { AxiosError } from 'axios';
 import { FormDocData } from '../../types/myTypes';
 import { defaultDocData } from '../../lib/myData';
+import LoadingBar from '../LoadingBar';
 
 const DataForm = () => {
 	const [formData, setFormData] = useState<FormDocData>(defaultDocData);
 	const [formErrors, setFormErrors] = useState<string[]>([]);
+	const [sending, setSending] = useState(false);
 	const formRef = useRef<HTMLFormElement>(null);
 
 	const handleInputChange = async (e: React.ChangeEvent<HTMLElement>) => {
@@ -17,6 +19,7 @@ const DataForm = () => {
 
 	const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
 		e.preventDefault();
+		setFormErrors([]);
 		try {
 			if (!formData.title && !formData.url) {
 				setFormErrors(['Must provide at least Title or Link / URL']);
@@ -26,15 +29,17 @@ const DataForm = () => {
 			for (const [key, value] of Object.entries(formData)) {
 				uploadData.append(key, value);
 			}
-			await axios.post('/api/forms/doc-data', uploadData);
+			setSending(true);
+			await axios.post('/api/forms/doc-data', uploadData, { timeout: 15000 });
 			setFormData(defaultDocData);
-			setFormErrors([]);
 			formRef.current?.reset();
+			setSending(false);
 		} catch (error) {
+			setSending(false);
 			if (error instanceof AxiosError) {
-				setFormErrors([error?.response?.data || 'Unknown server error']);
+				setFormErrors([error?.response?.data || 'Unknown server error.']);
 			} else {
-				setFormErrors([(error as Error).message || 'Unknown server error']);
+				setFormErrors([(error as Error).message || 'Unknown server error.']);
 			}
 		}
 	};
@@ -59,6 +64,7 @@ const DataForm = () => {
 					id='series'
 					onChange={handleInputChange}
 					value={formData.series}
+					disabled={sending}
 				>
 					<option value=''>Choose Formula series</option>
 					<option value='formula1'>Formula 1</option>
@@ -77,10 +83,12 @@ const DataForm = () => {
 					type='text'
 					name='title'
 					id='title'
-					maxLength={128}
+					minLength={16}
+					maxLength={256}
 					onChange={handleInputChange}
 					value={formData.title}
 					placeholder='Title'
+					disabled={sending}
 				/>
 				<Form.Label htmlFor='url'>Link / URL</Form.Label>
 				<Form.Control
@@ -94,19 +102,28 @@ const DataForm = () => {
 					type='text'
 					name='url'
 					id='url'
+					minLength={32}
 					maxLength={256}
 					onChange={handleInputChange}
 					value={formData.url}
 					placeholder='Link / URL'
+					disabled={sending}
 				/>
+				{formErrors.map((message, index) => (
+					<div className='text-danger' key={index}>
+						{message}
+					</div>
+				))}
+				{sending ? <LoadingBar /> : null}
 			</Form.Group>
-			{formErrors.map((message, index) => (
-				<div className='mx-1 text-danger' key={index}>
-					{message}
-				</div>
-			))}
+
 			<div className='pt-3 w-100 border-top text-end'>
-				<Button variant='primary' type='submit' onClick={handleSubmit}>
+				<Button
+					variant='primary'
+					type='submit'
+					disabled={sending}
+					onClick={handleSubmit}
+				>
 					Submit
 				</Button>
 			</div>

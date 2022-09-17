@@ -4,10 +4,12 @@ import axios, { AxiosError } from 'axios';
 import Link from 'next/link';
 import { FormFileData } from '../../types/myTypes';
 import { defaultFileData } from '../../lib/myData';
+import LoadingBar from '../LoadingBar';
 
 const FileForm = () => {
 	const [formData, setFormData] = useState<FormFileData>(defaultFileData);
 	const [formErrors, setFormErrors] = useState<string[]>([]);
+	const [sending, setSending] = useState(false);
 	const formRef = useRef<HTMLFormElement>(null);
 
 	const handleSelectChange = async (
@@ -35,25 +37,29 @@ const FileForm = () => {
 
 	const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
 		e.preventDefault();
+		setFormErrors([]);
 		try {
-			if (!formData.series && !formData.file) {
+			if (!formData.series || !formData.file) {
 				setFormErrors(['Must choose series and PDF file']);
 				return;
 			}
 			const uploadData = new FormData();
 			uploadData.append('file', formData.file as File);
+			setSending(true);
 			await axios.post(
 				`/api/forms/doc-file?series=${formData.series}`,
-				uploadData
+				uploadData,
+				{ timeout: 15000 }
 			);
 			setFormData(defaultFileData);
-			setFormErrors([]);
 			formRef.current?.reset();
+			setSending(false);
 		} catch (error) {
+			setSending(false);
 			if (error instanceof AxiosError) {
-				setFormErrors([error?.response?.data || 'Unknown server error']);
+				setFormErrors([error?.response?.data || 'Unknown server error.']);
 			} else {
-				setFormErrors([(error as Error).message || 'Unknown server error']);
+				setFormErrors([(error as Error).message || 'Unknown server error.']);
 			}
 		}
 	};
@@ -88,6 +94,7 @@ const FileForm = () => {
 					id='series'
 					onChange={handleSelectChange}
 					value={formData.series}
+					disabled={sending}
 				>
 					<option value=''>Choose Formula series</option>
 					<option value='formula1'>Formula 1</option>
@@ -108,18 +115,25 @@ const FileForm = () => {
 					id='file'
 					accept='.pdf'
 					onChange={handleFileChange}
+					disabled={sending}
 				/>
 				<Form.Text className='text-muted'>
 					Only PDF files, max size 1MB
 				</Form.Text>
+				{formErrors.map((message, index) => (
+					<div className='text-danger' key={index}>
+						{message}
+					</div>
+				))}
+				{sending ? <LoadingBar /> : null}
 			</Form.Group>
-			{formErrors.map((message, index) => (
-				<div className='mx-1 text-danger' key={index}>
-					{message}
-				</div>
-			))}
 			<div className='pt-3 w-100 border-top text-end'>
-				<Button variant='primary' type='submit' onClick={handleSubmit}>
+				<Button
+					variant='primary'
+					type='submit'
+					disabled={sending}
+					onClick={handleSubmit}
+				>
 					Submit
 				</Button>
 			</div>

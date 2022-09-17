@@ -3,10 +3,12 @@ import { Button, Form } from 'react-bootstrap';
 import axios, { AxiosError } from 'axios';
 import { FormContactData } from '../../types/myTypes';
 import { defaultContactData } from '../../lib/myData';
+import LoadingBar from '../LoadingBar';
 
 const ContactForm = () => {
 	const [formData, setFormData] = useState<FormContactData>(defaultContactData);
 	const [formErrors, setFormErrors] = useState<string[]>([]);
+	const [sending, setSending] = useState(false);
 	const formRef = useRef<HTMLFormElement>(null);
 
 	const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -17,6 +19,7 @@ const ContactForm = () => {
 
 	const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
 		e.preventDefault();
+		setFormErrors([]);
 		try {
 			if (!formData.email && !formData.message) {
 				setFormErrors(['Must provide an Email and a Message']);
@@ -26,11 +29,13 @@ const ContactForm = () => {
 			for (const [key, value] of Object.entries(formData)) {
 				uploadData.append(key, value);
 			}
-			await axios.post('/api/forms/contact', uploadData);
+			setSending(true);
+			await axios.post('/api/forms/contact', uploadData, { timeout: 15000 });
 			setFormData(defaultContactData);
-			setFormErrors([]);
 			formRef.current?.reset();
+			setSending(false);
 		} catch (error) {
+			setSending(false);
 			if (error instanceof AxiosError) {
 				setFormErrors([error?.response?.data || 'Unknown server error']);
 			} else {
@@ -57,13 +62,16 @@ const ContactForm = () => {
 					type='text'
 					name='email'
 					id='email'
-					maxLength={16}
+					minLength={16}
+					maxLength={64}
 					onChange={handleInputChange}
 					value={formData.email}
 					placeholder='Email'
+					disabled={sending}
 				/>
 				<Form.Label htmlFor='message'>Message</Form.Label>
 				<Form.Control
+					as='textarea'
 					className={`mb-2 ${
 						formErrors.length && !formData.message
 							? 'outline-error'
@@ -74,19 +82,28 @@ const ContactForm = () => {
 					type='text'
 					name='message'
 					id='message'
-					maxLength={128}
+					minLength={16}
+					maxLength={512}
+					rows={12}
 					onChange={handleInputChange}
 					value={formData.message}
 					placeholder='Message'
+					disabled={sending}
 				/>
+				{formErrors.map((message, index) => (
+					<div className='text-danger' key={index}>
+						{message}
+					</div>
+				))}
+				{sending ? <LoadingBar /> : null}
 			</Form.Group>
-			{formErrors.map((message, index) => (
-				<div className='mx-1 text-danger' key={index}>
-					{message}
-				</div>
-			))}
 			<div className='pt-3 w-100 border-top text-end'>
-				<Button variant='primary' type='submit' onClick={handleSubmit}>
+				<Button
+					variant='primary'
+					type='submit'
+					disabled={sending}
+					onClick={handleSubmit}
+				>
 					Submit
 				</Button>
 			</div>
