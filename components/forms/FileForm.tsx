@@ -81,7 +81,7 @@ const FileForm = () => {
 				supported.
 			</h4>
 			<Form.Group className='p-3 my-3 rounded-2 bg-light'>
-				<Form.Label htmlFor='series'>Select series</Form.Label>
+				<Form.Label htmlFor='series' className='fw-bolder'>Select series</Form.Label>
 				<Form.Select
 					className={`mb-2 ${
 						formErrors.length && !formData.series
@@ -101,7 +101,7 @@ const FileForm = () => {
 					<option value='formula2'>Formula 2</option>
 					<option value='formula3'>Formula 3</option>
 				</Form.Select>
-				<Form.Label htmlFor='file'>Select file</Form.Label>
+				<Form.Label htmlFor='file' className='fw-bolder'>Select file</Form.Label>
 				<Form.Control
 					className={`mb-2 ${
 						formErrors.length && !formData.file
