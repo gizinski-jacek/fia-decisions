@@ -1,6 +1,5 @@
 import multiparty from 'multiparty';
 import { NextApiRequest } from 'next';
-import { FormTextData } from './../types/myTypes';
 
 export const parseFile = (req: NextApiRequest) => {
 	// Currently not working when imported, looking for fix...
@@ -48,7 +47,9 @@ export const parseFile = (req: NextApiRequest) => {
 	});
 };
 
-export const parseFields = (req: NextApiRequest): Promise<FormTextData> => {
+export const parseFields = (
+	req: NextApiRequest
+): Promise<{ [key: string]: string }> => {
 	return new Promise((resolve, reject) => {
 		const form = new multiparty.Form();
 		// Errors may be emitted
@@ -58,13 +59,13 @@ export const parseFields = (req: NextApiRequest): Promise<FormTextData> => {
 			console.log('Error parsing form: ' + error.stack);
 			reject(new Error('Error parsing form'));
 		});
-		const fieldsArray: FormTextData = {};
+		const fieldsArray: { [key: string]: string } = {};
 		form.on('field', async (name, value) => {
 			if (!name && !value) {
 				console.log('no field values:' + name + ' - ' + value);
 				reject(new Error('No field values found'));
 			}
-			fieldsArray[name as keyof FormTextData] = value;
+			fieldsArray[name] = value;
 		});
 
 		// Close emitted after form parsed
