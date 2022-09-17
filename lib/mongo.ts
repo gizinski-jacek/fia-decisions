@@ -29,9 +29,12 @@ const connectMongo = async (dbName: string) => {
 			MONGODB_URI + dbName + '?retryWrites=true&w=majority',
 			opts
 		);
-		if (dbName === 'missingDocs') {
+		if (dbName === 'otherDocs') {
 			if (!client.models.Missing_Doc) {
 				client.model('Missing_Doc', require('../models/missingDoc'));
+			}
+			if (!client.models.Contact_Doc) {
+				client.model('Contact_Doc', require('../models/contactDoc'));
 			}
 		} else {
 			if (!client.models.Decision_Offence) {
@@ -49,9 +52,12 @@ const connectMongo = async (dbName: string) => {
 			MONGODB_URI + dbName + '?retryWrites=true&w=majority',
 			opts
 		);
-		if (dbName === 'missingDocs') {
+		if (dbName === 'otherDocs') {
 			if (!conn.models.Missing_Doc) {
 				conn.model('Missing_Doc', require('../models/missingDoc'));
+			}
+			if (!conn.models.Contact_Doc) {
+				conn.model('Contact_Doc', require('../models/contactDoc'));
 			}
 		} else {
 			if (!conn.models.Decision_Offence) {
