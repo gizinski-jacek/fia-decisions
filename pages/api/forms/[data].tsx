@@ -7,6 +7,7 @@ import { readPDFPages } from '../../../lib/readPDFPages';
 import { streamToBuffer } from '../../../lib/streamToBuffer';
 import { parseFields, parseFile } from '../../../lib/multiparty';
 import { dbNameList } from '../../../lib/myData';
+import { FormContactData, FormDocData } from '../../../types/myTypes';
 
 export const config = {
 	api: {
@@ -28,7 +29,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 				} else if (series === 'formula3') {
 					seriesDB = dbNameList.f3_2022_db;
 				} else {
-					return res.status(401).json({ success: false });
+					return res.status(422).json('Unsupported series');
 				}
 				if (
 					series === 'formula1' ||
@@ -90,7 +91,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 								{ $setOnInsert: { ...transformed } },
 								{ timestamps: true, upsert: true }
 							);
-							return res.status(200).json({ success: true });
+							return res.status(200).json('Document saved');
 						} catch (error) {
 							console.log(error);
 						}
@@ -104,30 +105,47 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 					// Parse req
 					form.parse(req);
 				} else {
-					return res.status(401).json('Unsupported series');
+					return res.status(422).json('Unsupported series');
 				}
 			} catch (error) {
 				console.log(error);
-				return res.status(404).json('Unknown server error');
+				return res.status(500).json('Unknown server error');
 			}
 		}
 		if (req.query.data === 'doc-data') {
 			try {
-				const fields = await parseFields(req);
-				if (!fields.doc_title && !fields.doc_link) {
-					return res.status(401).json('Must provide at least title or link');
+				const fields = (await parseFields(req)) as FormDocData;
+				if (!fields.series && !fields.title && !fields.url) {
+					return res
+						.status(40)
+						.json('Must provide Series and at least Title or Link / URL');
 				}
-				const conn = await connectMongo('missingDocs');
+				const conn = await connectMongo('otherDocs');
 				const newReport = new conn.models.Missing_Doc(fields);
 				await newReport.save();
-				return res.status(200).json({ success: true });
+				return res.status(200).json('Document saved');
 			} catch (error) {
 				console.log(error);
-				return res.status(404).json('Unknown server error');
+				return res.status(500).json('Unknown server error');
+			}
+		}
+		if (req.query.data === 'contact') {
+			try {
+				const fields = (await parseFields(req)) as FormContactData;
+				if (!fields.email && !fields.message) {
+					return res.status(422).json('Must provide an Email and a Message');
+				}
+				const conn = await connectMongo('otherDocs');
+				const newReport = new conn.models.ContactDoc(fields);
+				await newReport.save();
+				return res.status(200).json('Document saved');
+			} catch (error) {
+				console.log(error);
+				return res.status(500).json('Unknown server error');
 			}
 		}
 	}
-	return res.status(404).json({ success: false });
+	return res.status(404);
 };
 
 export default handler;
