@@ -99,12 +99,12 @@ const F1DocWrapper = ({ data }: Props) => {
 								{data.penalty_type}
 							</div>
 							<div
-								className='m-2 text-center text-sm-start'
+								className='m-2 text-center text-sm-start fw-bold'
 								style={{ width: '220px' }}
 							>
 								{data.incident_info.Driver}
 							</div>
-							<div className='m-2 d-none d-md-block' style={{ flex: 1 }}>
+							<div className='m-2 d-none d-md-block fw-bold' style={{ flex: 1 }}>
 								{data.doc_name}
 							</div>
 						</div>
