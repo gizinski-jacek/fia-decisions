@@ -111,7 +111,7 @@ const F1DocWrapper = ({ data }: Props) => {
 								<p className='fw-bold d-inline'>Title: </p>
 								<p className='d-inline'>{data.doc_name}</p>
 							</div>
-							<div className='me-md-3 mx-lg-0 me-lg-4'>
+							<div className='col-md-3 me-md-3 mx-lg-0 me-lg-4'>
 								<p className='fw-bold d-inline'>Date: </p>
 								<p className='d-inline'>
 									{data.document_info.Date} {data.document_info.Time}
