@@ -5,7 +5,7 @@ import { dbNameList } from '../../../lib/myData';
 import multiparty from 'multiparty';
 import { parseFields, parseFile } from '../../../lib/multiparty';
 import { streamToBuffer } from '../../../lib/streamToBuffer';
-import { readPDFPages } from '../../../lib/readPDFPages';
+import { readPDFPages } from '../../../lib/pdfReader';
 import { transformToDecOffDoc } from '../../../lib/transformToDecOffDoc';
 
 export const config = {
@@ -17,7 +17,8 @@ export const config = {
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 	if (req.method === 'POST') {
-		if (req.query.data === 'doc-file') {
+		const { data } = req.query;
+		if (data === 'doc-file') {
 			try {
 				const { series } = req.query;
 				let seriesDB = '';
@@ -108,7 +109,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 				return res.status(500).json('Unknown server error.');
 			}
 		}
-		if (req.query.data === 'doc-data') {
+		if (data === 'doc-data') {
 			try {
 				const fields = await parseFields(req);
 				if (!fields.series && !fields.title && !fields.url) {
@@ -125,7 +126,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 				return res.status(500).json('Unknown server error.');
 			}
 		}
-		if (req.query.data === 'contact') {
+		if (data === 'contact') {
 			try {
 				const fields = await parseFields(req);
 				if (!fields.email && !fields.message) {
