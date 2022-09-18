@@ -30,7 +30,7 @@ const FileForm = () => {
 			return;
 		}
 		if (file.type !== 'application/pdf') {
-			setFormErrors(['Only images PDF files are allowed']);
+			setFormErrors(['Only PDF files are allowed']);
 			return;
 		}
 		setFormData((prevState) => ({ ...prevState, file: file }));
@@ -41,7 +41,7 @@ const FileForm = () => {
 		setFormErrors([]);
 		try {
 			if (!formData.series || !formData.file) {
-				setFormErrors(['Must choose Series and PDF file']);
+				setFormErrors(['Must choose Series and a PDF file']);
 				return;
 			}
 			const uploadData = new FormData();
