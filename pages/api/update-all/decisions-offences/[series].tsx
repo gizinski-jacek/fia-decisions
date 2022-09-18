@@ -17,8 +17,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 		}
 		const { authorization } = req.headers;
 		if (
-			authorization ===
-			`Bearer ${process.env.CRON_JOB_UPDATE_ALL_DOCS_WITH_FS_SECRET}`
+			authorization === `Bearer ${process.env.CRON_JOB_UPDATE_ALL_DOCS_SECRET}`
 		) {
 			const { series } = req.query;
 			let seriesDB = '';
