@@ -21,7 +21,7 @@ const F1: NextPage<Props> = ({ data }) => {
 					<Accordion.Item eventKey='0'>
 						<Accordion.Header>
 							<div className='d-flex flex-column me-2 flex-sm-row w-100 align-items-center'>
-								<h4 className='fw-bold'>{key}</h4>
+								<h4 className='me-sm-3 fw-bold'>{key}</h4>
 								<h4 className='fw-bold'>
 									{array.find((doc) => doc.weekend)?.weekend}
 								</h4>
