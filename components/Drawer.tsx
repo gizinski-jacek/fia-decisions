@@ -114,7 +114,7 @@ const Drawer = () => {
 						<Button
 							variant='info'
 							size='sm'
-							className='fw-bolder text-white'
+							className='fw-bolder'
 							onClick={handleOpenFormModal}
 						>
 							Contact
