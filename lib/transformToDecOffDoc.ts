@@ -24,7 +24,7 @@ export const transformToDecOffDoc = (
 		fileName.charAt(fileName.length - 2) === '_' &&
 		fileName.charAt(fileName.length - 1).match(/[0-9]/)
 	) {
-		fileName = fileName.slice(fileName.length - 3);
+		fileName = fileName.slice(0, fileName.length - 3);
 	}
 	fileName.trim();
 
