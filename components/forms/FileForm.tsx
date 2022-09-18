@@ -26,11 +26,11 @@ const FileForm = () => {
 		const target = e.target;
 		const file = (target.files as FileList)[0];
 		if (file.size > 1000000) {
-			setFormErrors(['File is too large.']);
+			setFormErrors(['File is too big.']);
 			return;
 		}
 		if (file.type !== 'application/pdf') {
-			setFormErrors(['Only images PDF files are allowed.']);
+			setFormErrors(['Only PDF files are allowed.']);
 			return;
 		}
 		setFormData((prevState) => ({ ...prevState, file: file }));
