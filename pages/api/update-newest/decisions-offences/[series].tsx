@@ -40,19 +40,17 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 					.exec();
 				if (docList.length === 0) {
 					try {
-						if (
-							!process.env.MY_APP_URI_DEV ||
-							(!process.env.MY_APP_URI && !process.env.NODE_ENV)
-						) {
+						const appURI =
+							process.env.NODE_ENV === 'production'
+								? process.env.MY_APP_URI
+								: process.env.MY_APP_URI_DEV;
+						if (!appURI) {
 							throw new Error(
-								'Please define NODE_ENV, MY_APP_URI and MY_APP_URI_DEV environment variables inside .env.local as needed'
+								'Please define MY_APP_URI / MY_APP_URI_DEV environment variables inside .env.local'
 							);
 						}
 						await axios.get(
-							(process.env.NODE_ENV as string) === 'production'
-								? (process.env.MY_APP_URI as string)
-								: (process.env.MY_APP_URI_DEV as string) +
-										`/api/f1/update-all/decisions-offences/${series}`,
+							`${appURI}/api/f1/update-all/decisions-offences/${series}`,
 							{
 								headers: {
 									authorization: `Bearer ${process.env.CRON_JOB_UPDATE_ALL_DOCS_SECRET}`,
