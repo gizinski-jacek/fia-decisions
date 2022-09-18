@@ -5,7 +5,7 @@ import axios, { AxiosError } from 'axios';
 import connectMongo from '../../../../lib/mongo';
 import { dbNameList, fiaDomain, fiaPageList } from '../../../../lib/myData';
 import { streamToBuffer } from '../../../../lib/streamToBuffer';
-import { readPDFPages } from '../../../../lib/readPDFPages';
+import { readPDFPages } from '../../../../lib/pdfReader';
 import { transformToDecOffDoc } from '../../../../lib/transformToDecOffDoc';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -157,18 +157,21 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 							pdfData as any,
 							series as 'formula1' | 'formula2' | 'formula3'
 						);
+
 						try {
 							const docExists = await conn.models.Decision_Offence.findOne({
+								series: series,
 								doc_type: transformed.doc_type,
 								doc_name: transformed.doc_name,
 								doc_date: transformed.doc_date,
 								penalty_type: transformed.penalty_type,
 								grand_prix: transformed.grand_prix,
+								weekend: transformed.weekend,
 							});
 							if (docExists) {
-								return res
-									.status(403)
-									.json('Document already exists. Skipping.');
+								console.log('Document already exists. Skipping.');
+								resolve(null);
+								return;
 							}
 							await conn.models.Decision_Offence.create({
 								...transformed,
@@ -180,8 +183,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 						}
 					});
 				});
-				return res.status(200).json('Request for update accepted.');
+				return res.status(200).json('Update finished.');
 			} catch (error) {
+				console.log(error);
 				if (error instanceof AxiosError) {
 					return res
 						.status(error?.response?.status || 500)
