@@ -141,49 +141,54 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 				});
 
 				if (allDocsHref.length === 0) {
+					console.log('Documents are up to date.');
 					return res.status(200).json('Documents are up to date.');
 				}
 
-				await new Promise((resolve, reject) => {
-					allDocsHref.forEach(async (href) => {
-						const responseFile = await axios.get(fiaDomain + href, {
-							responseType: 'stream',
-							timeout: 15000,
-						});
-						const fileBuffer = await streamToBuffer(responseFile.data);
-						const pdfData = await readPDFPages(fileBuffer);
-						const transformed = transformToDecOffDoc(
-							href,
-							pdfData as any,
-							series as 'formula1' | 'formula2' | 'formula3'
-						);
+				await Promise.all(
+					allDocsHref.map(
+						(href) =>
+							new Promise(async (resolve, reject) => {
+								const responseFile = await axios.get(fiaDomain + href, {
+									responseType: 'stream',
+									timeout: 15000,
+								});
+								const fileBuffer = await streamToBuffer(responseFile.data);
+								const readPDF = await readPDFPages(fileBuffer);
+								const transformed = transformToDecOffDoc(
+									href,
+									readPDF as any,
+									series as 'formula1' | 'formula2' | 'formula3'
+								);
+								try {
+									const docExists = await conn.models.Decision_Offence.findOne({
+										series: series,
+										doc_type: transformed.doc_type,
+										doc_name: transformed.doc_name,
+										doc_date: transformed.doc_date,
+										penalty_type: transformed.penalty_type,
+										grand_prix: transformed.grand_prix,
+										weekend: transformed.weekend,
+									});
+									if (docExists) {
+										console.log('Document already exists. Skipping.');
+										resolve(null);
+										return;
+									}
+									await conn.models.Decision_Offence.create({
+										...transformed,
+										manual_upload: false,
+									});
+									resolve(null);
+								} catch (error) {
+									reject(error);
+								}
+							})
+					)
+				);
 
-						try {
-							const docExists = await conn.models.Decision_Offence.findOne({
-								series: series,
-								doc_type: transformed.doc_type,
-								doc_name: transformed.doc_name,
-								doc_date: transformed.doc_date,
-								penalty_type: transformed.penalty_type,
-								grand_prix: transformed.grand_prix,
-								weekend: transformed.weekend,
-							});
-							if (docExists) {
-								console.log('Document already exists. Skipping.');
-								resolve(null);
-								return;
-							}
-							await conn.models.Decision_Offence.create({
-								...transformed,
-								manual_upload: false,
-							});
-							resolve(null);
-						} catch (error) {
-							reject(error);
-						}
-					});
-				});
-				return res.status(200).json('Update finished.');
+				console.log('Finished updating.');
+				return res.status(200).json('Finished updating.');
 			} catch (error) {
 				console.log(error);
 				if (error instanceof AxiosError) {
