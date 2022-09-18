@@ -86,11 +86,10 @@ const F1DocWrapper = ({ data }: Props) => {
 			<Accordion id={data._id} className='my-1'>
 				<Accordion.Item eventKey='0'>
 					<Accordion.Header className='p-0 m-0'>
-						<div className='d-flex flex-column w-100 flex-sm-row align-items-center'>
+						<div className='d-flex flex-column w-100 flex-sm-row align-items-center cstm-stl-ctnr'>
 							<div
 								className='border rounded p-1 me-2 text-uppercase text-center fw-bold'
 								style={{
-									width: '180px',
 									...penaltyTypeColors[
 										data.penalty_type as keyof typeof penaltyTypeColors
 									],
@@ -98,13 +97,10 @@ const F1DocWrapper = ({ data }: Props) => {
 							>
 								{data.penalty_type}
 							</div>
-							<div
-								className='m-2 text-center text-sm-start fw-bold'
-								style={{ width: '220px' }}
-							>
+							<div className='m-2 text-center text-sm-start fw-bold'>
 								{data.incident_info.Driver}
 							</div>
-							<div className='m-2 d-none d-md-block fw-bold' style={{ flex: 1 }}>
+							<div className='m-2 d-none d-md-block flex-grow-1 fw-bold'>
 								{data.doc_name}
 							</div>
 						</div>
@@ -141,10 +137,9 @@ const F1DocWrapper = ({ data }: Props) => {
 							</div>
 						</div>
 						<Button
-							style={{ width: 'fit-content', height: 'fit-content' }}
 							size='sm'
 							variant='info'
-							className='fw-bolder'
+							className='fw-bolder mt-2 mt-sm-0 cstm-stl-btn'
 							onClick={handleOpenModal}
 						>
 							Details
