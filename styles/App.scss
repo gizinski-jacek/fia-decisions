@@ -32,3 +32,17 @@ nav {
 .accordion-body {
 	padding: 0.5rem !important;
 }
+
+.cstm-stl-ctnr {
+	:first-child {
+		min-width: 160px !important;
+	}
+
+	:nth-child(2) {
+		min-width: 200px !important;
+	}
+}
+
+.cstm-stl-btn {
+	height: fit-content !important;
+}
