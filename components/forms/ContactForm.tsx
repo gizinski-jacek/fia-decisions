@@ -9,6 +9,7 @@ const ContactForm = () => {
 	const [formData, setFormData] = useState<FormContactData>(defaultContactData);
 	const [formErrors, setFormErrors] = useState<string[]>([]);
 	const [sending, setSending] = useState(false);
+	const [submitSuccess, setSubmitSuccess] = useState(false);
 	const formRef = useRef<HTMLFormElement>(null);
 
 	const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -22,7 +23,7 @@ const ContactForm = () => {
 		setFormErrors([]);
 		try {
 			if (!formData.email && !formData.message) {
-				setFormErrors(['Must provide an Email and a Message']);
+				setFormErrors(['Must provide an Email and a Message.']);
 				return;
 			}
 			const uploadData = new FormData();
@@ -33,13 +34,15 @@ const ContactForm = () => {
 			await axios.post('/api/forms/contact', uploadData, { timeout: 15000 });
 			setFormData(defaultContactData);
 			formRef.current?.reset();
+			setSubmitSuccess(true);
 			setSending(false);
 		} catch (error) {
+			setSubmitSuccess(false);
 			setSending(false);
 			if (error instanceof AxiosError) {
-				setFormErrors([error?.response?.data || 'Unknown server error']);
+				setFormErrors([error?.response?.data || 'Unknown server error.']);
 			} else {
-				setFormErrors([(error as Error).message || 'Unknown server error']);
+				setFormErrors([(error as Error).message || 'Unknown server error.']);
 			}
 		}
 	};
@@ -50,7 +53,9 @@ const ContactForm = () => {
 				Use this form to report something or contact me about any other matter.
 			</h4>
 			<Form.Group className='p-3 my-3 rounded-2 bg-light'>
-				<Form.Label htmlFor='email' className='fw-bolder'>Email</Form.Label>
+				<Form.Label htmlFor='email' className='fw-bolder'>
+					Email
+				</Form.Label>
 				<Form.Control
 					className={`mb-2 ${
 						formErrors.length && !formData.email
@@ -69,7 +74,9 @@ const ContactForm = () => {
 					placeholder='Email'
 					disabled={sending}
 				/>
-				<Form.Label htmlFor='message' className='fw-bolder'>Message</Form.Label>
+				<Form.Label htmlFor='message' className='fw-bolder'>
+					Message
+				</Form.Label>
 				<Form.Control
 					as='textarea'
 					className={`mb-2 ${
@@ -90,12 +97,29 @@ const ContactForm = () => {
 					placeholder='Message'
 					disabled={sending}
 				/>
-				{formErrors.map((message, index) => (
-					<div className='text-danger' key={index}>
-						{message}
+				{formErrors.length > 0 && (
+					<div className='m-0 mt-4 alert alert-danger alert-dismissible'>
+						{formErrors.map((message, index) => (
+							<div key={index}>{message}</div>
+						))}
+						<button
+							type='button'
+							className='btn btn-close'
+							onClick={() => setFormErrors([])}
+						></button>
 					</div>
-				))}
-				{sending ? <LoadingBar /> : null}
+				)}
+				{submitSuccess && (
+					<div className='m-0 mt-4 alert alert-success alert-dismissible'>
+						<strong>Form submitted successfully!</strong>
+						<button
+							type='button'
+							className='btn btn-close'
+							onClick={() => setSubmitSuccess(false)}
+						></button>
+					</div>
+				)}
+				{sending && <LoadingBar />}
 			</Form.Group>
 			<div className='pt-3 w-100 border-top text-end'>
 				<Button

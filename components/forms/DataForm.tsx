@@ -9,6 +9,7 @@ const DataForm = () => {
 	const [formData, setFormData] = useState<FormDocData>(defaultDocData);
 	const [formErrors, setFormErrors] = useState<string[]>([]);
 	const [sending, setSending] = useState(false);
+	const [submitSuccess, setSubmitSuccess] = useState(false);
 	const formRef = useRef<HTMLFormElement>(null);
 
 	const handleInputChange = async (e: React.ChangeEvent<HTMLElement>) => {
@@ -33,8 +34,10 @@ const DataForm = () => {
 			await axios.post('/api/forms/doc-data', uploadData, { timeout: 15000 });
 			setFormData(defaultDocData);
 			formRef.current?.reset();
+			setSubmitSuccess(true);
 			setSending(false);
 		} catch (error) {
+			setSubmitSuccess(false);
 			setSending(false);
 			if (error instanceof AxiosError) {
 				setFormErrors([error?.response?.data || 'Unknown server error.']);
@@ -51,15 +54,11 @@ const DataForm = () => {
 				from the list.
 			</h4>
 			<Form.Group className='p-3 my-3 rounded-2 bg-light'>
-				<Form.Label htmlFor='series' className='fw-bolder'>Select series</Form.Label>
+				<Form.Label htmlFor='series' className='fw-bolder'>
+					Select series
+				</Form.Label>
 				<Form.Select
-					className={`mb-2 ${
-						formErrors.length && !formData.series
-							? 'outline-error'
-							: !formData.series
-							? 'outline-warning'
-							: 'outline-success'
-					}`}
+					className='mb-2'
 					name='series'
 					id='series'
 					onChange={handleInputChange}
@@ -71,7 +70,9 @@ const DataForm = () => {
 					<option value='formula2'>Formula 2</option>
 					<option value='formula3'>Formula 3</option>
 				</Form.Select>
-				<Form.Label htmlFor='title' className='fw-bolder'>Title</Form.Label>
+				<Form.Label htmlFor='title' className='fw-bolder'>
+					Title
+				</Form.Label>
 				<Form.Control
 					className={`mb-2 ${
 						formErrors.length && !formData.title && !formData.url
@@ -90,7 +91,9 @@ const DataForm = () => {
 					placeholder='Title'
 					disabled={sending}
 				/>
-				<Form.Label htmlFor='url' className='fw-bolder'>Link / URL</Form.Label>
+				<Form.Label htmlFor='url' className='fw-bolder'>
+					Link / URL
+				</Form.Label>
 				<Form.Control
 					className={`mb-2 ${
 						formErrors.length && !formData.title && !formData.url
@@ -109,14 +112,30 @@ const DataForm = () => {
 					placeholder='Link / URL'
 					disabled={sending}
 				/>
-				{formErrors.map((message, index) => (
-					<div className='text-danger' key={index}>
-						{message}
+				{formErrors.length > 0 && (
+					<div className='m-0 mt-4 alert alert-danger alert-dismissible'>
+						{formErrors.map((message, index) => (
+							<div key={index}>{message}</div>
+						))}
+						<button
+							type='button'
+							className='btn btn-close'
+							onClick={() => setFormErrors([])}
+						></button>
 					</div>
-				))}
-				{sending ? <LoadingBar /> : null}
+				)}
+				{submitSuccess && (
+					<div className='m-0 mt-4 alert alert-success alert-dismissible'>
+						<strong>Form submitted successfully!</strong>
+						<button
+							type='button'
+							className='btn btn-close'
+							onClick={() => setSubmitSuccess(false)}
+						></button>
+					</div>
+				)}
+				{sending && <LoadingBar />}
 			</Form.Group>
-
 			<div className='pt-3 w-100 border-top text-end'>
 				<Button
 					variant='primary'

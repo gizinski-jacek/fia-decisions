@@ -10,6 +10,7 @@ const FileForm = () => {
 	const [formData, setFormData] = useState<FormFileData>(defaultFileData);
 	const [formErrors, setFormErrors] = useState<string[]>([]);
 	const [sending, setSending] = useState(false);
+	const [submitSuccess, setSubmitSuccess] = useState(false);
 	const formRef = useRef<HTMLFormElement>(null);
 
 	const handleSelectChange = async (
@@ -40,7 +41,7 @@ const FileForm = () => {
 		setFormErrors([]);
 		try {
 			if (!formData.series || !formData.file) {
-				setFormErrors(['Must choose series and PDF file']);
+				setFormErrors(['Must choose Series and PDF file']);
 				return;
 			}
 			const uploadData = new FormData();
@@ -53,8 +54,10 @@ const FileForm = () => {
 			);
 			setFormData(defaultFileData);
 			formRef.current?.reset();
+			setSubmitSuccess(true);
 			setSending(false);
 		} catch (error) {
+			setSubmitSuccess(false);
 			setSending(false);
 			if (error instanceof AxiosError) {
 				setFormErrors([error?.response?.data || 'Unknown server error.']);
@@ -72,7 +75,13 @@ const FileForm = () => {
 			</h4>
 			<h4>
 				Only official documents from{' '}
-				<Link href='https://www.fia.com/documents/championships'>FIA site</Link>{' '}
+				<a
+					href='https://www.fia.com/documents/championships'
+					target='_blank'
+					rel='noreferrer'
+				>
+					FIA site
+				</a>{' '}
 				containing words <b className='text-success'>Decision</b> and{' '}
 				<b className='text-success'>Offence</b> in the{' '}
 				<b className='text-success'>title</b> and{' '}
@@ -81,7 +90,9 @@ const FileForm = () => {
 				supported.
 			</h4>
 			<Form.Group className='p-3 my-3 rounded-2 bg-light'>
-				<Form.Label htmlFor='series' className='fw-bolder'>Select series</Form.Label>
+				<Form.Label htmlFor='series' className='fw-bolder'>
+					Select series
+				</Form.Label>
 				<Form.Select
 					className={`mb-2 ${
 						formErrors.length && !formData.series
@@ -101,7 +112,9 @@ const FileForm = () => {
 					<option value='formula2'>Formula 2</option>
 					<option value='formula3'>Formula 3</option>
 				</Form.Select>
-				<Form.Label htmlFor='file' className='fw-bolder'>Select file</Form.Label>
+				<Form.Label htmlFor='file' className='fw-bolder'>
+					Select file
+				</Form.Label>
 				<Form.Control
 					className={`mb-2 ${
 						formErrors.length && !formData.file
@@ -120,12 +133,29 @@ const FileForm = () => {
 				<Form.Text className='text-muted'>
 					Only PDF files, max size 1MB
 				</Form.Text>
-				{formErrors.map((message, index) => (
-					<div className='text-danger' key={index}>
-						{message}
+				{formErrors.length > 0 && (
+					<div className='m-0 mt-4 alert alert-danger alert-dismissible'>
+						{formErrors.map((message, index) => (
+							<div key={index}>{message}</div>
+						))}
+						<button
+							type='button'
+							className='btn btn-close'
+							onClick={() => setFormErrors([])}
+						></button>
 					</div>
-				))}
-				{sending ? <LoadingBar /> : null}
+				)}
+				{submitSuccess && (
+					<div className='m-0 mt-4 alert alert-success alert-dismissible'>
+						<strong>Form submitted successfully!</strong>
+						<button
+							type='button'
+							className='btn btn-close'
+							onClick={() => setSubmitSuccess(false)}
+						></button>
+					</div>
+				)}
+				{sending && <LoadingBar />}
 			</Form.Group>
 			<div className='pt-3 w-100 border-top text-end'>
 				<Button
