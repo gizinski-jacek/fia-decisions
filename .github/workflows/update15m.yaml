@@ -1,4 +1,4 @@
-name: every-15m-cron-job
+name: every-15m-docs-update
 on:
   schedule:
     - cron: '*/15 * * * *'
@@ -6,8 +6,18 @@ jobs:
   cron:
     runs-on: ubuntu-latest
     steps:
-      - name: Call API route fetching new documents
+      - name: Call F1 API route fetching new documents
         run: |
           curl --request GET \
-          --url '${{ secrets.UPDATE_DEC_OFF_ENDPOINT }}' \
+          --url '${{ secrets.UPDATE_F1_ENDPOINT }}' \
+          --header 'Authorization: Bearer ${{ secrets.CRON_JOB_SECRET }}'
+      - name: Call F2 API route fetching new documents
+        run: |
+          curl --request GET \
+          --url '${{ secrets.UPDATE_F2_ENDPOINT }}' \
+          --header 'Authorization: Bearer ${{ secrets.CRON_JOB_SECRET }}'
+      - name: Call F3 API route fetching new documents
+        run: |
+          curl --request GET \
+          --url '${{ secrets.UPDATE_F3_ENDPOINT }}' \
           --header 'Authorization: Bearer ${{ secrets.CRON_JOB_SECRET }}'
