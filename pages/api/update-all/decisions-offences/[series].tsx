@@ -5,7 +5,7 @@ import axios, { AxiosError } from 'axios';
 import connectMongo from '../../../../lib/mongo';
 import { dbNameList, fiaDomain, fiaPageList } from '../../../../lib/myData';
 import { streamToBuffer } from '../../../../lib/streamToBuffer';
-import { readPDFPages } from '../../../../lib/readPDFPages';
+import { readPDFPages } from '../../../../lib/pdfReader';
 import { transformToDecOffDoc } from '../../../../lib/transformToDecOffDoc';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -17,7 +17,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 		}
 		const { authorization } = req.headers;
 		if (
-			authorization === `Bearer ${process.env.CRON_JOB_UPDATE_ALL_DOCS_SECRET}`
+			authorization ===
+			`Bearer ${process.env.CRON_JOB_UPDATE_ALL_DOCS_WITH_FS_SECRET}`
 		) {
 			const { series } = req.query;
 			let seriesDB = '';
@@ -87,44 +88,97 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 				}
 
 				const conn = await connectMongo(seriesDB);
-				await new Promise((resolve, reject) => {
-					allDocsHref.forEach(async (href) => {
-						const responseFile = await axios.get(fiaDomain + href, {
-							responseType: 'stream',
-							timeout: 15000,
-						});
-						const fileBuffer = await streamToBuffer(responseFile.data);
-						const readPDF = await readPDFPages(fileBuffer);
-						const transformed = transformToDecOffDoc(
-							href,
-							readPDF as any,
-							series as 'formula1' | 'formula2' | 'formula3'
-						);
-						try {
-							const docExists = await conn.models.Decision_Offence.findOne({
-								doc_type: transformed.doc_type,
-								doc_name: transformed.doc_name,
-								doc_date: transformed.doc_date,
-								penalty_type: transformed.penalty_type,
-								grand_prix: transformed.grand_prix,
+				// await Promise.all(
+				// 	allDocsHref.map(
+				// 		(href) =>
+				// 			new Promise(async (resolve, reject) => {
+				// 				const responseFile = await axios.get(fiaDomain + href, {
+				// 					responseType: 'stream',
+				// 					timeout: 15000,
+				// 				});
+				// 				const fileBuffer = await streamToBuffer(responseFile.data);
+				// 				const readPDF = await readPDFPages(fileBuffer);
+				// 				const transformed = transformToDecOffDoc(
+				// 					href,
+				// 					readPDF as any,
+				// 					series as 'formula1' | 'formula2' | 'formula3'
+				// 				);
+				// 				try {
+				// 					const docExists = await conn.models.Decision_Offence.findOne({
+				// 						series: series,
+				// 						doc_type: transformed.doc_type,
+				// 						doc_name: transformed.doc_name,
+				// 						doc_date: transformed.doc_date,
+				// 						penalty_type: transformed.penalty_type,
+				// 						grand_prix: transformed.grand_prix,
+				// 						weekend: transformed.weekend,
+				// 					});
+				// 					if (docExists) {
+				// 						console.log('Document already exists. Skipping.');
+				//						resolve(null);
+				// 						return;
+				// 					}
+				// 					await conn.models.Decision_Offence.create({
+				// 						...transformed,
+				// 						manual_upload: false,
+				// 					});
+				// 					resolve(null);
+				// 				} catch (error) {
+				// 					reject(error);
+				// 				}
+				// 			})
+				// 	)
+				// );
+				allDocsHref.forEach(
+					(href) =>
+						new Promise(async (resolve, reject) => {
+							const responseFile = await axios.get(fiaDomain + href, {
+								responseType: 'stream',
+								timeout: 15000,
 							});
-							if (docExists) {
-								return res
-									.status(403)
-									.json('Document already exists. Skipping.');
+							const fileBuffer = await streamToBuffer(responseFile.data);
+							const readPDF = await readPDFPages(fileBuffer);
+							const transformed = transformToDecOffDoc(
+								href,
+								readPDF as any,
+								series as 'formula1' | 'formula2' | 'formula3'
+							);
+							try {
+								const docExists = await conn.models.Decision_Offence.findOne({
+									series: series,
+									doc_type: transformed.doc_type,
+									doc_name: transformed.doc_name,
+									doc_date: transformed.doc_date,
+									penalty_type: transformed.penalty_type,
+									grand_prix: transformed.grand_prix,
+									weekend: transformed.weekend,
+								});
+								if (docExists) {
+									console.log('Document already exists. Skipping.');
+									resolve(null);
+									return;
+								}
+								await conn.models.Decision_Offence.create({
+									...transformed,
+									manual_upload: false,
+								});
+								resolve(null);
+							} catch (error) {
+								reject(error);
 							}
-							await conn.models.Decision_Offence.create({
-								...transformed,
-								manual_upload: false,
-							});
-							resolve(null);
-						} catch (error) {
-							reject(error);
-						}
-					});
-				});
-				return res.status(200).json('Request for update accepted.');
+						})
+				);
+
+				console.log(
+					'Request to update all files accepted. This might take a while.'
+				);
+				return res
+					.status(200)
+					.json(
+						'Request to update all files accepted. This might take a while.'
+					);
 			} catch (error) {
+				console.log(error);
 				if (error instanceof AxiosError) {
 					return res
 						.status(error?.response?.status || 500)
