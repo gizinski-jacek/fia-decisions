@@ -158,12 +158,25 @@ export const transformToDecOffDoc = (
 			if (incidentInfoStringsWithoutHeadline[index - 1] === 'Decision') {
 				const arr: string[] = [];
 				let i = index;
-				while (incidentInfoStringsWithoutHeadline[i]) {
-					arr.push(incidentInfoStringsWithoutHeadline[i] as string);
-					incidentSkipIndexes.push(i);
-					i++;
+				if (
+					incidentInfoStringsWithoutHeadline[i]?.charAt(
+						incidentInfoStringsWithoutHeadline[i]?.length - 1
+					) === ':'
+				) {
+					while (incidentInfoStringsWithoutHeadline[i]) {
+						arr.push(incidentInfoStringsWithoutHeadline[i] as string);
+						incidentSkipIndexes.push(i);
+						i++;
+					}
+					return arr;
+				} else {
+					while (incidentInfoStringsWithoutHeadline[i]) {
+						arr.push(incidentInfoStringsWithoutHeadline[i] as string);
+						incidentSkipIndexes.push(i);
+						i++;
+					}
+					return [arr.join(' ')];
 				}
-				return arr;
 			}
 
 			return str;
