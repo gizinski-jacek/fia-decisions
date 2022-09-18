@@ -84,7 +84,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 							return res
 								.status(403)
 								.json(
-									'Document already exists. If you believe this to be mistake please use Contact form to let me know about this issue.'
+									'Document already exists. If you believe this to be a mistake please use Contact form to let me know about this issue.'
 								);
 						}
 						await conn.models.Decision_Offence.create({
@@ -115,7 +115,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 				if (!fields.series && !fields.title && !fields.url) {
 					return res
 						.status(40)
-						.json('Must provide Series and at least Title or Link / URL.');
+						.json('Must provide at least Title or Link / URL');
 				}
 				const conn = await connectMongo('otherDocs');
 				const newReport = new conn.models.Missing_Doc(fields);
