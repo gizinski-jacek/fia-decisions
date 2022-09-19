@@ -1,4 +1,5 @@
 import Head from 'next/head';
+import { useState } from 'react';
 import { ThemeContextProvider } from '../hooks/ThemeProvider';
 import Drawer from './Drawer';
 import Footer from './Footer';
@@ -8,6 +9,12 @@ interface Props {
 }
 
 const Layout = ({ children }: Props) => {
+	const [drawerOnLeft, setDrawerOnLeft] = useState(true);
+
+	const toggleDrawerPosition = () => {
+		setDrawerOnLeft((prevState) => !prevState);
+	};
+
 	return (
 		<ThemeContextProvider>
 			<Head>
@@ -15,9 +22,18 @@ const Layout = ({ children }: Props) => {
 				<meta name='description' content='FIA Decisions' />
 				<link rel='icon' href='/favicon.ico' />
 			</Head>
-			<Drawer />
-			<main>{children}</main>
-			{/* <Footer /> */}
+			<div
+				className={`d-flex flex-column ${
+					drawerOnLeft ? 'flex-sm-row' : 'flex-sm-column'
+				}`}
+			>
+				<Drawer
+					drawerOnLeft={drawerOnLeft}
+					toggleDrawerPosition={toggleDrawerPosition}
+				/>
+				<main>{children}</main>
+				{/* <Footer /> */}
+			</div>
 		</ThemeContextProvider>
 	);
 };
