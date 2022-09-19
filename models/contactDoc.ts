@@ -8,14 +8,14 @@ const Contact_Doc = new Schema<ContactDocModel>(
 		email: {
 			type: String,
 			trim: true,
-			minlength: 16,
+			minlength: 8,
 			maxlength: 64,
 			required: true,
 		},
 		message: {
 			type: String,
 			trim: true,
-			minlength: 16,
+			minlength: 4,
 			maxlength: 512,
 			required: true,
 		},
