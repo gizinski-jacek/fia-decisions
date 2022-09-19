@@ -8,7 +8,7 @@ import fs from 'fs';
 import { readPDFPagesWithFS } from '../../../../lib/pdfReader';
 import { transformToDecOffDoc } from '../../../../lib/transformToDecOffDoc';
 
-const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 	// Alternative route for requesting update of all documents.
 	// Unlike other routes, this one uses host machines file
 	// system to perform the update. Slower but more reliable.

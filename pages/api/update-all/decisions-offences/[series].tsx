@@ -8,7 +8,7 @@ import { streamToBuffer } from '../../../../lib/streamToBuffer';
 import { readPDFPages } from '../../../../lib/pdfReader';
 import { transformToDecOffDoc } from '../../../../lib/transformToDecOffDoc';
 
-const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 	if (req.method === 'GET') {
 		if (!process.env.CRON_JOB_UPDATE_ALL_DOCS_SECRET) {
 			throw new Error(
