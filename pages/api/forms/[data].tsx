@@ -7,6 +7,9 @@ import { parseFields, parseFile } from '../../../lib/multiparty';
 import { streamToBuffer } from '../../../lib/streamToBuffer';
 import { readPDFPages } from '../../../lib/pdfReader';
 import { transformToDecOffDoc } from '../../../lib/transformToDecOffDoc';
+import * as Yup from 'yup';
+import yupValidation from '../../../lib/yup';
+import { FormContactData, FormDocData } from '../../../types/myTypes';
 
 export const config = {
 	api: {
@@ -15,7 +18,7 @@ export const config = {
 	},
 };
 
-const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+const handler = async (req: NextApiRequest, res: NextApiResponse<string[]>) => {
 	if (req.method === 'POST') {
 		const { data } = req.query;
 		if (data === 'doc-file') {
@@ -29,8 +32,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 				} else if (series === 'formula3') {
 					seriesDB = dbNameList.f3_2022_db;
 				} else {
-					return res.status(422).json('Unsupported series.');
+					return res.status(422).json(['Unsupported series.']);
 				}
+
+				if (!series) {
+					return res.status(422).json(['Must choose a Series.']);
+				}
+
 				// Currently not working when imported, looking for fix...
 				// const file = await parseFile(req);
 
@@ -64,6 +72,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 						console.log('got error on part ' + error);
 					});
 
+					if (!part) {
+						return res.status(422).json(['Must choose a PDF file.']);
+					}
+
 					const fileBuffer = await streamToBuffer(part);
 					const pdfData = await readPDFPages(fileBuffer);
 					const transformed = transformToDecOffDoc(
@@ -83,18 +95,17 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 						if (docExists) {
 							return res
 								.status(403)
-								.json(
-									'Document already exists. If you believe this to be a mistake please use Contact form to let me know about this issue.'
-								);
+								.json([
+									'Document already exists. If you believe this to be a mistake please use Contact form to let me know about this issue.',
+								]);
 						}
 						await conn.models.Decision_Offence.create({
 							...transformed,
 							manual_upload: true,
 						});
-						return res.status(200).json('Document saved.');
+						return res.status(200).json(['Document saved.']);
 					} catch (error) {
-						console.log(error);
-						return res.status(500).json('Unknown server error.');
+						return res.status(500).json(['Unknown server error.']);
 					}
 				});
 
@@ -106,39 +117,51 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 				// Parse req
 				form.parse(req);
 			} catch (error) {
-				return res.status(500).json('Unknown server error.');
+				return res.status(500).json(['Unknown server error.']);
 			}
 		}
 		if (data === 'doc-data') {
 			try {
 				const fields = await parseFields(req);
-				if (!fields.series && !fields.title && !fields.url) {
+				if (!fields.title && !fields.url) {
 					return res
-						.status(40)
-						.json('Must provide at least Title or Link / URL');
+						.status(422)
+						.json(['Must provide at least a Title or a Link / URL.']);
+				}
+				const { errors } = await yupValidation(
+					dataFormValidationSchema,
+					fields
+				);
+				if (errors) {
+					return res.status(422).json(errors);
 				}
 				const conn = await connectMongo('otherDocs');
 				const newReport = new conn.models.Missing_Doc(fields);
 				await newReport.save();
-				return res.status(200).json('Document saved.');
+				return res.status(200).json(['Document saved.']);
 			} catch (error) {
-				console.log(error);
-				return res.status(500).json('Unknown server error.');
+				return res.status(500).json(['Unknown server error.']);
 			}
 		}
 		if (data === 'contact') {
 			try {
 				const fields = await parseFields(req);
 				if (!fields.email && !fields.message) {
-					return res.status(422).json('Must provide an Email and a Message.');
+					return res.status(422).json(['Must provide an Email and a Message.']);
+				}
+				const { errors } = await yupValidation(
+					contactFormValidationSchema,
+					fields
+				);
+				if (errors) {
+					return res.status(422).json(errors);
 				}
 				const conn = await connectMongo('otherDocs');
 				const newReport = new conn.models.Contact_Doc(fields);
 				await newReport.save();
-				return res.status(200).json('Document saved.');
+				return res.status(200).json(['Document saved.']);
 			} catch (error) {
-				console.log(error);
-				return res.status(500).json('Unknown server error.');
+				return res.status(500).json(['Unknown server error.']);
 			}
 		}
 	}
@@ -146,3 +169,29 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 };
 
 export default handler;
+
+const dataFormValidationSchema: Yup.SchemaOf<{ title: string; url: string }> =
+	Yup.object().shape({
+		title: Yup.string()
+			.required('Title is required.')
+			.min(4, 'Title min 8 characters.')
+			.max(32, 'Title max 256 characters.'),
+		url: Yup.string()
+			.required('Link / URL is required.')
+			.min(4, 'Link / URL min 16 characters.')
+			.max(32, 'Link / URL max 256 characters.')
+			.url('Link / URL is invalid.'),
+	});
+
+const contactFormValidationSchema: Yup.SchemaOf<FormContactData> =
+	Yup.object().shape({
+		email: Yup.string()
+			.required('Email is required.')
+			.min(8, 'Email min 4 characters.')
+			.max(64, 'Email max 64 characters.')
+			.email('Email is invalid.'),
+		message: Yup.string()
+			.required('Message is required.')
+			.min(4, 'Message min 4 characters.')
+			.max(512, 'Message max 512 characters.'),
+	});
