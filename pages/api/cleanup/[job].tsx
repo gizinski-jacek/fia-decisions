@@ -2,7 +2,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import fs from 'fs';
 
-const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 	if (req.method === 'DELETE') {
 		const { job } = req.query;
 		if (job === 'delete-files') {
@@ -32,10 +32,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 					console.log('Finished cleanup.');
 					return res.status(200).json('Finished cleanup.');
 				} else {
-					return res.status(401).json({ success: false });
+					return res.status(401);
 				}
 			} catch (error) {
-				return res.status(404).json({ success: false });
+				return res.status(404);
 			}
 		}
 	}
