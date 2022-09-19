@@ -40,7 +40,9 @@ const ContactForm = () => {
 			setSubmitSuccess(false);
 			setSending(false);
 			if (error instanceof AxiosError) {
-				setFormErrors([error?.response?.data || 'Unknown server error.']);
+				Array.isArray(error?.response?.data)
+					? setFormErrors(error?.response?.data || ['Unknown server error.'])
+					: setFormErrors([error?.response?.data || 'Unknown server error.']);
 			} else {
 				setFormErrors([(error as Error).message || 'Unknown server error.']);
 			}
@@ -52,75 +54,91 @@ const ContactForm = () => {
 			<h4>
 				Use this form to report something or contact me about any other matter.
 			</h4>
-			<Form.Group className='p-3 my-3 rounded-2 bg-light'>
-				<Form.Label htmlFor='email' className='fw-bolder'>
-					Email
-				</Form.Label>
-				<Form.Control
-					className={`mb-2 ${
-						formErrors.length && !formData.email
-							? 'outline-error'
-							: !formData.email
-							? 'outline-warning'
-							: 'outline-success'
-					}`}
-					type='text'
-					name='email'
-					id='email'
-					minLength={16}
-					maxLength={64}
-					onChange={handleInputChange}
-					value={formData.email}
-					placeholder='Email'
-					disabled={sending}
-				/>
-				<Form.Label htmlFor='message' className='fw-bolder'>
-					Message
-				</Form.Label>
-				<Form.Control
-					as='textarea'
-					className={`mb-2 ${
-						formErrors.length && !formData.message
-							? 'outline-error'
-							: !formData.message
-							? 'outline-warning'
-							: 'outline-success'
-					}`}
-					type='text'
-					name='message'
-					id='message'
-					minLength={16}
-					maxLength={512}
-					rows={12}
-					onChange={handleInputChange}
-					value={formData.message}
-					placeholder='Message'
-					disabled={sending}
-				/>
-				{formErrors.length > 0 && (
-					<div className='m-0 mt-4 alert alert-danger alert-dismissible'>
-						{formErrors.map((message, index) => (
-							<div key={index}>{message}</div>
-						))}
-						<button
-							type='button'
-							className='btn btn-close'
-							onClick={() => setFormErrors([])}
-						></button>
-					</div>
-				)}
-				{submitSuccess && (
-					<div className='m-0 mt-4 alert alert-success alert-dismissible'>
-						<strong>Form submitted successfully!</strong>
-						<button
-							type='button'
-							className='btn btn-close'
-							onClick={() => setSubmitSuccess(false)}
-						></button>
-					</div>
-				)}
-				{sending && <LoadingBar />}
-			</Form.Group>
+			<div className='p-3 my-3 rounded-2 bg-light'>
+				<Form.Group className='mb-3'>
+					<Form.Label htmlFor='email' className='fw-bolder'>
+						Email
+					</Form.Label>
+					<Form.Control
+						className={` ${
+							formErrors.length > 0 && !formData.email
+								? 'outline-error'
+								: !formData.email ||
+								  formData.email.length < 8 ||
+								  formData.email.length > 64
+								? 'outline-warning'
+								: 'outline-success'
+						}`}
+						type='text'
+						name='email'
+						id='email'
+						minLength={8}
+						maxLength={64}
+						onChange={handleInputChange}
+						value={formData.email}
+						placeholder='Email'
+						disabled={sending}
+						aria-describedby='emailInputHelpText'
+					/>
+					<Form.Text muted id='emailInputHelpText'>
+						Valid email, 8-64 characters long
+					</Form.Text>
+				</Form.Group>
+				<Form.Group>
+					<Form.Label htmlFor='message' className='fw-bolder'>
+						Message
+					</Form.Label>
+					<Form.Control
+						as='textarea'
+						className={
+							formErrors.length > 0 && !formData.message
+								? 'outline-error'
+								: !formData.message ||
+								  formData.message.length < 4 ||
+								  formData.message.length > 512
+								? 'outline-warning'
+								: 'outline-success'
+						}
+						type='text'
+						name='message'
+						id='message'
+						minLength={4}
+						maxLength={512}
+						rows={formData.message.length <= 256 ? 7 : 13}
+						onChange={handleInputChange}
+						value={formData.message}
+						placeholder='Message'
+						disabled={sending}
+						aria-describedby='messageInputHelpText'
+					/>
+					<Form.Text muted id='messageInputHelpText'>
+						Message 4-512 characters long
+					</Form.Text>
+					{formErrors.length > 0 && (
+						<div className='m-0 mt-4 alert alert-danger alert-dismissible'>
+							{formErrors.map((message, index) => (
+								<div key={index}>{message}</div>
+							))}
+							<button
+								type='button'
+								className='btn btn-close'
+								onClick={() => setFormErrors([])}
+							></button>
+						</div>
+					)}
+					{submitSuccess && (
+						<div className='m-0 mt-4 alert alert-success alert-dismissible'>
+							<strong>Form submitted successfully!</strong>
+							<button
+								type='button'
+								className='btn btn-close'
+								onClick={() => setSubmitSuccess(false)}
+							></button>
+						</div>
+					)}
+					{sending && <LoadingBar />}
+				</Form.Group>
+			</div>
 			<div className='pt-3 w-100 border-top text-end'>
 				<Button
 					variant='primary'

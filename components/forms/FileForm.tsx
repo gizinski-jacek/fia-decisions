@@ -26,11 +26,11 @@ const FileForm = () => {
 		const target = e.target;
 		const file = (target.files as FileList)[0];
 		if (file.size > 1000000) {
-			setFormErrors(['File too large']);
+			setFormErrors(['File is too large.']);
 			return;
 		}
 		if (file.type !== 'application/pdf') {
-			setFormErrors(['Only PDF files are allowed']);
+			setFormErrors(['Only images PDF files are allowed.']);
 			return;
 		}
 		setFormData((prevState) => ({ ...prevState, file: file }));
@@ -40,8 +40,16 @@ const FileForm = () => {
 		e.preventDefault();
 		setFormErrors([]);
 		try {
-			if (!formData.series || !formData.file) {
-				setFormErrors(['Must choose Series and a PDF file']);
+			if (!formData.series && !formData.file) {
+				setFormErrors(['Must choose a Series and a PDF file.']);
+				return;
+			}
+			if (!formData.series) {
+				setFormErrors(['Must choose a Series.']);
+				return;
+			}
+			if (!formData.file) {
+				setFormErrors(['Must choose a PDF file.']);
 				return;
 			}
 			const uploadData = new FormData();
@@ -60,7 +68,9 @@ const FileForm = () => {
 			setSubmitSuccess(false);
 			setSending(false);
 			if (error instanceof AxiosError) {
-				setFormErrors([error?.response?.data || 'Unknown server error.']);
+				Array.isArray(error?.response?.data)
+					? setFormErrors(error?.response?.data || ['Unknown server error.'])
+					: setFormErrors([error?.response?.data || 'Unknown server error.']);
 			} else {
 				setFormErrors([(error as Error).message || 'Unknown server error.']);
 			}
@@ -89,74 +99,79 @@ const FileForm = () => {
 				<b className='text-danger'>Session, Fact, Offence, Decision</b> are
 				supported.
 			</h4>
-			<Form.Group className='p-3 my-3 rounded-2 bg-light'>
-				<Form.Label htmlFor='series' className='fw-bolder'>
-					Select series
-				</Form.Label>
-				<Form.Select
-					className={`mb-2 ${
-						formErrors.length && !formData.series
-							? 'outline-error'
-							: !formData.series
-							? 'outline-warning'
-							: 'outline-success'
-					}`}
-					name='series'
-					id='series'
-					onChange={handleSelectChange}
-					value={formData.series}
-					disabled={sending}
-				>
-					<option value=''>Choose Formula series</option>
-					<option value='formula1'>Formula 1</option>
-					<option value='formula2'>Formula 2</option>
-					<option value='formula3'>Formula 3</option>
-				</Form.Select>
-				<Form.Label htmlFor='file' className='fw-bolder'>
-					Select file
-				</Form.Label>
-				<Form.Control
-					className={`mb-2 ${
-						formErrors.length && !formData.file
-							? 'outline-error'
-							: !formData.file
-							? 'outline-warning'
-							: 'outline-success'
-					}`}
-					type='file'
-					name='file'
-					id='file'
-					accept='.pdf'
-					onChange={handleFileChange}
-					disabled={sending}
-				/>
-				<Form.Text className='text-muted'>
-					Only PDF files, max size 1MB
-				</Form.Text>
-				{formErrors.length > 0 && (
-					<div className='m-0 mt-4 alert alert-danger alert-dismissible'>
-						{formErrors.map((message, index) => (
-							<div key={index}>{message}</div>
-						))}
-						<button
-							type='button'
-							className='btn btn-close'
-							onClick={() => setFormErrors([])}
-						></button>
-					</div>
-				)}
-				{submitSuccess && (
-					<div className='m-0 mt-4 alert alert-success alert-dismissible'>
-						<strong>Form submitted successfully!</strong>
-						<button
-							type='button'
-							className='btn btn-close'
-							onClick={() => setSubmitSuccess(false)}
-						></button>
-					</div>
-				)}
-				{sending && <LoadingBar />}
-			</Form.Group>
+			<div className='p-3 my-3 rounded-2 bg-light'>
+				<Form.Group className='mb-3'>
+					<Form.Label htmlFor='series' className='fw-bolder'>
+						Select series
+					</Form.Label>
+					<Form.Select
+						className={
+							formErrors.length > 0 && !formData.series
+								? 'outline-error'
+								: !formData.series
+								? 'outline-warning'
+								: 'outline-success'
+						}
+						name='series'
+						id='series'
+						onChange={handleSelectChange}
+						value={formData.series}
+						disabled={sending}
+					>
+						<option value=''>Choose Formula series</option>
+						<option value='formula1'>Formula 1</option>
+						<option value='formula2'>Formula 2</option>
+						<option value='formula3'>Formula 3</option>
+					</Form.Select>
+				</Form.Group>
+				<Form.Group>
+					<Form.Label htmlFor='file' className='fw-bolder'>
+						Select file
+					</Form.Label>
+					<Form.Control
+						className={
+							formErrors.length > 0 && !formData.file
+								? 'outline-error'
+								: !formData.file
+								? 'outline-warning'
+								: 'outline-success'
+						}
+						type='file'
+						name='file'
+						id='file'
+						accept='.pdf'
+						onChange={handleFileChange}
+						disabled={sending}
+						aria-describedby='fileSelectHelpText'
+					/>
+					<Form.Text muted id='fileSelectHelpText'>
+						Only PDF files, max size 1MB
+					</Form.Text>
+					{formErrors.length > 0 && (
+						<div className='m-0 mt-4 alert alert-danger alert-dismissible'>
+							{formErrors.map((message, index) => (
+								<div key={index}>{message}</div>
+							))}
+							<button
+								type='button'
+								className='btn btn-close'
+								onClick={() => setFormErrors([])}
+							></button>
+						</div>
+					)}
+					{submitSuccess && (
+						<div className='m-0 mt-4 alert alert-success alert-dismissible'>
+							<strong>Form submitted successfully!</strong>
+							<button
+								type='button'
+								className='btn btn-close'
+								onClick={() => setSubmitSuccess(false)}
+							></button>
+						</div>
+					)}
+					{sending && <LoadingBar />}
+				</Form.Group>
+			</div>
 			<div className='pt-3 w-100 border-top text-end'>
 				<Button
 					variant='primary'
