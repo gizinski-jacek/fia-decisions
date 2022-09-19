@@ -20,7 +20,8 @@
     "react-bootstrap": "^2.5.0",
     "react-dom": "18.2.0",
     "sass": "^1.54.8",
-    "use-local-storage": "^2.3.6"
+    "use-local-storage": "^2.3.6",
+    "yup": "^0.32.11"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^5.16.5",
