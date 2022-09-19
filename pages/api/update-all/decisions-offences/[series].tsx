@@ -177,7 +177,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 						'Request to update all files accepted. This might take a while.'
 					);
 			} catch (error) {
-				console.log(error);
 				if (error instanceof AxiosError) {
 					return res
 						.status(error?.response?.status || 500)

@@ -106,7 +106,6 @@ export const getServerSideProps = async (
 			props: { data: JSON.parse(JSON.stringify(groupedByGP)) },
 		};
 	} catch (error) {
-		console.log(error);
 		return {
 			props: { data: [] },
 		};
