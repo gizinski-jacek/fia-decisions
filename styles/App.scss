@@ -1,7 +1,41 @@
 nav {
+	transition: 0.15s ease-in-out;
+
 	li {
-		max-width: 100px;
+		white-space: nowrap;
 	}
+}
+
+.custom-width {
+	width: 100% !important;
+
+	@media only screen and (min-width: 576px) {
+		&.custom-width-sm {
+			width: 60px !important;
+		}
+
+		&.custom-width-md {
+			width: 120px !important;
+		}
+	}
+
+	@media only screen and (min-width: 768px) {
+		width: 100% !important;
+	}
+}
+
+.custom-container {
+	:first-child {
+		min-width: 160px !important;
+	}
+
+	:nth-child(2) {
+		min-width: 200px !important;
+	}
+}
+
+.custom-button {
+	height: fit-content !important;
 }
 
 .outline-success {
@@ -31,18 +65,4 @@ nav {
 
 .accordion-body {
 	padding: 0.5rem !important;
-}
-
-.cstm-stl-ctnr {
-	:first-child {
-		min-width: 160px !important;
-	}
-
-	:nth-child(2) {
-		min-width: 200px !important;
-	}
-}
-
-.cstm-stl-btn {
-	height: fit-content !important;
 }
