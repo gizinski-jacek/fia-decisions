@@ -55,34 +55,35 @@ export const getServerSideProps = async (
 ) => {
 	try {
 		let seriesDB = '';
-		if (context.params?.series === 'f1') {
+		const { series } = context.params as { series: string };
+		if (series === 'f1') {
 			seriesDB = dbNameList.f1_2022_db;
-		} else if (context.params?.series === 'f2') {
+		} else if (series === 'f2') {
 			seriesDB = dbNameList.f2_2022_db;
-		} else if (context.params?.series === 'f3') {
+		} else if (series === 'f3') {
 			seriesDB = dbNameList.f3_2022_db;
-		} else if (context.params?.series === 'formula') {
+		} else if (series === 'formula') {
 			return {
 				redirect: {
 					destination: '/f1',
 					permanent: false,
 				},
 			};
-		} else if (context.params?.series === 'formula1') {
+		} else if (series === 'formula1') {
 			return {
 				redirect: {
 					destination: '/f1',
 					permanent: false,
 				},
 			};
-		} else if (context.params?.series === 'formula2') {
+		} else if (series === 'formula2') {
 			return {
 				redirect: {
 					destination: '/f2',
 					permanent: false,
 				},
 			};
-		} else if (context.params?.series === 'formula3') {
+		} else if (series === 'formula3') {
 			return {
 				redirect: {
 					destination: '/f3',
