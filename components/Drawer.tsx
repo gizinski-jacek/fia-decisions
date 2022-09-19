@@ -7,14 +7,24 @@ import FileForm from './forms/FileForm';
 import DataForm from './forms/DataForm';
 import ContactForm from './forms/ContactForm';
 
-const Drawer = () => {
+interface Props {
+	drawerOnLeft: boolean;
+	toggleDrawerPosition: () => void;
+}
+
+const Drawer = ({ drawerOnLeft, toggleDrawerPosition }: Props) => {
 	const { toggleTheme } = useContext(ThemeContext);
+	const [drawerSmall, setDrawerSmall] = useState(false);
 	const [showFormModal, setShowFormModal] = useState(false);
 	const [displayedForm, setDisplayedForm] = useState<
 		'file' | 'data' | 'contact'
 	>('file');
 	const [showCalendarModal, setShowCalendarModal] = useState(false);
 	const router = useRouter();
+
+	const toggleDrawerSize = () => {
+		setDrawerSmall((prevState) => !prevState);
+	};
 
 	const handleToggleTheme = () => {
 		toggleTheme();
@@ -42,8 +52,22 @@ const Drawer = () => {
 
 	return (
 		<>
-			<nav className='d-flex flex-column flex-sm-row bg-light'>
-				<ul className='nav flex-grow-1 nav-tabs justify-content-between justify-content-sm-start nav-fill p-2 gap-5'>
+			<nav
+				className={`d-flex flex-column bg-light overflow-hidden custom-width ${
+					drawerOnLeft
+						? drawerSmall
+							? 'flex-md-column custom-width-sm'
+							: 'flex-md-column custom-width-md'
+						: 'flex-md-row'
+				}`}
+			>
+				<ul
+					className={`nav nav-tabs nav-fill justify-content-between justify-content-md-start p-2 gap-4 ${
+						drawerOnLeft
+							? 'flex-sm-column mb-2 pb-3'
+							: 'flex-sm-row flex-sm-grow-1'
+					}`}
+				>
 					{/* <li className='nav-item'>
 						<Link href='/'>
 							<a
@@ -62,7 +86,7 @@ const Drawer = () => {
 									router.query.series === 'f1' ? 'active' : ''
 								}`}
 							>
-								Formula 1
+								{drawerOnLeft && drawerSmall ? 'F1' : 'Formula 1'}
 							</a>
 						</Link>
 					</li>
@@ -73,7 +97,7 @@ const Drawer = () => {
 									router.query.series === 'f2' ? 'active' : ''
 								}`}
 							>
-								Formula 2
+								{drawerOnLeft && drawerSmall ? 'F2' : 'Formula 2'}
 							</a>
 						</Link>
 					</li>
@@ -84,40 +108,66 @@ const Drawer = () => {
 									router.query.series === 'f3' ? 'active' : ''
 								}`}
 							>
-								Formula 3
+								{drawerOnLeft && drawerSmall ? 'F3' : 'Formula 3'}
 							</a>
 						</Link>
 					</li>
 				</ul>
-				<ul className='nav nav-tabs nav-fill justify-content-between p-2 gap-5'>
-					{/* <li className='nav-item'>
-						<Button
-							variant='warning'
-							size='sm'
-							className='fw-bolder'
-							onClick={handleOpenCalendarModal}
-						>
-							Calendar
-						</Button>
-					</li> */}
-					{/* <li className='nav-item ms-auto'>
+				<ul
+					className={`nav nav-fill justify-content-between p-2 gap-4 order-first order-md-last ${
+						drawerOnLeft ? 'flex-sm-column order-sm-last' : 'flex-row nav-tabs'
+					} ${drawerOnLeft && drawerSmall ? 'nav-pills' : ''}`}
+				>
+					{drawerOnLeft && (
+						<li className='nav-item d-none d-sm-block'>
+							<Button
+								variant='dark'
+								size='sm'
+								className='w-100 fw-bolder'
+								onClick={toggleDrawerSize}
+							>
+								{drawerOnLeft && drawerSmall ? 'S' : 'Size'}
+							</Button>
+						</li>
+					)}
+					<li className='nav-item d-none d-sm-block'>
 						<Button
 							variant='dark'
 							size='sm'
-							className='fw-bolder'
+							className='w-100 fw-bolder'
+							onClick={toggleDrawerPosition}
+						>
+							{drawerOnLeft && drawerSmall ? 'P' : 'Position'}
+						</Button>
+					</li>
+					<li className={`nav-item`}>
+						<Button
+							variant='warning'
+							size='sm'
+							className='w-100 fw-bolder'
+							onClick={handleOpenCalendarModal}
+						>
+							{drawerOnLeft && drawerSmall ? 'Cal' : 'Calendar'}
+						</Button>
+					</li>
+					<li className='nav-item'>
+						<Button
+							variant='dark'
+							size='sm'
+							className='w-100 fw-bolder'
 							onClick={handleToggleTheme}
 						>
 							Mode
 						</Button>
-					</li> */}
+					</li>
 					<li className='nav-item'>
 						<Button
 							variant='info'
 							size='sm'
-							className='fw-bolder'
+							className='w-100 fw-bolder'
 							onClick={handleOpenFormModal}
 						>
-							Contact
+							{drawerOnLeft && drawerSmall ? 'Con' : 'Contact'}
 						</Button>
 					</li>
 				</ul>
