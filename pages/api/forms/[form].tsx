@@ -20,8 +20,8 @@ export const config = {
 
 const handler = async (req: NextApiRequest, res: NextApiResponse<string[]>) => {
 	if (req.method === 'POST') {
-		const { data } = req.query;
-		if (data === 'doc-file') {
+		const { form } = req.query;
+		if (form === 'doc-file') {
 			try {
 				const { series } = req.query;
 				let seriesDB = '';
@@ -120,7 +120,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string[]>) => {
 				return res.status(500).json(['Unknown server error.']);
 			}
 		}
-		if (data === 'doc-data') {
+		if (form === 'doc-data') {
 			try {
 				const fields = await parseFields(req);
 				if (!fields.title && !fields.url) {
@@ -143,7 +143,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string[]>) => {
 				return res.status(500).json(['Unknown server error.']);
 			}
 		}
-		if (data === 'contact') {
+		if (form === 'contact') {
 			try {
 				const fields = await parseFields(req);
 				if (!fields.email && !fields.message) {
