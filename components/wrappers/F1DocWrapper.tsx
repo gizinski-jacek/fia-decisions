@@ -86,7 +86,7 @@ const F1DocWrapper = ({ data }: Props) => {
 			<Accordion id={data._id} className='my-1'>
 				<Accordion.Item eventKey='0'>
 					<Accordion.Header className='p-0 m-0'>
-						<div className='d-flex flex-column w-100 flex-sm-row align-items-center cstm-stl-ctnr'>
+						<div className='d-flex flex-column w-100 flex-sm-row align-items-center custom-container'>
 							<div
 								className='border rounded p-1 me-2 text-uppercase text-center fw-bold'
 								style={{
@@ -139,7 +139,7 @@ const F1DocWrapper = ({ data }: Props) => {
 						<Button
 							size='sm'
 							variant='info'
-							className='fw-bolder mt-2 mt-sm-0 cstm-stl-btn'
+							className='fw-bolder mt-2 mt-sm-0 custom-button'
 							onClick={handleOpenModal}
 						>
 							Details
