@@ -88,7 +88,7 @@ const F1DocWrapper = ({ data }: Props) => {
 					<Accordion.Header className='p-0 m-0'>
 						<div className='d-flex flex-column w-100 flex-sm-row align-items-center custom-container'>
 							<div
-								className='border rounded p-1 me-2 text-uppercase text-center fw-bold'
+								className='border rounded p-1 me-sm-2 text-uppercase text-center fw-bold'
 								style={{
 									...penaltyTypeColors[
 										data.penalty_type as keyof typeof penaltyTypeColors
@@ -97,11 +97,14 @@ const F1DocWrapper = ({ data }: Props) => {
 							>
 								{data.penalty_type}
 							</div>
-							<div className='m-2 text-center text-sm-start fw-bold'>
+							<div className='d-none d-sm-block m-1 me-sm-4 text-center fw-bold'>
+								{data.incident_info.Session}
+							</div>
+							<div className='m-1 me-sm-4 text-center text-sm-start fw-bold'>
 								{data.incident_info.Driver}
 							</div>
-							<div className='m-2 d-none d-md-block flex-grow-1 fw-bold'>
-								{data.doc_name}
+							<div className='d-sm-none d-md-block text-center text-sm-start  flex-grow-1 fw-bold'>
+								{data.doc_name.slice(data.doc_name.lastIndexOf('-') + 2)}
 							</div>
 						</div>
 					</Accordion.Header>
@@ -116,6 +119,10 @@ const F1DocWrapper = ({ data }: Props) => {
 								<p className='d-inline'>
 									{data.document_info.Date} {data.document_info.Time}
 								</p>
+							</div>
+							<div className='d-block d-sm-none'>
+								<p className='fw-bold d-inline'>Session: </p>
+								<p className='d-inline'>{data.incident_info.Session}</p>
 							</div>
 							<div className='mx-md-3'>
 								{data.incident_info.Decision.map((s, i) => {
