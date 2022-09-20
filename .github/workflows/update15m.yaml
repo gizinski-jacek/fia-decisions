@@ -1,7 +1,7 @@
-name: every-15m-docs-update
+name: update-every-15m-Fri-Sun
 on:
   schedule:
-    - cron: '*/15 * * * *'
+    - cron: '*/15 * * * 5,6,0'
 jobs:
   cron:
     runs-on: ubuntu-latest
