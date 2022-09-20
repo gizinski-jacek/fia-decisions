@@ -1,26 +1,48 @@
 nav {
+	position: static;
 	transition: 0.15s ease-in-out;
+
+	// Needs refactoring!
+	&.custom-nav-hide {
+		position: absolute;
+		width: 100%;
+		transform: translateY(-100%);
+
+		.custom-btn1-show {
+			position: relative;
+			top: 0;
+			animation: slideBtn1Down 0.3s ease-in-out forwards;
+		}
+
+		@keyframes slideBtn1Down {
+			75% {
+				transform: translateY(0);
+			}
+
+			100% {
+				transform: translateY(150%);
+			}
+		}
+
+		.custom-btn2-show {
+			position: relative;
+			top: 0;
+			animation: slideBtn2Down 0.3s ease-in-out forwards;
+		}
+
+		@keyframes slideBtn2Down {
+			75% {
+				transform: translateY(0);
+			}
+
+			100% {
+				transform: translateY(300%);
+			}
+		}
+	}
 
 	li {
 		white-space: nowrap;
-	}
-}
-
-.custom-width {
-	width: 100% !important;
-
-	@media only screen and (min-width: 576px) {
-		&.custom-width-sm {
-			width: 60px !important;
-		}
-
-		&.custom-width-md {
-			width: 120px !important;
-		}
-	}
-
-	@media only screen and (min-width: 768px) {
-		width: 100% !important;
 	}
 }
 
@@ -30,6 +52,14 @@ nav {
 	}
 
 	:nth-child(2) {
+		min-width: 80px !important;
+	}
+
+	:nth-child(3) {
+		min-width: 200px !important;
+	}
+
+	:nth-child(4) {
 		min-width: 200px !important;
 	}
 }
