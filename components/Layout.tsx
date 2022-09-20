@@ -9,7 +9,7 @@ interface Props {
 }
 
 const Layout = ({ children }: Props) => {
-	const [drawerOnLeft, setDrawerOnLeft] = useState(true);
+	const [drawerOnLeft, setDrawerOnLeft] = useState(false);
 
 	const toggleDrawerPosition = () => {
 		setDrawerOnLeft((prevState) => !prevState);
