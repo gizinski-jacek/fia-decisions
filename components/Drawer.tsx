@@ -15,6 +15,7 @@ interface Props {
 
 const Drawer = ({ drawerOnLeft, toggleDrawerPosition }: Props) => {
 	const { theme, toggleTheme } = useContext(ThemeContext);
+	// Save theme, position and size in local storage
 	const [selectedTheme, setSelectedTheme] = useState('light');
 	const [screenIsSmall, setSmallScreen] = useState(false);
 	const [drawerIsSmall, setDrawerSmall] = useState(false);
@@ -83,13 +84,13 @@ const Drawer = ({ drawerOnLeft, toggleDrawerPosition }: Props) => {
 				${drawerIsHidden ? 'custom-nav-hide' : ''}`}
 			>
 				<ul
-					className={`nav nav-tabs border-start d-none d-sm-flex justify-content-between align-items-center p-2 p-md-2 gap-2 
+					className={`nav nav-tabs d-none d-sm-flex justify-content-between align-items-center p-2 p-md-2 gap-2 
 					${
 						drawerOnLeft && drawerIsSmall
 							? 'flex-column'
 							: drawerOnLeft && !drawerIsSmall
 							? 'flex-row'
-							: 'flex-column flex-lg-row  order-sm-4'
+							: 'flex-column flex-lg-row border-start order-sm-4'
 					}`}
 				>
 					<li
@@ -139,10 +140,9 @@ const Drawer = ({ drawerOnLeft, toggleDrawerPosition }: Props) => {
 				>
 					<ul
 						className={`nav nav-tabs nav-fill p-2 py-2 p-md-2 
-						${drawerOnLeft ? 'flex-sm-column gap-2' : 'flex-sm-row flex-sm-grow-1 gap-3'}
-						${screenIsSmall || drawerOnLeft ? '' : 'border-start'}`}
+						${drawerOnLeft ? 'flex-sm-column gap-2' : 'flex-sm-row flex-sm-grow-1 gap-3 '}`}
 					>
-						<li className='nav-item flex-grow-0'>
+						{/* <li className='nav-item'>
 							<Link href='/'>
 								<a
 									className={`w-100 btn btn-sm btn-success fw-bolder d-flex align-items-center justify-content-center 
@@ -160,7 +160,7 @@ const Drawer = ({ drawerOnLeft, toggleDrawerPosition }: Props) => {
 										: 'Home'}
 								</a>
 							</Link>
-						</li>
+						</li> */}
 						<li className='nav-item'>
 							<Link href={'/f1'}>
 								<a
@@ -222,7 +222,7 @@ const Drawer = ({ drawerOnLeft, toggleDrawerPosition }: Props) => {
 					<ul
 						className={`nav nav-fill nav-tabs p-2 order-first order-lg-2  
 						${drawerOnLeft ? 'flex-sm-column order-sm-2 gap-2' : 'flex-row gap-3'}
-						${screenIsSmall || drawerOnLeft ? '' : 'border-start'}`}
+						${screenIsSmall || drawerOnLeft ? '' : 'custom-border'}`}
 					>
 						<li className='nav-item'>
 							<Button
@@ -247,7 +247,7 @@ const Drawer = ({ drawerOnLeft, toggleDrawerPosition }: Props) => {
 								</div>
 							</Button>
 						</li>
-						<li className='nav-item'>
+						{/* <li className='nav-item'>
 							<Button
 								variant='dark'
 								size='sm'
@@ -264,7 +264,7 @@ const Drawer = ({ drawerOnLeft, toggleDrawerPosition }: Props) => {
 											<div className={`me-2 ${style.mode_slider}`}>
 												<div className={style.mode_slider_circle}></div>
 											</div>
-											Mode
+											Theme
 										</div>
 									) : drawerOnLeft && drawerIsSmall ? (
 										<span className={`${style.mode_icon} m-auto`}>
@@ -276,12 +276,12 @@ const Drawer = ({ drawerOnLeft, toggleDrawerPosition }: Props) => {
 											<div className={`me-2 ${style.mode_slider}`}>
 												<div className={style.mode_slider_circle}></div>
 											</div>
-											Mode
+											Theme
 										</div>
 									)}
 								</div>
 							</Button>
-						</li>
+						</li> */}
 						<li className='nav-item'>
 							<Button
 								variant='info'
