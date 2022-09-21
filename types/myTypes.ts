@@ -6,6 +6,7 @@ export interface TransformedPDFData {
 	penalty_type: string;
 	grand_prix: string;
 	weekend: string;
+	incident_title: string;
 	document_info: DocumentInfo;
 	incident_info: IncidentInfo;
 	stewards: string[];

@@ -12,6 +12,7 @@ const DecisionOffenceSchema = new Schema<DecisionOffenceModel>(
 		grand_prix: { type: String, trim: true, required: true },
 		penalty_type: { type: String, trim: true, required: true },
 		weekend: { type: String, trim: true, required: true },
+		incident_title: { type: String, trim: true, required: true },
 		document_info: {
 			From: { type: String, trim: true, required: true },
 			To: { type: String, trim: true, required: true },
