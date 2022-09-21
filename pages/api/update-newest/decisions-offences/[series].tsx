@@ -131,7 +131,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 							dateStrings[0] +
 							' ' +
 							dateAndTime[1];
-						if (new Date(reformattedDate) >= new Date(docList[0].doc_date)) {
+						if (
+							new Date(reformattedDate).getTime() + 7200000 >=
+							new Date(docList[0].doc_date).getTime()
+						) {
 							allDocsHref.push(link.href);
 							return;
 						}
@@ -142,6 +145,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 					console.log('Documents are up to date.');
 					return res.status(200).json('Documents are up to date.');
 				}
+				console.log(`Number of new scrapped documents: ${allDocsHref.length}.`);
 
 				await Promise.all(
 					allDocsHref.map(
