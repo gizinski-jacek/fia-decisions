@@ -109,9 +109,8 @@ const F1DocWrapper = ({ data }: Props) => {
 							<div className='m-1 me-sm-4 text-center text-sm-start fw-bold'>
 								{data.incident_info.Driver}
 							</div>
-							<div className='d-sm-none d-md-block text-center text-sm-start  flex-grow-1 fw-bold'>
-								{/* Refactor */}
-								{data.doc_name}
+							<div className='d-sm-none d-md-block text-capitalize text-center text-sm-start  flex-grow-1 fw-bold'>
+								{data.incident_title}
 							</div>
 						</div>
 					</Accordion.Header>
