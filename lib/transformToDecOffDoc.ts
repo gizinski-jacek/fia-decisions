@@ -28,23 +28,24 @@ export const transformToDecOffDoc = (
 	}
 	fileName.trim();
 
-	const gpName = fileName.slice(0, fileName.indexOf('-') + 1).trim();
-	const docType = fileName
-		.replace(gpName, '')
-		.trim()
-		.slice(0, 8)
-		.toLowerCase()
-		.trim();
+	const gpName = fileName.slice(0, fileName.indexOf('-')).trim();
+	const docType = [fileName].map((string) => {
+		let str = string.replace(gpName, '').trim();
+		if (str.charAt(0) === '-') {
+			str = str.slice(1).trim();
+		}
+		return str.slice(0, 8).toLowerCase().trim();
+	})[0];
 
 	const incidentTitle = [fileName].map((string) => {
 		let str = string.replace(gpName, '').toLowerCase().trim();
 		if (str.charAt(0) === '-') {
 			str = str.slice(1).trim();
 		}
-		if (str.slice(0, 7).toLowerCase() === 'offence') {
+		if (str.slice(0, 7).toLowerCase().trim() === 'offence') {
 			str = str.slice(7).trim();
 		}
-		if (str.slice(0, 8).toLowerCase() === 'decision') {
+		if (str.slice(0, 8).toLowerCase().trim() === 'decision') {
 			str = str.slice(8).trim();
 		}
 		if (str.charAt(0) === '-') {
@@ -88,14 +89,17 @@ export const transformToDecOffDoc = (
 		)
 		.map((str, i, arr) => {
 			if (i !== 0 && str.length > 3) {
-				if (str.includes('No') && str.includes('Driver')) {
+				if (
+					str.toLowerCase().includes('no') &&
+					str.toLowerCase().includes('driver')
+				) {
 					return 'Driver';
 				} else if (
 					i + 1 !== arr.length &&
-					str.toLowerCase().includes('team') &&
-					arr[i + 1].toLowerCase().includes('manager')
+					str.toLowerCase().trim() === 'team' &&
+					arr[i + 1].toLowerCase().trim() === 'manager'
 				) {
-					return 'Team Manager';
+					throw new Error('Not a driver penalty. Skipping.');
 				} else if (str === 'The Stewards') {
 					return;
 				} else {
