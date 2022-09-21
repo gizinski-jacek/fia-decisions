@@ -17,6 +17,7 @@ const ThemeContext = createContext<ThemeProps>({
 
 const ThemeContextProvider = ({ children }: Props) => {
 	const [theme, setTheme] = useLocalStorage<'dark' | 'light'>('theme', 'light');
+
 	const toggleTheme = () => {
 		const newTheme = theme === 'light' ? 'dark' : 'light';
 		setTheme(newTheme);
@@ -28,6 +29,10 @@ const ThemeContextProvider = ({ children }: Props) => {
 		).matches;
 		setTheme(defaultLight ? 'light' : 'dark');
 	}, [setTheme]);
+
+	// useEffect(() => {
+	// 	document.body.className = theme;
+	// }, [theme]);
 
 	return (
 		<ThemeContext.Provider value={{ theme, toggleTheme }}>
