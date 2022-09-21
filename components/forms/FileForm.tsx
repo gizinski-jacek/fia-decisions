@@ -160,7 +160,7 @@ const FileForm = () => {
 					)}
 					{submitSuccess && (
 						<div className='m-0 mt-4 alert alert-success alert-dismissible'>
-							<strong>Form submitted successfully!</strong>
+							<strong>File submitted successfully!</strong>
 							<button
 								type='button'
 								className='btn btn-close'
