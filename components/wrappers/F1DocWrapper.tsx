@@ -103,7 +103,7 @@ const F1DocWrapper = ({ data }: Props) => {
 							>
 								{data.penalty_type}
 							</div>
-							<div className='d-none d-sm-block m-1 me-sm-4 text-center fw-bold'>
+							<div className='d-none d-sm-block m-1 me-sm-4 text-center fw-bold text-break'>
 								{data.incident_info.Session}
 							</div>
 							<div className='m-1 me-sm-4 text-center text-sm-start fw-bold'>
