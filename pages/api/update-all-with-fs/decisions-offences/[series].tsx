@@ -262,12 +262,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 				);
 
 				console.log(
-					'Request to update all files with fs accepted. This might take a while.'
+					'Request to update all files using file system accepted. This might take a while.'
 				);
 				return res
 					.status(200)
 					.json(
-						'Request to update all files with fs accepted. This might take a while.'
+						'Request to update all files using file system accepted. This might take a while.'
 					);
 			} catch (error) {
 				if (error instanceof AxiosError) {
