@@ -28,13 +28,30 @@ export const transformToDecOffDoc = (
 	}
 	fileName.trim();
 
+	const gpName = fileName.slice(0, fileName.indexOf('-') + 1).trim();
 	const docType = fileName
-		.slice(
-			fileName.indexOf('-') + 1,
-			fileName.indexOf('-', fileName.indexOf('-') + 1)
-		)
+		.replace(gpName, '')
+		.trim()
+		.slice(0, 8)
+		.toLowerCase()
 		.trim();
-	const gpName = fileName.slice(0, fileName.indexOf('-')).trim();
+
+	const incidentTitle = [fileName].map((string) => {
+		let str = string.replace(gpName, '').toLowerCase().trim();
+		if (str.charAt(0) === '-') {
+			str = str.slice(1).trim();
+		}
+		if (str.slice(0, 7).toLowerCase() === 'offence') {
+			str = str.slice(7).trim();
+		}
+		if (str.slice(0, 8).toLowerCase() === 'decision') {
+			str = str.slice(8).trim();
+		}
+		if (str.charAt(0) === '-') {
+			str = str.slice(1).trim();
+		}
+		return str;
+	})[0];
 
 	const trimmedStringsArray = pdfDataArray.map((str) => str.trim());
 	const documentInfoStrings = trimmedStringsArray.slice(
@@ -247,6 +264,7 @@ export const transformToDecOffDoc = (
 		grand_prix: gpName,
 		penalty_type: penaltyType,
 		weekend: weekend,
+		incident_title: incidentTitle,
 		document_info: documentInfo,
 		incident_info: { ...incidentInfo, Reason: reasonText },
 		stewards: stewards,
