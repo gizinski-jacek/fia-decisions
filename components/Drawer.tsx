@@ -7,6 +7,9 @@ import FileForm from './forms/FileForm';
 import DataForm from './forms/DataForm';
 import ContactForm from './forms/ContactForm';
 import style from '../styles/Slider.module.scss';
+import axios from 'axios';
+import { WeekendData } from '../types/myTypes';
+import RaceWeekendWrapper from './wrappers/CalendarWrapper';
 
 interface Props {
 	drawerOnLeft: boolean;
@@ -25,7 +28,22 @@ const Drawer = ({ drawerOnLeft, toggleDrawerPosition }: Props) => {
 		'file' | 'data' | 'contact'
 	>('file');
 	const [showCalendarModal, setShowCalendarModal] = useState(false);
+	// const [calendarTimezone, setCalendarTimezone] = useState<'my' | 'track'>(
+	// 	'my'
+	// );
+	const [calendarData, setCalendarData] = useState<WeekendData[]>([]);
 	const router = useRouter();
+
+	const getCalendarData = async (): Promise<WeekendData[]> => {
+		const res = await axios.get('http://ergast.com/api/f1/current.json');
+		return res.data.MRData.RaceTable.Races;
+	};
+
+	useEffect(() => {
+		(async () => {
+			setCalendarData(await getCalendarData());
+		})();
+	}, []);
 
 	useEffect(() => {
 		setSelectedTheme(theme);
@@ -75,6 +93,10 @@ const Drawer = ({ drawerOnLeft, toggleDrawerPosition }: Props) => {
 	const handleCloseCalendarModal = () => {
 		setShowCalendarModal(false);
 	};
+
+	// const toggleCalendarTimezone = (value: 'my' | 'track') => {
+	// 	setCalendarTimezone(value);
+	// };
 
 	return (
 		<>
@@ -371,17 +393,50 @@ const Drawer = ({ drawerOnLeft, toggleDrawerPosition }: Props) => {
 			<Modal
 				show={showCalendarModal}
 				onHide={handleCloseCalendarModal}
-				dialogClassName='modal-lg'
+				dialogClassName='modal-lg custom-modal-width'
 			>
 				<Modal.Header closeButton>
-					<Modal.Title>Race Calendar</Modal.Title>
+					<Modal.Title className='w-100 me-5'>
+						<div className='d-flex align-items-center'>
+							<h2 className='m-0'>
+								{calendarData.find((w) => w.season !== undefined)?.season} Race
+								Calendar
+							</h2>
+							{/* <div className='d-flex ms-5'>
+								<Button
+									size='sm'
+									className={`mx-2 fw-bold ${
+										calendarTimezone === 'my'
+											? 'btn-success'
+											: 'btn-secondary opacity-75'
+									}`}
+									onClick={() => toggleCalendarTimezone('my')}
+								>
+									My Time
+								</Button>
+								<Button
+									size='sm'
+									className={`mx-2 fw-bold ${
+										calendarTimezone === 'track'
+											? 'btn-success'
+											: 'btn-secondary opacity-75'
+									}`}
+									onClick={() => toggleCalendarTimezone('track')}
+								>
+									Track Time
+								</Button>
+							</div> */}
+						</div>
+					</Modal.Title>
 				</Modal.Header>
-				<Modal.Body>
-					{/* <div className='text-break'>{modalDataRender(data)}</div> */}
+				<Modal.Body className='bg-light'>
+					{
+						<RaceWeekendWrapper
+							calendarData={calendarData}
+							// timezone={calendarTimezone}
+						/>
+					}
 				</Modal.Body>
-				<Modal.Footer className='d-flex flex-row'>
-					{/* <div className='me-auto'>Stewards: {data.stewards.join(', ')}</div> */}
-				</Modal.Footer>
 			</Modal>
 		</>
 	);
