@@ -85,6 +85,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 				if (allDocsHref.length === 0) {
 					return res.status(200).json('Documents are up to date.');
 				}
+				console.log(
+					`Total number of scrapped documents: ${allDocsHref.length}.`
+				);
 
 				const conn = await connectMongo(seriesDB);
 				// await Promise.all(

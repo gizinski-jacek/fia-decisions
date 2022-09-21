@@ -11,7 +11,7 @@ import { transformToDecOffDoc } from '../../../../lib/transformToDecOffDoc';
 const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 	// Alternative route for requesting update of all documents.
 	// Unlike other routes, this one uses host machines file
-	// system to perform the update. Slower but more reliable.
+	// system to perform the update. Might be more reliable, but slower.
 	// Recommend using other routes over this one.
 	// Created as an alternative.
 	if (req.method === 'GET') {
@@ -91,6 +91,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 				if (allDocsHref.length === 0) {
 					return res.status(200).json('Documents are up to date.');
 				}
+				console.log(
+					`Total number of scrapped documents: ${allDocsHref.length}.`
+				);
 
 				const conn = await connectMongo(seriesDB);
 				// await Promise.all(
