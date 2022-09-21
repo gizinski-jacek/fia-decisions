@@ -9,6 +9,7 @@ interface Props {
 }
 
 const Layout = ({ children }: Props) => {
+	// Save position in local storage
 	const [drawerOnLeft, setDrawerOnLeft] = useState(false);
 
 	const toggleDrawerPosition = () => {
@@ -23,9 +24,8 @@ const Layout = ({ children }: Props) => {
 				<link rel='icon' href='/favicon.ico' />
 			</Head>
 			<div
-				className={`d-flex flex-column ${
-					drawerOnLeft ? 'flex-sm-row' : 'flex-sm-column'
-				}`}
+				className={`d-flex flex-column custom-main-container 
+				${drawerOnLeft ? 'flex-sm-row' : 'flex-sm-column'}`}
 			>
 				<Drawer
 					drawerOnLeft={drawerOnLeft}
