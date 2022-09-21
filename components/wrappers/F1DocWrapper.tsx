@@ -31,6 +31,12 @@ const F1DocWrapper = ({ data }: Props) => {
 
 	const modalDataRender = (obj: DecisionOffenceModel) => {
 		const content = [];
+		content.push(
+			<h4 key={'title'} className='fw-bold'>
+				{obj.doc_name}
+			</h4>
+		);
+
 		for (const [key, value] of Object.entries(obj.document_info)) {
 			content.push(
 				<div key={`document_info-${key}`} className='my-1'>
@@ -104,7 +110,8 @@ const F1DocWrapper = ({ data }: Props) => {
 								{data.incident_info.Driver}
 							</div>
 							<div className='d-sm-none d-md-block text-center text-sm-start  flex-grow-1 fw-bold'>
-								{data.doc_name.slice(data.doc_name.lastIndexOf('-') + 2)}
+								{/* Refactor */}
+								{data.doc_name}
 							</div>
 						</div>
 					</Accordion.Header>
