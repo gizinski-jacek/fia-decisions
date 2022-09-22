@@ -1,12 +1,13 @@
-import { Table } from 'react-bootstrap';
+import { OverlayTrigger, Table, Tooltip } from 'react-bootstrap';
 import { WeekendData } from '../../types/myTypes';
 
 interface Props {
 	calendarData: WeekendData[];
 	// timezone: 'my' | 'track';
+	nextRace: WeekendData | null;
 }
 
-const CalendarWrapper = ({ calendarData }: Props) => {
+const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
 	return (
 		<Table striped bordered hover responsive>
 			<thead>
@@ -15,32 +16,73 @@ const CalendarWrapper = ({ calendarData }: Props) => {
 						<p>Total: {calendarData.length}</p>
 					</th>
 					<th>
-						<p>{`Race Name & Track Wiki`}</p>
+						<p>{`Race / Track Name & Wiki`}</p>
 					</th>
 					<th>
 						<p>Date</p>
 					</th>
 					<th>
 						<p>Friday</p>
-						<u className='text-info'>FP1</u>
+						<OverlayTrigger
+							placement='left'
+							overlay={<Tooltip>Free Practice 1</Tooltip>}
+						>
+							<span className='text-info text-decoration-underline'>FP1</span>
+						</OverlayTrigger>
 					</th>
 					<th>
 						<p>Friday</p>
-						<u className='text-info'>FP2</u> /{' '}
-						<u className='text-danger'>Quali</u>
+						<OverlayTrigger
+							placement='left'
+							overlay={<Tooltip>Free Practice 2</Tooltip>}
+						>
+							<span className='text-info text-decoration-underline'>FP2</span>
+						</OverlayTrigger>{' '}
+						/{' '}
+						<OverlayTrigger
+							placement='left'
+							overlay={<Tooltip>Qualifying</Tooltip>}
+						>
+							<span className='text-danger text-decoration-underline'>Q</span>
+						</OverlayTrigger>
 					</th>
 					<th>
 						<p>Saturday</p>
-						<u className='text-info'>FP3</u>
+						<OverlayTrigger
+							placement='left'
+							overlay={<Tooltip>Free Practice 3</Tooltip>}
+						>
+							<span className='text-info text-decoration-underline'>FP3</span>
+						</OverlayTrigger>
 					</th>
 					<th>
 						<p>Saturday</p>
-						<u className='text-danger'>Q</u> /{' '}
-						<u className='text-success'>Sprint</u>
+						<OverlayTrigger
+							placement='left'
+							overlay={<Tooltip>Qualifying</Tooltip>}
+						>
+							<span className='text-danger text-decoration-underline'>Q</span>
+						</OverlayTrigger>{' '}
+						/{' '}
+						<OverlayTrigger
+							placement='left'
+							overlay={<Tooltip>Sprint Race</Tooltip>}
+						>
+							<span className='text-success text-decoration-underline'>
+								Sprint
+							</span>
+						</OverlayTrigger>
 					</th>
 					<th>
 						<p>Sunday</p>
-						<u className='text-success'>Race</u>
+						<OverlayTrigger
+							placement='left'
+							overlay={<Tooltip>Main Race</Tooltip>}
+						>
+							<span className='text-success text-decoration-underline'>
+								Race
+							</span>
+						</OverlayTrigger>
 					</th>
 				</tr>
 			</thead>
@@ -48,12 +90,24 @@ const CalendarWrapper = ({ calendarData }: Props) => {
 				{calendarData.map((weekend) => {
 					if (weekend.Sprint) {
 						return (
-							<tr key={weekend.Circuit.circuitId}>
+							<tr
+								key={weekend.Circuit.circuitId}
+								className={`${
+									weekend.round === nextRace?.round ? 'bg-warning' : 'bg-light'
+								}`}
+							>
 								<td>
 									<p>Race {weekend.round}</p>
 								</td>
 								<td>
-									<a href={weekend.url}>{weekend.Circuit.circuitName}</a>
+									<OverlayTrigger
+										placement='left'
+										overlay={
+											<Tooltip>Track: {weekend.Circuit.circuitName}</Tooltip>
+										}
+									>
+										<a href={weekend.url}>{weekend.raceName}</a>
+									</OverlayTrigger>
 								</td>
 								<td>
 									<strong>
@@ -70,9 +124,7 @@ const CalendarWrapper = ({ calendarData }: Props) => {
 								</td>
 								<td>
 									<div className='d-flex'>
-										<span className='text-info text-decoration-underline fw-bold'>
-											FP1:{' '}
-										</span>
+										<span className='text-info fw-bold'>FP1: </span>
 										<strong className='ms-auto'>
 											{new Date(
 												weekend.FirstPractice.date +
@@ -87,9 +139,7 @@ const CalendarWrapper = ({ calendarData }: Props) => {
 								</td>
 								<td>
 									<div className='d-flex'>
-										<span className='text-danger text-decoration-underline fw-bold'>
-											Q:{' '}
-										</span>
+										<span className='text-danger fw-bold'>Q: </span>
 										<strong className='ms-auto'>
 											{new Date(
 												weekend.Qualifying.date + ' ' + weekend.Qualifying.time
@@ -102,9 +152,7 @@ const CalendarWrapper = ({ calendarData }: Props) => {
 								</td>
 								<td>
 									<div className='d-flex'>
-										<span className='text-info text-decoration-underline fw-bold'>
-											FP2:{' '}
-										</span>
+										<span className='text-info fw-bold'>FP2: </span>
 										<strong className='ms-auto'>
 											{new Date(
 												weekend.SecondPractice.date +
@@ -119,9 +167,7 @@ const CalendarWrapper = ({ calendarData }: Props) => {
 								</td>
 								<td>
 									<div className='d-flex'>
-										<span className='text-success text-decoration-underline fw-bold'>
-											S:{' '}
-										</span>
+										<span className='text-success fw-bold'>S: </span>
 										<strong className='ms-auto'>
 											{new Date(
 												weekend.Sprint.date + ' ' + weekend.Sprint.time
@@ -134,9 +180,7 @@ const CalendarWrapper = ({ calendarData }: Props) => {
 								</td>
 								<td>
 									<div className='d-flex'>
-										<span className='text-success text-decoration-underline fw-bold'>
-											R:{' '}
-										</span>
+										<span className='text-success fw-bold'>R: </span>
 										<strong className='ms-auto'>
 											{new Date(
 												weekend.date + ' ' + weekend.time
@@ -151,12 +195,24 @@ const CalendarWrapper = ({ calendarData }: Props) => {
 						);
 					} else if (weekend.ThirdPractice) {
 						return (
-							<tr key={weekend.Circuit.circuitId}>
+							<tr
+								key={weekend.Circuit.circuitId}
+								className={`${
+									weekend.round === nextRace?.round ? 'bg-warning' : 'bg-light'
+								}`}
+							>
 								<td>
 									<p>Race {weekend.round}</p>
 								</td>
 								<td>
-									<a href={weekend.url}>{weekend.raceName}</a>
+									<OverlayTrigger
+										placement='left'
+										overlay={
+											<Tooltip>Track: {weekend.Circuit.circuitName}</Tooltip>
+										}
+									>
+										<a href={weekend.url}>{weekend.raceName}</a>
+									</OverlayTrigger>
 								</td>
 								<td>
 									<strong>
@@ -173,9 +229,7 @@ const CalendarWrapper = ({ calendarData }: Props) => {
 								</td>
 								<td>
 									<div className='d-flex'>
-										<span className='text-info text-decoration-underline fw-bold'>
-											FP1:{' '}
-										</span>
+										<span className='text-info fw-bold'>FP1: </span>
 										<strong className='ms-auto'>
 											{new Date(
 												weekend.FirstPractice.date +
@@ -190,9 +244,7 @@ const CalendarWrapper = ({ calendarData }: Props) => {
 								</td>
 								<td>
 									<div className='d-flex'>
-										<span className='text-info text-decoration-underline fw-bold'>
-											FP2:{' '}
-										</span>
+										<span className='text-info fw-bold'>FP2: </span>
 										<strong className='ms-auto'>
 											{new Date(
 												weekend.SecondPractice.date +
@@ -207,9 +259,7 @@ const CalendarWrapper = ({ calendarData }: Props) => {
 								</td>
 								<td>
 									<div className='d-flex'>
-										<span className='text-info text-decoration-underline fw-bold'>
-											FP3:{' '}
-										</span>
+										<span className='text-info fw-bold'>FP3: </span>
 										<strong className='ms-auto'>
 											{new Date(
 												weekend.ThirdPractice.date +
@@ -224,9 +274,7 @@ const CalendarWrapper = ({ calendarData }: Props) => {
 								</td>
 								<td>
 									<div className='d-flex'>
-										<span className='text-danger text-decoration-underline fw-bold'>
-											Q:{' '}
-										</span>
+										<span className='text-danger fw-bold'>Q: </span>
 										<strong className='ms-auto'>
 											{new Date(
 												weekend.Qualifying.date + ' ' + weekend.Qualifying.time
@@ -239,9 +287,7 @@ const CalendarWrapper = ({ calendarData }: Props) => {
 								</td>
 								<td>
 									<div className='d-flex'>
-										<span className='text-success text-decoration-underline fw-bold'>
-											R:{' '}
-										</span>
+										<span className='text-success fw-bold'>R: </span>
 										<strong className='ms-auto'>
 											{new Date(
 												weekend.date + ' ' + weekend.time
