@@ -9,10 +9,10 @@ interface Props {
 
 const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
 	return (
-		<Table striped bordered hover responsive>
+		<Table size='sm' striped bordered hover responsive='sm'>
 			<thead>
 				<tr>
-					<th>
+					<th className='d-none d-lg-table-cell'>
 						<p>Total: {calendarData.length}</p>
 					</th>
 					<th>
@@ -32,19 +32,21 @@ const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
 					</th>
 					<th>
 						<p>Friday</p>
-						<OverlayTrigger
-							placement='left'
-							overlay={<Tooltip>Free Practice 2</Tooltip>}
-						>
-							<span className='text-info text-decoration-underline'>FP2</span>
-						</OverlayTrigger>{' '}
-						/{' '}
-						<OverlayTrigger
-							placement='left'
-							overlay={<Tooltip>Qualifying</Tooltip>}
-						>
-							<span className='text-danger text-decoration-underline'>Q</span>
-						</OverlayTrigger>
+						<div className='d-md-flex'>
+							<OverlayTrigger
+								placement='left'
+								overlay={<Tooltip>Free Practice 2</Tooltip>}
+							>
+								<span className='text-info text-decoration-underline'>FP2</span>
+							</OverlayTrigger>
+							<span className='mx-1'>/</span>
+							<OverlayTrigger
+								placement='left'
+								overlay={<Tooltip>Qualifying</Tooltip>}
+							>
+								<span className='text-danger text-decoration-underline'>Q</span>
+							</OverlayTrigger>
+						</div>
 					</th>
 					<th>
 						<p>Saturday</p>
@@ -57,21 +59,23 @@ const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
 					</th>
 					<th>
 						<p>Saturday</p>
-						<OverlayTrigger
-							placement='left'
-							overlay={<Tooltip>Qualifying</Tooltip>}
-						>
-							<span className='text-danger text-decoration-underline'>Q</span>
-						</OverlayTrigger>{' '}
-						/{' '}
-						<OverlayTrigger
-							placement='left'
-							overlay={<Tooltip>Sprint Race</Tooltip>}
-						>
-							<span className='text-success text-decoration-underline'>
-								Sprint
-							</span>
-						</OverlayTrigger>
+						<div className='d-flex'>
+							<OverlayTrigger
+								placement='left'
+								overlay={<Tooltip>Qualifying</Tooltip>}
+							>
+								<span className='text-danger text-decoration-underline'>Q</span>
+							</OverlayTrigger>
+							<span className='mx-1'>/</span>
+							<OverlayTrigger
+								placement='left'
+								overlay={<Tooltip>Sprint Race</Tooltip>}
+							>
+								<span className='text-success text-decoration-underline'>
+									Sprint
+								</span>
+							</OverlayTrigger>
+						</div>
 					</th>
 					<th>
 						<p>Sunday</p>
@@ -96,7 +100,7 @@ const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
 									weekend.round === nextRace?.round ? 'bg-warning' : 'bg-light'
 								}`}
 							>
-								<td>
+								<td className='d-none d-lg-table-cell'>
 									<p>Race {weekend.round}</p>
 								</td>
 								<td>
@@ -110,7 +114,7 @@ const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
 									</OverlayTrigger>
 								</td>
 								<td>
-									<strong>
+									<span className='fw-bold ms-auto'>
 										{new Date(
 											weekend.SecondPractice.date +
 												' ' +
@@ -120,12 +124,12 @@ const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
 											month: '2-digit',
 											day: '2-digit',
 										})}
-									</strong>
+									</span>
 								</td>
 								<td>
-									<div className='d-flex'>
-										<span className='text-info fw-bold'>FP1: </span>
-										<strong className='ms-auto'>
+									<div className='d-md-flex'>
+										<span className='text-info fw-bold me-1'>FP1: </span>
+										<span className='fw-bold ms-auto'>
 											{new Date(
 												weekend.FirstPractice.date +
 													' ' +
@@ -134,26 +138,26 @@ const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
 												hour: '2-digit',
 												minute: '2-digit',
 											})}
-										</strong>
+										</span>
 									</div>
 								</td>
 								<td>
-									<div className='d-flex'>
-										<span className='text-danger fw-bold'>Q: </span>
-										<strong className='ms-auto'>
+									<div className='d-md-flex'>
+										<span className='text-danger fw-bold me-1'>Q: </span>
+										<span className='fw-bold ms-auto'>
 											{new Date(
 												weekend.Qualifying.date + ' ' + weekend.Qualifying.time
 											).toLocaleString(undefined, {
 												hour: '2-digit',
 												minute: '2-digit',
 											})}
-										</strong>
+										</span>
 									</div>
 								</td>
 								<td>
-									<div className='d-flex'>
-										<span className='text-info fw-bold'>FP2: </span>
-										<strong className='ms-auto'>
+									<div className='d-md-flex'>
+										<span className='text-info fw-bold me-1'>FP2: </span>
+										<span className='fw-bold ms-auto'>
 											{new Date(
 												weekend.SecondPractice.date +
 													' ' +
@@ -162,33 +166,33 @@ const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
 												hour: '2-digit',
 												minute: '2-digit',
 											})}
-										</strong>
+										</span>
 									</div>
 								</td>
 								<td>
-									<div className='d-flex'>
-										<span className='text-success fw-bold'>S: </span>
-										<strong className='ms-auto'>
+									<div className='d-md-flex'>
+										<span className='text-success fw-bold me-1'>S: </span>
+										<span className='fw-bold ms-auto'>
 											{new Date(
 												weekend.Sprint.date + ' ' + weekend.Sprint.time
 											).toLocaleString(undefined, {
 												hour: '2-digit',
 												minute: '2-digit',
 											})}
-										</strong>
+										</span>
 									</div>
 								</td>
 								<td>
-									<div className='d-flex'>
-										<span className='text-success fw-bold'>R: </span>
-										<strong className='ms-auto'>
+									<div className='d-md-flex'>
+										<span className='text-success fw-bold me-1'>R: </span>
+										<span className='fw-bold ms-auto'>
 											{new Date(
 												weekend.date + ' ' + weekend.time
 											).toLocaleString(undefined, {
 												hour: '2-digit',
 												minute: '2-digit',
 											})}
-										</strong>
+										</span>
 									</div>
 								</td>
 							</tr>
@@ -201,7 +205,7 @@ const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
 									weekend.round === nextRace?.round ? 'bg-warning' : 'bg-light'
 								}`}
 							>
-								<td>
+								<td className='d-none d-lg-table-cell'>
 									<p>Race {weekend.round}</p>
 								</td>
 								<td>
@@ -215,7 +219,7 @@ const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
 									</OverlayTrigger>
 								</td>
 								<td>
-									<strong>
+									<span className='fw-bold text-wrap'>
 										{new Date(
 											weekend.SecondPractice.date +
 												' ' +
@@ -225,12 +229,12 @@ const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
 											month: '2-digit',
 											day: '2-digit',
 										})}
-									</strong>
+									</span>
 								</td>
 								<td>
-									<div className='d-flex'>
-										<span className='text-info fw-bold'>FP1: </span>
-										<strong className='ms-auto'>
+									<div className='d-md-flex'>
+										<span className='text-info fw-bold me-1'>FP1: </span>
+										<span className='fw-bold ms-auto'>
 											{new Date(
 												weekend.FirstPractice.date +
 													' ' +
@@ -239,13 +243,13 @@ const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
 												hour: '2-digit',
 												minute: '2-digit',
 											})}
-										</strong>
+										</span>
 									</div>
 								</td>
 								<td>
-									<div className='d-flex'>
-										<span className='text-info fw-bold'>FP2: </span>
-										<strong className='ms-auto'>
+									<div className='d-md-flex'>
+										<span className='text-info fw-bold me-1'>FP2: </span>
+										<span className='fw-bold ms-auto'>
 											{new Date(
 												weekend.SecondPractice.date +
 													' ' +
@@ -254,13 +258,13 @@ const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
 												hour: '2-digit',
 												minute: '2-digit',
 											})}
-										</strong>
+										</span>
 									</div>
 								</td>
 								<td>
-									<div className='d-flex'>
-										<span className='text-info fw-bold'>FP3: </span>
-										<strong className='ms-auto'>
+									<div className='d-md-flex'>
+										<span className='text-info fw-bold me-1'>FP3: </span>
+										<span className='fw-bold ms-auto'>
 											{new Date(
 												weekend.ThirdPractice.date +
 													' ' +
@@ -269,33 +273,33 @@ const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
 												hour: '2-digit',
 												minute: '2-digit',
 											})}
-										</strong>
+										</span>
 									</div>
 								</td>
 								<td>
-									<div className='d-flex'>
-										<span className='text-danger fw-bold'>Q: </span>
-										<strong className='ms-auto'>
+									<div className='d-md-flex'>
+										<span className='text-danger fw-bold me-1'>Q: </span>
+										<span className='fw-bold ms-auto'>
 											{new Date(
 												weekend.Qualifying.date + ' ' + weekend.Qualifying.time
 											).toLocaleString(undefined, {
 												hour: '2-digit',
 												minute: '2-digit',
 											})}
-										</strong>
+										</span>
 									</div>
 								</td>
 								<td>
-									<div className='d-flex'>
-										<span className='text-success fw-bold'>R: </span>
-										<strong className='ms-auto'>
+									<div className='d-md-flex'>
+										<span className='text-success fw-bold me-1'>R: </span>
+										<span className='fw-bold ms-auto'>
 											{new Date(
 												weekend.date + ' ' + weekend.time
 											).toLocaleString(undefined, {
 												hour: '2-digit',
 												minute: '2-digit',
 											})}
-										</strong>
+										</span>
 									</div>
 								</td>
 							</tr>
