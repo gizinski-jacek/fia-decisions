@@ -16,7 +16,7 @@ const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
 						<p>Total: {calendarData.length}</p>
 					</th>
 					<th>
-						<p>{`Race / Track Name & Wiki`}</p>
+						<p>Race Info</p>
 					</th>
 					<th>
 						<p>Date</p>
@@ -27,7 +27,9 @@ const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
 							placement='left'
 							overlay={<Tooltip>Free Practice 1</Tooltip>}
 						>
-							<span className='text-info text-decoration-underline'>FP1</span>
+							<span className='text-primary text-decoration-underline'>
+								FP1
+							</span>
 						</OverlayTrigger>
 					</th>
 					<th>
@@ -37,7 +39,9 @@ const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
 								placement='left'
 								overlay={<Tooltip>Free Practice 2</Tooltip>}
 							>
-								<span className='text-info text-decoration-underline'>FP2</span>
+								<span className='text-primary text-decoration-underline'>
+									FP2
+								</span>
 							</OverlayTrigger>
 							<span className='mx-1'>/</span>
 							<OverlayTrigger
@@ -54,12 +58,14 @@ const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
 							placement='left'
 							overlay={<Tooltip>Free Practice 3</Tooltip>}
 						>
-							<span className='text-info text-decoration-underline'>FP3</span>
+							<span className='text-primary text-decoration-underline'>
+								FP3
+							</span>
 						</OverlayTrigger>
 					</th>
 					<th>
 						<p>Saturday</p>
-						<div className='d-flex'>
+						<div>
 							<OverlayTrigger
 								placement='left'
 								overlay={<Tooltip>Qualifying</Tooltip>}
@@ -127,9 +133,9 @@ const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
 									</span>
 								</td>
 								<td>
-									<div className='d-md-flex'>
-										<span className='text-info fw-bold me-1'>FP1: </span>
-										<span className='fw-bold ms-auto'>
+									<div className='d-flex flex-column flex-md-row justify-content-between'>
+										<span className='text-primary fw-bold me-1'>FP1: </span>
+										<span className='fw-bold'>
 											{new Date(
 												weekend.FirstPractice.date +
 													' ' +
@@ -142,9 +148,9 @@ const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
 									</div>
 								</td>
 								<td>
-									<div className='d-md-flex'>
+									<div className='d-flex flex-column flex-md-row justify-content-between'>
 										<span className='text-danger fw-bold me-1'>Q: </span>
-										<span className='fw-bold ms-auto'>
+										<span className='fw-bold'>
 											{new Date(
 												weekend.Qualifying.date + ' ' + weekend.Qualifying.time
 											).toLocaleString(undefined, {
@@ -155,9 +161,9 @@ const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
 									</div>
 								</td>
 								<td>
-									<div className='d-md-flex'>
-										<span className='text-info fw-bold me-1'>FP2: </span>
-										<span className='fw-bold ms-auto'>
+									<div className='d-flex flex-column flex-md-row justify-content-between'>
+										<span className='text-primary fw-bold me-1'>FP2: </span>
+										<span className='fw-bold'>
 											{new Date(
 												weekend.SecondPractice.date +
 													' ' +
@@ -170,9 +176,9 @@ const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
 									</div>
 								</td>
 								<td>
-									<div className='d-md-flex'>
+									<div className='d-flex flex-column flex-md-row justify-content-between'>
 										<span className='text-success fw-bold me-1'>S: </span>
-										<span className='fw-bold ms-auto'>
+										<span className='fw-bold'>
 											{new Date(
 												weekend.Sprint.date + ' ' + weekend.Sprint.time
 											).toLocaleString(undefined, {
@@ -183,9 +189,9 @@ const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
 									</div>
 								</td>
 								<td>
-									<div className='d-md-flex'>
+									<div className='d-flex flex-column flex-md-row justify-content-between'>
 										<span className='text-success fw-bold me-1'>R: </span>
-										<span className='fw-bold ms-auto'>
+										<span className='fw-bold'>
 											{new Date(
 												weekend.date + ' ' + weekend.time
 											).toLocaleString(undefined, {
@@ -219,7 +225,7 @@ const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
 									</OverlayTrigger>
 								</td>
 								<td>
-									<span className='fw-bold text-wrap'>
+									<span className='fw-bold'>
 										{new Date(
 											weekend.SecondPractice.date +
 												' ' +
@@ -232,9 +238,9 @@ const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
 									</span>
 								</td>
 								<td>
-									<div className='d-md-flex'>
-										<span className='text-info fw-bold me-1'>FP1: </span>
-										<span className='fw-bold ms-auto'>
+									<div className='d-flex flex-column flex-md-row justify-content-between'>
+										<span className='text-primary fw-bold me-1'>FP1: </span>
+										<span className='fw-bold'>
 											{new Date(
 												weekend.FirstPractice.date +
 													' ' +
@@ -247,9 +253,9 @@ const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
 									</div>
 								</td>
 								<td>
-									<div className='d-md-flex'>
-										<span className='text-info fw-bold me-1'>FP2: </span>
-										<span className='fw-bold ms-auto'>
+									<div className='d-flex flex-column flex-md-row justify-content-between'>
+										<span className='text-primary fw-bold me-1'>FP2: </span>
+										<span className='fw-bold'>
 											{new Date(
 												weekend.SecondPractice.date +
 													' ' +
@@ -262,9 +268,9 @@ const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
 									</div>
 								</td>
 								<td>
-									<div className='d-md-flex'>
-										<span className='text-info fw-bold me-1'>FP3: </span>
-										<span className='fw-bold ms-auto'>
+									<div className='d-flex flex-column flex-md-row justify-content-between'>
+										<span className='text-primary fw-bold me-1'>FP3: </span>
+										<span className='fw-bold'>
 											{new Date(
 												weekend.ThirdPractice.date +
 													' ' +
@@ -277,9 +283,9 @@ const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
 									</div>
 								</td>
 								<td>
-									<div className='d-md-flex'>
+									<div className='d-flex flex-column flex-md-row justify-content-between'>
 										<span className='text-danger fw-bold me-1'>Q: </span>
-										<span className='fw-bold ms-auto'>
+										<span className='fw-bold'>
 											{new Date(
 												weekend.Qualifying.date + ' ' + weekend.Qualifying.time
 											).toLocaleString(undefined, {
@@ -290,9 +296,9 @@ const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
 									</div>
 								</td>
 								<td>
-									<div className='d-md-flex'>
+									<div className='d-flex flex-column flex-md-row justify-content-between'>
 										<span className='text-success fw-bold me-1'>R: </span>
-										<span className='fw-bold ms-auto'>
+										<span className='fw-bold'>
 											{new Date(
 												weekend.date + ' ' + weekend.time
 											).toLocaleString(undefined, {
