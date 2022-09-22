@@ -9,7 +9,7 @@ import ContactForm from './forms/ContactForm';
 import style from '../styles/Slider.module.scss';
 import axios from 'axios';
 import { WeekendData } from '../types/myTypes';
-import RaceWeekendWrapper from './wrappers/CalendarWrapper';
+import CalendarWrapper from './wrappers/CalendarWrapper';
 
 interface Props {
 	drawerOnLeft: boolean;
@@ -431,7 +431,7 @@ const Drawer = ({ drawerOnLeft, toggleDrawerPosition }: Props) => {
 				</Modal.Header>
 				<Modal.Body className='bg-light'>
 					{
-						<RaceWeekendWrapper
+						<CalendarWrapper
 							calendarData={calendarData}
 							// timezone={calendarTimezone}
 						/>
