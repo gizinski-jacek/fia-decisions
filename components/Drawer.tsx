@@ -32,16 +32,35 @@ const Drawer = ({ drawerOnLeft, toggleDrawerPosition }: Props) => {
 	// 	'my'
 	// );
 	const [calendarData, setCalendarData] = useState<WeekendData[]>([]);
+	const [nextRace, setNextRace] = useState<WeekendData | null>(null);
 	const router = useRouter();
 
 	const getCalendarData = async (): Promise<WeekendData[]> => {
-		const res = await axios.get('http://ergast.com/api/f1/current.json');
+		const res = await axios.get('https://ergast.com/api/f1/current.json');
 		return res.data.MRData.RaceTable.Races;
 	};
 
 	useEffect(() => {
 		(async () => {
-			setCalendarData(await getCalendarData());
+			const data = await getCalendarData();
+			const timeToday = new Date('2022/10/3 03:59:59');
+			const oneDay = 24 * 60 * 60 * 1000;
+			const futureRaces = data.filter(
+				(r) =>
+					new Date(r.date + ' ' + r.time).getTime() >
+					timeToday.getTime() - oneDay
+			);
+			const dayAfterTheNextRace =
+				new Date(futureRaces[0].date + ' ' + futureRaces[0].time).setHours(4) +
+				oneDay;
+			let upcomingRace: WeekendData;
+			if (dayAfterTheNextRace > timeToday.getTime()) {
+				upcomingRace = futureRaces[0];
+			} else {
+				upcomingRace = futureRaces[1];
+			}
+			setNextRace(upcomingRace);
+			setCalendarData(data);
 		})();
 	}, []);
 
@@ -399,6 +418,7 @@ const Drawer = ({ drawerOnLeft, toggleDrawerPosition }: Props) => {
 					<Modal.Title className='w-100 me-5'>
 						<div className='d-flex align-items-center'>
 							<h2 className='m-0'>
+								Formula 1{' '}
 								{calendarData.find((w) => w.season !== undefined)?.season} Race
 								Calendar
 							</h2>
@@ -434,6 +454,7 @@ const Drawer = ({ drawerOnLeft, toggleDrawerPosition }: Props) => {
 						<CalendarWrapper
 							calendarData={calendarData}
 							// timezone={calendarTimezone}
+							nextRace={nextRace}
 						/>
 					}
 				</Modal.Body>
