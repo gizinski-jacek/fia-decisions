@@ -372,7 +372,7 @@ const Drawer = ({ drawerOnLeft, toggleDrawerPosition }: Props) => {
 				dialogClassName='modal-md'
 			>
 				<Modal.Header closeButton>
-					<Modal.Title className='d-flex gap-5'>
+					<Modal.Title className='d-flex gap-5 me-2'>
 						<Button
 							variant={`success ${displayedForm === 'file' ? 'active' : ''}`}
 							type='submit'
@@ -417,11 +417,10 @@ const Drawer = ({ drawerOnLeft, toggleDrawerPosition }: Props) => {
 				<Modal.Header closeButton>
 					<Modal.Title className='w-100 me-5'>
 						<div className='d-flex align-items-center'>
-							<h2 className='m-0'>
-								Formula 1{' '}
-								{calendarData.find((w) => w.season !== undefined)?.season} Race
-								Calendar
-							</h2>
+							<h3 className='m-0 text-nowrap'>
+								F1 {calendarData.find((w) => w.season !== undefined)?.season}{' '}
+								Race Calendar
+							</h3>
 							{/* <div className='d-flex ms-5'>
 								<Button
 									size='sm'
