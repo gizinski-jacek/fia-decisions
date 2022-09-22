@@ -254,7 +254,7 @@ const Drawer = ({ drawerOnLeft, toggleDrawerPosition }: Props) => {
 								onClick={handleOpenCalendarModal}
 							>
 								<div
-									className={`d-flex align-items-center justify-content-start 
+									className={`d-flex align-items-center justify-content-center 
 									${drawerOnLeft ? 'justify-content-sm-start' : 'justify-content-sm-center'}`}
 								>
 									<i
