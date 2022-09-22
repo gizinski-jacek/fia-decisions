@@ -6,7 +6,7 @@ interface Props {
 	// timezone: 'my' | 'track';
 }
 
-const RaceWeekendWrapper = ({ calendarData }: Props) => {
+const CalendarWrapper = ({ calendarData }: Props) => {
 	return (
 		<Table striped bordered hover responsive>
 			<thead>
@@ -261,4 +261,4 @@ const RaceWeekendWrapper = ({ calendarData }: Props) => {
 	);
 };
 
-export default RaceWeekendWrapper;
+export default CalendarWrapper;
