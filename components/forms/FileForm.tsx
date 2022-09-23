@@ -171,7 +171,7 @@ const FileForm = () => {
 					{sending && <LoadingBar />}
 				</Form.Group>
 			</div>
-			<div className='pt-3 w-100 border-top text-end'>
+			<div className='w-100 text-end'>
 				<Button
 					variant='primary'
 					type='submit'
