@@ -24,7 +24,7 @@ const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
 					<th>
 						<p>Friday</p>
 						<OverlayTrigger
-							placement='left'
+							placement='top'
 							overlay={<Tooltip>Free Practice 1</Tooltip>}
 						>
 							<span className='text-primary text-decoration-underline'>
@@ -36,7 +36,7 @@ const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
 						<p>Friday</p>
 						<div className='d-md-flex'>
 							<OverlayTrigger
-								placement='left'
+								placement='top'
 								overlay={<Tooltip>Free Practice 2</Tooltip>}
 							>
 								<span className='text-primary text-decoration-underline'>
@@ -45,7 +45,7 @@ const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
 							</OverlayTrigger>
 							<span className='mx-1'>/</span>
 							<OverlayTrigger
-								placement='left'
+								placement='top'
 								overlay={<Tooltip>Qualifying</Tooltip>}
 							>
 								<span className='text-danger text-decoration-underline'>Q</span>
@@ -55,7 +55,7 @@ const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
 					<th>
 						<p>Saturday</p>
 						<OverlayTrigger
-							placement='left'
+							placement='top'
 							overlay={<Tooltip>Free Practice 3</Tooltip>}
 						>
 							<span className='text-primary text-decoration-underline'>
@@ -67,14 +67,14 @@ const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
 						<p>Saturday</p>
 						<div>
 							<OverlayTrigger
-								placement='left'
+								placement='top'
 								overlay={<Tooltip>Qualifying</Tooltip>}
 							>
 								<span className='text-danger text-decoration-underline'>Q</span>
 							</OverlayTrigger>
 							<span className='mx-1'>/</span>
 							<OverlayTrigger
-								placement='left'
+								placement='top'
 								overlay={<Tooltip>Sprint Race</Tooltip>}
 							>
 								<span className='text-success text-decoration-underline'>
@@ -86,7 +86,7 @@ const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
 					<th>
 						<p>Sunday</p>
 						<OverlayTrigger
-							placement='left'
+							placement='top'
 							overlay={<Tooltip>Main Race</Tooltip>}
 						>
 							<span className='text-success text-decoration-underline'>
@@ -111,7 +111,7 @@ const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
 								</td>
 								<td>
 									<OverlayTrigger
-										placement='left'
+										placement='top'
 										overlay={
 											<Tooltip>Track: {weekend.Circuit.circuitName}</Tooltip>
 										}
@@ -216,7 +216,7 @@ const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
 								</td>
 								<td>
 									<OverlayTrigger
-										placement='left'
+										placement='top'
 										overlay={
 											<Tooltip>Track: {weekend.Circuit.circuitName}</Tooltip>
 										}
