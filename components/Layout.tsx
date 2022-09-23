@@ -2,7 +2,6 @@ import Head from 'next/head';
 import { DrawerContextProvider } from '../hooks/DrawerProvider';
 import { ThemeContextProvider } from '../hooks/ThemeProvider';
 import Drawer from './Drawer';
-import Footer from './Footer';
 import ScrollToTopBtn from './ScrollToTopBtn';
 
 interface Props {
@@ -19,7 +18,6 @@ const Layout = ({ children }: Props) => {
 					<link rel='icon' href='/favicon.ico' />
 				</Head>
 				<Drawer>{children}</Drawer>
-				{/* <Footer /> */}
 				<ScrollToTopBtn />
 			</DrawerContextProvider>
 		</ThemeContextProvider>
