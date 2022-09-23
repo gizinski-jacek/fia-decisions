@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { Accordion, Button, Modal } from 'react-bootstrap';
-import { DecisionOffenceModel } from '../../types/myTypes';
+import { DecisionOffenceModel, PenaltyColors } from '../../types/myTypes';
 
 interface Props {
 	data: DecisionOffenceModel;
 }
 
-const penaltyTypeColors = {
+const penaltyTypeColors: PenaltyColors = {
 	time: { color: 'black', backgroundColor: 'lime' },
 	grid: { color: 'black', backgroundColor: 'red' },
 	fine: { color: 'black', backgroundColor: 'pink' },
@@ -97,7 +97,7 @@ const F1DocWrapper = ({ data }: Props) => {
 								className='rounded-pill p-1 me-sm-2 text-uppercase text-center fw-bold'
 								style={{
 									...penaltyTypeColors[
-										data.penalty_type as keyof typeof penaltyTypeColors
+										data.penalty_type as keyof PenaltyColors
 									],
 								}}
 							>
