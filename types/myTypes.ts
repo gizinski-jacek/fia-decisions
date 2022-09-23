@@ -91,3 +91,7 @@ export interface WeekendData {
 	Sprint?: { date: string; time: string };
 	Qualifying: { date: string; time: string };
 }
+
+export interface PenaltyColors {
+	[key: string]: { color: string; backgroundColor: string };
+}
