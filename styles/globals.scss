@@ -43,7 +43,6 @@ body {
 }
 
 main {
-	width: 100%;
-	max-width: 992px;
-	margin: 0 auto;
+	max-width: 992px !important;
+	min-height: 100vh !important;
 }
