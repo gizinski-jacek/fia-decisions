@@ -1,5 +1,3 @@
-//@ts-nocheck
-
 import mongoose from 'mongoose';
 import { MissingDocModel } from '../types/myTypes';
 
@@ -13,7 +11,7 @@ const Missing_Doc = new Schema<MissingDocModel>(
 			trim: true,
 			minlength: 8,
 			maxlength: 256,
-			required: function () {
+			required: function (this: MissingDocModel) {
 				return !this.url;
 			},
 		},
@@ -22,7 +20,7 @@ const Missing_Doc = new Schema<MissingDocModel>(
 			trim: true,
 			minlength: 16,
 			maxlength: 256,
-			required: function () {
+			required: function (this: MissingDocModel) {
 				return !this.title;
 			},
 		},
