@@ -135,7 +135,7 @@ export const transformToDecOffDoc = (
 				if (
 					i === index &&
 					incidentInfoStringsWithoutHeadline[i]?.charAt(
-						incidentInfoStringsWithoutHeadline[i]?.length - 1
+						(incidentInfoStringsWithoutHeadline[i]?.length as number) - 1
 					) !== ':'
 				) {
 					while (incidentInfoStringsWithoutHeadline[i] !== 'Offence') {
@@ -181,7 +181,7 @@ export const transformToDecOffDoc = (
 				let i = index;
 				if (
 					incidentInfoStringsWithoutHeadline[i]?.charAt(
-						incidentInfoStringsWithoutHeadline[i]?.length - 1
+						(incidentInfoStringsWithoutHeadline[i]?.length as number) - 1
 					) === ':'
 				) {
 					while (incidentInfoStringsWithoutHeadline[i]) {
@@ -206,7 +206,9 @@ export const transformToDecOffDoc = (
 
 	for (let i = 0; i < incidentInfoFormatted.length; i += 2) {
 		// Reminder to fix type error here
-		incidentInfo[incidentInfoFormatted[i]] = incidentInfoFormatted[i + 1] || '';
+		const key = incidentInfoFormatted[i];
+		const value = incidentInfoFormatted[i + 1] || '';
+		incidentInfo[key] = value;
 	}
 
 	const stewardCount = series === 'formula1' ? 4 : 3;
