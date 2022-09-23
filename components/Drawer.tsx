@@ -1,27 +1,27 @@
-import { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { Button, Modal } from 'react-bootstrap';
 import { ThemeContext } from '../hooks/ThemeProvider';
+import { DrawerContext } from '../hooks/DrawerProvider';
+import { WeekendData } from '../types/myTypes';
 import FileForm from './forms/FileForm';
 import DataForm from './forms/DataForm';
 import ContactForm from './forms/ContactForm';
 import style from '../styles/Slider.module.scss';
-import axios from 'axios';
-import { WeekendData } from '../types/myTypes';
 import CalendarWrapper from './wrappers/CalendarWrapper';
+import axios from 'axios';
 
 interface Props {
-	drawerOnLeft: boolean;
-	toggleDrawerPosition: () => void;
+	children: React.ReactNode;
 }
 
-const Drawer = ({ drawerOnLeft, toggleDrawerPosition }: Props) => {
+const Drawer = ({ children }: Props) => {
 	const { theme, toggleTheme } = useContext(ThemeContext);
-	// Save theme, position and size in local storage
+	const { drawer, toggleDrawerPosition, toggleDrawerSize } =
+		useContext(DrawerContext);
 	const [selectedTheme, setSelectedTheme] = useState('light');
 	const [screenIsSmall, setSmallScreen] = useState(false);
-	const [drawerIsSmall, setDrawerSmall] = useState(false);
 	const [drawerIsHidden, setDrawerHidden] = useState(false);
 	const [showFormModal, setShowFormModal] = useState(false);
 	const [displayedForm, setDisplayedForm] = useState<
@@ -70,20 +70,14 @@ const Drawer = ({ drawerOnLeft, toggleDrawerPosition }: Props) => {
 
 	useEffect(() => {
 		if (typeof window !== 'undefined') {
-			const handleResize = () =>
+			const toggleScreenIsSmall = () =>
 				window.innerWidth < 576 ? setSmallScreen(true) : setSmallScreen(false);
 
-			window.addEventListener('resize', handleResize);
+			window.addEventListener('resize', toggleScreenIsSmall);
 
-			handleResize();
-
-			return () => window.removeEventListener('resize', handleResize);
+			return () => window.removeEventListener('resize', toggleScreenIsSmall);
 		}
 	}, []);
-
-	const toggleDrawerSize = () => {
-		setDrawerSmall((prevState) => !prevState);
-	};
 
 	const toggleDrawerVisiblity = () => {
 		setDrawerHidden((prevState) => !prevState);
@@ -118,37 +112,40 @@ const Drawer = ({ drawerOnLeft, toggleDrawerPosition }: Props) => {
 	// };
 
 	return (
-		<>
+		<div
+			className={`d-flex flex-column custom-main-container 
+			${drawer.onLeft ? 'flex-sm-row' : 'flex-sm-column'}`}
+		>
 			<nav
 				className={`d-flex bg-light border-bottom border-end 
-				${drawerOnLeft ? 'flex-column' : 'flex-row'}
-				${drawerIsHidden ? 'custom-nav-hide' : ''}`}
+				${drawerIsHidden ? 'custom-nav-hide' : ''} 
+				${drawer.onLeft ? 'flex-column' : 'flex-row'}`}
 			>
 				<ul
-					className={`nav nav-tabs d-none d-sm-flex justify-content-between align-items-center p-2 p-md-2 gap-2 
+					className={`nav nav-tabs d-none d-sm-flex flex-nowrap justify-content-between align-items-center p-2 p-md-2 gap-2 
 					${
-						drawerOnLeft && drawerIsSmall
+						drawer.onLeft && drawer.isSmall
 							? 'flex-column'
-							: drawerOnLeft && !drawerIsSmall
+							: drawer.onLeft && !drawer.isSmall
 							? 'flex-row'
 							: 'flex-column flex-lg-row border-start order-sm-4'
 					}`}
 				>
 					<li
 						className={`nav-item d-none d-sm-block 
-						${drawerOnLeft ? '' : 'order-last'}
-						${drawerIsHidden ? 'custom-btn1-show' : ''}`}
+						${drawerIsHidden ? 'custom-btn1-show' : ''}
+						${drawer.onLeft ? 'flex-grow-1' : 'order-lg-last'}`}
 					>
 						<Button
 							variant='dark'
 							size='sm'
 							className='w-100 fw-bolder'
 							onClick={() =>
-								drawerOnLeft ? toggleDrawerSize() : toggleDrawerVisiblity()
+								drawer.onLeft ? toggleDrawerSize() : toggleDrawerVisiblity()
 							}
 						>
-							{drawerOnLeft ? (
-								drawerIsSmall ? (
+							{drawer.onLeft ? (
+								drawer.isSmall ? (
 									<i className='bi bi-arrow-bar-right fs-6'></i>
 								) : (
 									<i className='bi bi-arrow-bar-left fs-6'></i>
@@ -160,14 +157,17 @@ const Drawer = ({ drawerOnLeft, toggleDrawerPosition }: Props) => {
 							)}
 						</Button>
 					</li>
-					<li className='nav-item d-none d-sm-block'>
+					<li
+						className={`nav-item d-none d-sm-block 
+						${drawer.onLeft ? 'flex-grow-1' : ''}`}
+					>
 						<Button
 							variant='dark'
 							size='sm'
 							className='w-100 fw-bolder'
 							onClick={toggleDrawerPosition}
 						>
-							{drawerOnLeft ? (
+							{drawer.onLeft ? (
 								<i className='bi bi-arrow-up-right-square fs-6'></i>
 							) : (
 								<i className='bi bi-arrow-down-left-square fs-6'></i>
@@ -177,26 +177,36 @@ const Drawer = ({ drawerOnLeft, toggleDrawerPosition }: Props) => {
 				</ul>
 				<div
 					className={`flex-grow-1 d-flex flex-column 
-					${drawerOnLeft ? 'flex-lg-column' : 'flex-lg-row'}`}
+					${drawer.onLeft ? 'flex-lg-column' : 'flex-lg-row'}`}
 				>
 					<ul
-						className={`nav nav-tabs nav-fill p-2 py-2 p-md-2 
-						${drawerOnLeft ? 'flex-sm-column gap-2' : 'flex-sm-row flex-sm-grow-1 gap-3 '}`}
+						className={`nav nav-tabs nav-fill flex-nowrap p-2 py-2 p-md-2 
+						${
+							drawer.onLeft
+								? 'flex-sm-column gap-2'
+								: 'flex-sm-row flex-sm-grow-1 gap-3 '
+						}`}
 					>
 						{/* <li className='nav-item'>
 							<Link href='/'>
 								<a
-									className={`w-100 btn btn-sm btn-success fw-bolder d-flex align-items-center justify-content-center 
-									${drawerOnLeft ? 'justify-content-sm-start' : 'justify-content-sm-center'} 
+									className={`w-100 btn btn-sm btn-success fw-bolder d-flex align-items-center justify-content-center text-nowrap 
+									${drawer.onLeft ? 'justify-content-sm-start' : 'justify-content-sm-center'} 
 									${router.query.series === '' ? 'active' : ''}`}
 								>
 									<i
 										className={`bi bi-house-door fs-6 
-										${screenIsSmall ? 'me-2' : drawerOnLeft && drawerIsSmall ? 'm-auto' : 'me-2'}`}
+										${
+											screenIsSmall
+												? 'me-2'
+												: drawer.onLeft && drawer.isSmall
+												? 'm-auto'
+												: 'me-2'
+										}`}
 									></i>
 									{screenIsSmall
 										? 'Home'
-										: drawerOnLeft && drawerIsSmall
+										: drawer.onLeft && drawer.isSmall
 										? ''
 										: 'Home'}
 								</a>
@@ -205,17 +215,23 @@ const Drawer = ({ drawerOnLeft, toggleDrawerPosition }: Props) => {
 						<li className='nav-item'>
 							<Link href={'/f1'}>
 								<a
-									className={`w-100 btn btn-sm btn-danger fw-bolder d-flex align-items-center justify-content-center 
-									${drawerOnLeft ? 'justify-content-sm-start' : 'justify-content-sm-center'} 
+									className={`w-100 btn btn-sm btn-danger fw-bolder d-flex align-items-center justify-content-center text-nowrap 
+									${drawer.onLeft ? 'justify-content-sm-start' : 'justify-content-sm-center'} 
 									${router.query.series === 'f1' ? 'active' : ''}`}
 								>
 									<i
 										className={`bi bi-1-square fs-6 
-										${screenIsSmall ? 'me-2' : drawerOnLeft && drawerIsSmall ? 'm-auto' : 'me-2'}`}
+										${
+											screenIsSmall
+												? 'me-2'
+												: drawer.onLeft && drawer.isSmall
+												? 'm-auto'
+												: 'me-2'
+										}`}
 									></i>
 									{screenIsSmall
 										? 'Formula 1'
-										: drawerOnLeft && drawerIsSmall
+										: drawer.onLeft && drawer.isSmall
 										? ''
 										: 'Formula 1'}
 								</a>
@@ -224,17 +240,23 @@ const Drawer = ({ drawerOnLeft, toggleDrawerPosition }: Props) => {
 						<li className='nav-item'>
 							<Link href={'/f2'}>
 								<a
-									className={`w-100 btn btn-sm btn-primary fw-bolder d-flex align-items-center justify-content-center 
-									${drawerOnLeft ? 'justify-content-sm-start' : 'justify-content-sm-center'} 
+									className={`w-100 btn btn-sm btn-primary fw-bolder d-flex align-items-center justify-content-center text-nowrap 
+									${drawer.onLeft ? 'justify-content-sm-start' : 'justify-content-sm-center'} 
 									${router.query.series === 'f2' ? 'active' : ''}`}
 								>
 									<i
 										className={`bi bi-2-square fs-6 
-										${screenIsSmall ? 'me-2' : drawerOnLeft && drawerIsSmall ? 'm-auto' : 'me-2'}`}
+										${
+											screenIsSmall
+												? 'me-2'
+												: drawer.onLeft && drawer.isSmall
+												? 'm-auto'
+												: 'me-2'
+										}`}
 									></i>
 									{screenIsSmall
 										? 'Formula 2'
-										: drawerOnLeft && drawerIsSmall
+										: drawer.onLeft && drawer.isSmall
 										? ''
 										: 'Formula 2'}
 								</a>
@@ -243,17 +265,23 @@ const Drawer = ({ drawerOnLeft, toggleDrawerPosition }: Props) => {
 						<li className='nav-item'>
 							<Link href={'/f3'}>
 								<a
-									className={`w-100 btn btn-sm btn-secondary fw-bolder d-flex align-items-center justify-content-center 
-									${drawerOnLeft ? 'justify-content-sm-start' : 'justify-content-sm-center'} 
+									className={`w-100 btn btn-sm btn-secondary fw-bolder d-flex align-items-center justify-content-center text-nowrap 
+									${drawer.onLeft ? 'justify-content-sm-start' : 'justify-content-sm-center'} 
 									${router.query.series === 'f3' ? 'active' : ''}`}
 								>
 									<i
 										className={`bi bi-3-square fs-6 
-										${screenIsSmall ? 'me-2' : drawerOnLeft && drawerIsSmall ? 'm-auto' : 'me-2'}`}
+										${
+											screenIsSmall
+												? 'me-2'
+												: drawer.onLeft && drawer.isSmall
+												? 'm-auto'
+												: 'me-2'
+										}`}
 									></i>
 									{screenIsSmall
 										? 'Formula 3'
-										: drawerOnLeft && drawerIsSmall
+										: drawer.onLeft && drawer.isSmall
 										? ''
 										: 'Formula 3'}
 								</a>
@@ -261,9 +289,9 @@ const Drawer = ({ drawerOnLeft, toggleDrawerPosition }: Props) => {
 						</li>
 					</ul>
 					<ul
-						className={`nav nav-fill nav-tabs p-2 order-first order-lg-2  
-						${drawerOnLeft ? 'flex-sm-column order-sm-2 gap-2' : 'flex-row gap-3'}
-						${screenIsSmall || drawerOnLeft ? '' : 'custom-border'}`}
+						className={`nav nav-fill nav-tabs flex-nowrap p-2 order-first order-lg-2  
+						${drawer.onLeft ? 'flex-sm-column order-sm-2 gap-2' : 'flex-row gap-3'}
+						${screenIsSmall || drawer.onLeft ? '' : 'custom-border'}`}
 					>
 						<li className='nav-item'>
 							<Button
@@ -273,16 +301,22 @@ const Drawer = ({ drawerOnLeft, toggleDrawerPosition }: Props) => {
 								onClick={handleOpenCalendarModal}
 							>
 								<div
-									className={`d-flex align-items-center justify-content-center 
-									${drawerOnLeft ? 'justify-content-sm-start' : 'justify-content-sm-center'}`}
+									className={`d-flex align-items-center justify-content-center text-nowrap 
+									${drawer.onLeft ? 'justify-content-sm-start' : 'justify-content-sm-center'}`}
 								>
 									<i
 										className={`bi bi-calendar-week fs-6 
-										${screenIsSmall ? 'me-2' : drawerOnLeft && drawerIsSmall ? 'm-auto' : 'me-2'}`}
+										${
+											screenIsSmall
+												? 'me-2'
+												: drawer.onLeft && drawer.isSmall
+												? 'm-auto'
+												: 'me-2'
+										}`}
 									></i>
 									{screenIsSmall
 										? 'Calendar'
-										: drawerOnLeft && drawerIsSmall
+										: drawer.onLeft && drawer.isSmall
 										? ''
 										: 'Calendar'}
 								</div>
@@ -296,8 +330,8 @@ const Drawer = ({ drawerOnLeft, toggleDrawerPosition }: Props) => {
 								onClick={handleToggleTheme}
 							>
 								<div
-									className={`d-flex align-items-center justify-content-center 
-									${drawerOnLeft ? 'justify-content-sm-start' : 'justify-content-sm-center'}
+									className={`d-flex align-items-center justify-content-center text-nowrap 
+									${drawer.onLeft ? 'justify-content-sm-start' : 'justify-content-sm-center'}
 									${style.mode} ${style[selectedTheme]}`}
 								>
 									{screenIsSmall ? (
@@ -307,7 +341,7 @@ const Drawer = ({ drawerOnLeft, toggleDrawerPosition }: Props) => {
 											</div>
 											Theme
 										</div>
-									) : drawerOnLeft && drawerIsSmall ? (
+									) : drawer.onLeft && drawer.isSmall ? (
 										<span className={`${style.mode_icon} m-auto`}>
 											<i className={`bi bi-sun ${style.sun} fs-6`}></i>
 											<i className={`bi bi-moon-fill ${style.moon} fs-6`}></i>
@@ -331,16 +365,22 @@ const Drawer = ({ drawerOnLeft, toggleDrawerPosition }: Props) => {
 								onClick={handleOpenFormModal}
 							>
 								<div
-									className={`d-flex align-items-center justify-content-center 
-									${drawerOnLeft ? 'justify-content-sm-start' : 'justify-content-sm-center'}`}
+									className={`d-flex align-items-center justify-content-center text-nowrap 
+									${drawer.onLeft ? 'justify-content-sm-start' : 'justify-content-sm-center'}`}
 								>
 									<i
 										className={`bi bi-envelope fs-6 
-										${screenIsSmall ? 'me-2' : drawerOnLeft && drawerIsSmall ? 'm-auto' : 'me-2'}`}
+										${
+											screenIsSmall
+												? 'me-2'
+												: drawer.onLeft && drawer.isSmall
+												? 'm-auto'
+												: 'me-2'
+										}`}
 									></i>
 									{screenIsSmall
 										? 'Contact'
-										: drawerOnLeft && drawerIsSmall
+										: drawer.onLeft && drawer.isSmall
 										? ''
 										: 'Contact'}
 								</div>
@@ -366,6 +406,7 @@ const Drawer = ({ drawerOnLeft, toggleDrawerPosition }: Props) => {
 					</ul>
 				</div>
 			</nav>
+			<main className='w-100 mx-auto'>{children}</main>
 			<Modal
 				show={showFormModal}
 				onHide={handleCloseFormModal}
@@ -458,7 +499,7 @@ const Drawer = ({ drawerOnLeft, toggleDrawerPosition }: Props) => {
 					}
 				</Modal.Body>
 			</Modal>
-		</>
+		</div>
 	);
 };
 
