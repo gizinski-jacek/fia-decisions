@@ -7,47 +7,58 @@ import {
 } from '../types/myTypes';
 
 export const transformToDecOffDoc = (
-	// Value from anchor href property to decompose into file name, doc type and grand prix name
+	// Value from anchor href property to decompose into file name, doc type and grand prix name.
 	string: string,
-	// Array of strings parsed from FIA Decision or Offence, but not Reprimand, documents parsed with pdfReader
+	// Array of strings parsed from FIA Decision or Offence, but not Reprimand, documents parsed with pdfReader.
 	pdfDataArray: string[],
-	// Info to determine number of strings to slice off, F1 has 4 stewards, F2 and F3 has 3 stewards
+	// Info to determine number of strings to slice off, F1 has 4 stewards, F2 and F3 has 3 stewards.
 	series: 'formula1' | 'formula2' | 'formula3'
 ): TransformedPDFData => {
 	let fileName: string;
+	// Checking if string value comes from file name or from anchors href.
 	if (string.lastIndexOf('/') === -1) {
+		// Removing just file extension.
 		fileName = string.slice(0, -4);
 	} else {
+		// Extracting file name from href, removing extension.
 		fileName = string.slice(string.lastIndexOf('/') + 1).slice(0, -4);
 	}
-	if (
-		fileName.charAt(fileName.length - 2) === '_' &&
-		fileName.charAt(fileName.length - 1).match(/[0-9]/)
-	) {
-		fileName = fileName.slice(0, fileName.length - 3);
+	// Extracting end part of filename, matching against common duplicate file suffixes.
+	// Removing suffix if present.
+	const regexMatch = fileName.slice(-5).match(/(_|-| )?\(?[0-9]{1,2}\)?/);
+	if (regexMatch) {
+		fileName = fileName.slice(0, -regexMatch[0].length);
 	}
 	fileName.trim();
 
+	// Extracting grand prix name.
 	const gpName = fileName.slice(0, fileName.indexOf('-')).trim();
-	const docType = [fileName].map((string) => {
-		let str = string.replace(gpName, '').trim();
-		if (str.charAt(0) === '-') {
-			str = str.slice(1).trim();
-		}
-		return str.slice(0, 8).toLowerCase().trim();
-	})[0];
+	// Checking if document file name is title offence or decision.
+	const docType = (() => {
+		const str = fileName.replace(gpName, '').slice(0, 10).toLowerCase();
+		return str.includes('offence')
+			? 'Offence'
+			: str.includes('decision')
+			? 'Decision'
+			: 'Wrong Doc Type';
+	})();
 
 	const incidentTitle = [fileName].map((string) => {
-		let str = string.replace(gpName, '').toLowerCase().trim();
+		// Removing grand prix name from filename string.
+		let str = string.replace(gpName, '').trim();
+		// Checking for a dash, removing it and trimming whitespaces.
 		if (str.charAt(0) === '-') {
 			str = str.slice(1).trim();
 		}
+		// Checking for "offence" word, removing it and trimming whitespaces.
 		if (str.slice(0, 7).toLowerCase().trim() === 'offence') {
 			str = str.slice(7).trim();
 		}
 		if (str.slice(0, 8).toLowerCase().trim() === 'decision') {
+			// Checking for "decision" word, removing it and trimming whitespaces.
 			str = str.slice(8).trim();
 		}
+		// Checking for a dash, removing it and trimming whitespaces.
 		if (str.charAt(0) === '-') {
 			str = str.slice(1).trim();
 		}
@@ -240,18 +251,20 @@ export const transformToDecOffDoc = (
 		.join(' ');
 
 	const penaltiesArray = [
-		'time',
-		'grid',
-		'fine',
-		'disqualified',
-		'warning',
-		'drive through',
-		'pit lane',
-		'reprimand',
+		'Time',
+		'Grid',
+		'Fine',
+		'Disqualified',
+		'Warning',
+		'Drive Through',
+		'Drive-Through',
+		'Pit Lane',
+		'Pit-Lane',
+		'Reprimand',
 	];
 	let penaltyType = 'none';
 	penaltiesArray.forEach((value) => {
-		if (incidentInfo.Decision[0].toLowerCase().includes(value)) {
+		if (incidentInfo.Decision[0].toLowerCase().includes(value.toLowerCase())) {
 			penaltyType = value;
 			return;
 		}
