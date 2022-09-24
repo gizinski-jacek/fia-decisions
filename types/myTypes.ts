@@ -53,27 +53,27 @@ export interface FiaPageList {
 	f3_2022_page: string;
 }
 
-export interface FormFileData {
+export interface FileFormValues {
 	series: string;
 	file: File | null;
 }
 
-export interface FormDocData {
+export interface DataFormValues {
 	series: string;
 	title?: string;
 	url?: string;
 }
 
-export interface MissingDocModel extends FormDocData {
+export interface MissingDocModel extends DataFormValues {
 	_id: string;
 }
 
-export interface FormContactData {
+export interface ContactFormValues {
 	email: string;
 	message: string;
 }
 
-export interface ContactDocModel extends FormContactData {
+export interface ContactDocModel extends ContactFormValues {
 	_id: string;
 }
 
