@@ -11,16 +11,10 @@ import axios from 'axios';
 import CalendarWrapper from '../wrappers/CalendarWrapper';
 
 interface Props {
-	drawerIsHidden: boolean;
 	screenIsSmall: boolean;
-	toggleDrawerVisiblity: () => void;
 }
 
-const DrawerUtilities = ({
-	drawerIsHidden,
-	screenIsSmall,
-	toggleDrawerVisiblity,
-}: Props) => {
+const DrawerUtilities = ({ screenIsSmall }: Props) => {
 	const { toggleTheme } = useContext(ThemeContext);
 	const { drawer } = useContext(DrawerContext);
 
@@ -95,8 +89,8 @@ const DrawerUtilities = ({
 	return (
 		<>
 			<ul
-				className={`nav nav-fill nav-tabs flex-nowrap p-2 order-first order-lg-2  
-						${drawer.onLeft ? 'flex-sm-column order-sm-2 gap-2' : 'flex-row gap-3'}
+				className={`nav nav-fill nav-tabs flex-nowrap p-2  
+						${drawer.onLeft ? 'flex-sm-column gap-2' : 'flex-row gap-3'}
 						${screenIsSmall || drawer.onLeft ? '' : 'custom-border'}`}
 			>
 				<li className='nav-item'>
@@ -190,23 +184,6 @@ const DrawerUtilities = ({
 								? ''
 								: 'Contact'}
 						</div>
-					</Button>
-				</li>
-				<li
-					className={`nav-item d-sm-none flex-grow-0 
-							${drawerIsHidden ? 'custom-btn2-show' : ''}`}
-				>
-					<Button
-						variant='dark'
-						size='sm'
-						className='w-100 fw-bolder'
-						onClick={toggleDrawerVisiblity}
-					>
-						{drawerIsHidden ? (
-							<i className='bi bi-arrow-bar-down fs-6'></i>
-						) : (
-							<i className='bi bi-arrow-bar-up fs-6'></i>
-						)}
 					</Button>
 				</li>
 			</ul>
