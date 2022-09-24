@@ -6,41 +6,58 @@ nav {
 	position: static;
 	transition: 0.15s ease-in-out;
 
-	// Needs refactoring!
+	&.custom-sm-grid {
+		display: grid;
+		grid-template-columns: 1fr max-content;
+		grid-template-areas:
+			'utilities controls'
+			'links links';
+	}
+
+	&.custom-md-grid {
+		display: grid;
+		grid-template-columns: 1fr max-content;
+		grid-template-areas:
+			'utilities controls'
+			'links controls';
+	}
+
+	ul:first-child {
+		grid-area: links;
+	}
+
+	ul:nth-child(2) {
+		grid-area: utilities;
+	}
+
+	ul:nth-child(3) {
+		grid-area: controls;
+	}
+
 	&.custom-nav-hide {
 		position: absolute;
 		width: 100%;
 		transform: translateY(-100%);
 
-		.custom-btn1-show {
+		.custom-btn-show {
 			position: relative;
 			top: 0;
-			animation: slideBtn1Down 0.3s ease-in-out forwards;
+			animation: slideBtnDown 0.3s ease-in-out forwards;
 		}
 
-		@keyframes slideBtn1Down {
+		@keyframes slideBtnDown {
 			75% {
-				transform: translateY(0);
+				transform: translateY(0) rotateX(180deg);
 			}
 
 			100% {
-				transform: translateY(150%);
+				transform: translateY(300%) rotateX(180deg);
 			}
 		}
 
-		.custom-btn2-show {
-			position: relative;
-			top: 0;
-			animation: slideBtn2Down 0.3s ease-in-out forwards;
-		}
-
-		@keyframes slideBtn2Down {
-			75% {
-				transform: translateY(0);
-			}
-
-			100% {
-				transform: translateY(300%);
+		@media only screen and (min-width: 992px) {
+			.custom-btn-show {
+				top: -150%;
 			}
 		}
 	}
