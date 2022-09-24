@@ -37,6 +37,7 @@ const FileForm = () => {
 
 	const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
 		e.preventDefault();
+		setSubmitSuccess(false);
 		setFormErrors([]);
 		try {
 			if (!formData.series && !formData.file) {

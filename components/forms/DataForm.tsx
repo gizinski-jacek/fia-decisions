@@ -20,6 +20,7 @@ const DataForm = () => {
 
 	const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
 		e.preventDefault();
+		setSubmitSuccess(false);
 		setFormErrors([]);
 		try {
 			if (!formData.title && !formData.url) {
