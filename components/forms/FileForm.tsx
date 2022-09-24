@@ -1,12 +1,12 @@
 import { useRef, useState } from 'react';
 import { Button, Form } from 'react-bootstrap';
 import axios, { AxiosError } from 'axios';
-import { FormFileData } from '../../types/myTypes';
+import { FileFormValues } from '../../types/myTypes';
 import { defaultFileData } from '../../lib/myData';
 import LoadingBar from '../LoadingBar';
 
 const FileForm = () => {
-	const [formData, setFormData] = useState<FormFileData>(defaultFileData);
+	const [formData, setFormData] = useState<FileFormValues>(defaultFileData);
 	const [formErrors, setFormErrors] = useState<string[]>([]);
 	const [sending, setSending] = useState(false);
 	const [submitSuccess, setSubmitSuccess] = useState(false);
@@ -56,7 +56,7 @@ const FileForm = () => {
 			uploadData.append('file', formData.file as File);
 			setSending(true);
 			await axios.post(
-				`/api/forms/doc-file?series=${formData.series}`,
+				`/api/forms/file?series=${formData.series}`,
 				uploadData,
 				{ timeout: 15000 }
 			);

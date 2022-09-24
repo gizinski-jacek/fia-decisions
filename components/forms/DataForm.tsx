@@ -1,12 +1,12 @@
 import { useState, useRef } from 'react';
 import { Button, Form } from 'react-bootstrap';
 import axios, { AxiosError } from 'axios';
-import { FormDocData } from '../../types/myTypes';
+import { DataFormValues } from '../../types/myTypes';
 import { defaultDocData } from '../../lib/myData';
 import LoadingBar from '../LoadingBar';
 
 const DataForm = () => {
-	const [formData, setFormData] = useState<FormDocData>(defaultDocData);
+	const [formData, setFormData] = useState<DataFormValues>(defaultDocData);
 	const [formErrors, setFormErrors] = useState<string[]>([]);
 	const [sending, setSending] = useState(false);
 	const [submitSuccess, setSubmitSuccess] = useState(false);
@@ -32,7 +32,7 @@ const DataForm = () => {
 				uploadData.append(key, value);
 			}
 			setSending(true);
-			await axios.post('/api/forms/doc-data', uploadData, { timeout: 15000 });
+			await axios.post('/api/forms/data', uploadData, { timeout: 15000 });
 			setFormData(defaultDocData);
 			formRef.current?.reset();
 			setSubmitSuccess(true);

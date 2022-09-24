@@ -1,12 +1,13 @@
 import { useState, useRef } from 'react';
 import { Button, Form } from 'react-bootstrap';
 import axios, { AxiosError } from 'axios';
-import { FormContactData } from '../../types/myTypes';
+import { ContactFormValues } from '../../types/myTypes';
 import { defaultContactData } from '../../lib/myData';
 import LoadingBar from '../LoadingBar';
 
 const ContactForm = () => {
-	const [formData, setFormData] = useState<FormContactData>(defaultContactData);
+	const [formData, setFormData] =
+		useState<ContactFormValues>(defaultContactData);
 	const [formErrors, setFormErrors] = useState<string[]>([]);
 	const [sending, setSending] = useState(false);
 	const [submitSuccess, setSubmitSuccess] = useState(false);
