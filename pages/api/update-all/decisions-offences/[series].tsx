@@ -90,47 +90,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 				);
 
 				const conn = await connectMongo(seriesDB);
-				// await Promise.all(
-				// 	allDocsHref.map(
-				// 		(href) =>
-				// 			new Promise(async (resolve, reject) => {
-				// 				const responseFile = await axios.get(fiaDomain + href, {
-				// 					responseType: 'stream',
-				// 					timeout: 15000,
-				// 				});
-				// 				const fileBuffer = await streamToBuffer(responseFile.data);
-				// 				const readPDF = await readPDFPages(fileBuffer);
-				// 				const transformed = transformToDecOffDoc(
-				// 					href,
-				// 					readPDF as any,
-				// 					series as 'formula1' | 'formula2' | 'formula3'
-				// 				);
-				// 				try {
-				// 					const docExists = await conn.models.Decision_Offence.findOne({
-				// 						series: series,
-				// 						doc_type: transformed.doc_type,
-				// 						doc_name: transformed.doc_name,
-				// 						doc_date: transformed.doc_date,
-				// 						penalty_type: transformed.penalty_type,
-				// 						grand_prix: transformed.grand_prix,
-				// 						weekend: transformed.weekend,
-				// 					});
-				// 					if (docExists) {
-				// 						console.log('Document already exists. Skipping.');
-				//						resolve(null);
-				// 						return;
-				// 					}
-				// 					await conn.models.Decision_Offence.create({
-				// 						...transformed,
-				// 						manual_upload: false,
-				// 					});
-				// 					resolve(null);
-				// 				} catch (error) {
-				// 					reject(error);
-				// 				}
-				// 			})
-				// 	)
-				// );
 				allDocsHref.forEach(
 					(href) =>
 						new Promise(async (resolve, reject) => {

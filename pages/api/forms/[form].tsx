@@ -3,13 +3,13 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import connectMongo from '../../../lib/mongo';
 import { dbNameList } from '../../../lib/myData';
 import multiparty from 'multiparty';
-import { parseFields, parseFile } from '../../../lib/multiparty';
+import { parseFields } from '../../../lib/multiparty';
 import { streamToBuffer } from '../../../lib/streamToBuffer';
 import { readPDFPages } from '../../../lib/pdfReader';
 import { transformToDecOffDoc } from '../../../lib/transformToDecOffDoc';
 import * as Yup from 'yup';
 import yupValidation from '../../../lib/yup';
-import { FormContactData, FormDocData } from '../../../types/myTypes';
+import { FormContactData } from '../../../types/myTypes';
 
 export const config = {
 	api: {
@@ -39,18 +39,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string[]>) => {
 					return res.status(422).json(['Must choose a Series.']);
 				}
 
-				// Currently not working when imported, looking for fix...
-				// const file = await parseFile(req);
-
 				const form = new multiparty.Form();
-
 				// Errors may be emitted
 				// Note that if you are listening to 'part' events, the same error may be
 				// emitted from the `form` and the `part`.
 				form.on('error', (error: any) => {
 					console.log('Error parsing form: ' + error.stack);
 				});
-
 				// Parts are emitted when parsing the form
 				form.on('part', async (part) => {
 					// You *must* act on the part by reading it
@@ -75,7 +70,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string[]>) => {
 					if (!part) {
 						return res.status(422).json(['Must choose a PDF file.']);
 					}
-
 					const fileBuffer = await streamToBuffer(part);
 					const pdfData = await readPDFPages(fileBuffer);
 					const transformed = transformToDecOffDoc(
@@ -108,12 +102,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string[]>) => {
 						return res.status(500).json(['Unknown server error.']);
 					}
 				});
-
 				// Close emitted after form parsed
 				form.on('close', function () {
 					console.log('Upload completed!');
 				});
-
 				// Parse req
 				form.parse(req);
 			} catch (error) {

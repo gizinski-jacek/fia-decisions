@@ -70,11 +70,6 @@ const connectMongo = async (dbName: string) => {
 		return conn;
 	}
 	return conn;
-
-	// cached.client.connection.useDb(dbName, {
-	// 	useCache: true,
-	// 	noListener: true,
-	// });
 };
 
 export default connectMongo;
