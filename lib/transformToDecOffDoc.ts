@@ -65,13 +65,16 @@ export const transformToDecOffDoc = (
 		return str;
 	})[0];
 
+	// Trimming all document strings just in case.
 	const trimmedStringsArray = pdfDataArray.map((str) => str.trim());
+	// Extracting general document data fields, like From who, To whom, Document #, Date and Time.
 	const documentInfoStrings = trimmedStringsArray.slice(
 		0,
 		trimmedStringsArray.indexOf('Time') + 2
 	);
 
 	const documentSkipIndexes: number[] = [];
+	// To whom field is usually a two line text separated by comma, joining them.
 	const documentInfoFormatted = documentInfoStrings
 		.map((str, i) => {
 			if (documentSkipIndexes.indexOf(i) !== -1) {
@@ -88,11 +91,22 @@ export const transformToDecOffDoc = (
 		.filter((u) => u !== undefined) as string[];
 
 	const documentInfo = {} as DocumentInfo;
+	// Transforming general document data strings into key, value pairs.
 	for (let i = 0; i < documentInfoFormatted.length; i += 2) {
-		documentInfo[documentInfoFormatted[i] as keyof DocumentInfo] =
-			documentInfoFormatted[i + 1] || '';
+		const key = documentInfoFormatted[i] as keyof DocumentInfo;
+		const value = documentInfoFormatted[i + 1];
+		documentInfo[key] = value || '';
 	}
 
+	// Skipping general document data fields, extracting document Title,
+	// which includes year, Grand Prix name and race weekend date, and also
+	// extracting detailed incident data fields, like opening statement, No / Driver,
+	// Competitor, incident Time, Session, Fact, Offence and Decision.
+	// Skipping first index containing the year, then skipping strings shorter
+	// than 4 characters, those are each letter of Grand Prix name with whitespaces.
+	// Replacing No / Driver field with Driver so it gets properly cast
+	// as key in schema model. Skipping document if Team Manager is present
+	// instead of No / Driver, as we're not interested in non-driver penalties.
 	const incidentInfoStrings = trimmedStringsArray
 		.slice(
 			trimmedStringsArray.indexOf('Time') + 2,
@@ -120,20 +134,31 @@ export const transformToDecOffDoc = (
 		})
 		.filter((u) => u !== undefined);
 
+	// Extracting first index, which is race weekend date, and removing it from array.
 	const weekend = incidentInfoStrings[0] as string;
 	const incidentInfoStringsWithoutWeekend = incidentInfoStrings.slice(1);
 
 	const incidentInfo = {} as IncidentInfo;
+	// Extracting opening statement string, joining them, and removing them from array.
 	incidentInfo.Headline = incidentInfoStringsWithoutWeekend
 		.slice(0, incidentInfoStringsWithoutWeekend.indexOf('Driver'))
 		.join(' ');
-
-	const incidentSkipIndexes: number[] = [];
 	const incidentInfoStringsWithoutHeadline =
 		incidentInfoStringsWithoutWeekend.slice(
-			incidentInfoStringsWithoutWeekend.indexOf('Competitor') - 2
+			incidentInfoStringsWithoutWeekend.indexOf('Driver')
 		);
 
+	// The array should now only contain detailed incident data strings.
+	// Strings after Fact and before Offence describe facts about incident,
+	// they can be single line or several lines long, or a list of changed
+	// car components indicated by colon. In case of the former they get joined,
+	// in latter case they get returned as is. In both cases the returned value
+	// is an array of string, containing just one long string or list of strings.
+	// Using SkipIndexes array to skip indexes of string that are part of longer
+	// sentence / paragraph and were joined with previous string.
+	// Similar reasoning and method is used for strings between Decision and end of array.
+	// Joining string between Offence and Decision fields.
+	const incidentSkipIndexes: number[] = [];
 	const incidentInfoFormatted = incidentInfoStringsWithoutHeadline
 		.map((str, index) => {
 			if (incidentSkipIndexes.indexOf(index) !== -1) {
@@ -215,6 +240,7 @@ export const transformToDecOffDoc = (
 		})
 		.filter((u) => u !== undefined);
 
+	// Transforming detailed incident data strings into key, value pairs.
 	for (let i = 0; i < incidentInfoFormatted.length; i += 2) {
 		// Reminder to fix type error here
 		const key = incidentInfoFormatted[i];
@@ -222,34 +248,23 @@ export const transformToDecOffDoc = (
 		incidentInfo[key] = value;
 	}
 
+	// Checking which series we're working on to know how many string to
+	// skip at the end of array, F1 has one steward more than F2 and F3.
 	const stewardCount = series === 'formula1' ? 4 : 3;
+	// Extracting stewards names and "The Stewards" string from the end of document.
 	const stewards = trimmedStringsArray
 		.filter((str) => str !== 'The Stewards')
-		.slice(stewardCount - stewardCount * 2);
+		.slice(-stewardCount);
 
-	const reasonStrings = trimmedStringsArray
+	// Skipping stewards names from the end of array, extracting
+	// Reason and strings after it and joining them into single paragraph.
+	const reasonContents = trimmedStringsArray
 		.slice(trimmedStringsArray.lastIndexOf('Reason') + 1)
 		.filter((str) => str !== 'The Stewards')
-		.slice(0, stewardCount - stewardCount * 2);
-
-	const reasonSkipIndexes: number[] = [];
-	const reasonText = reasonStrings
-		.map((str, i) => {
-			if (reasonSkipIndexes.indexOf(i) !== -1) {
-				return;
-			} else if (str.charAt(str.length - 1) === ',') {
-				reasonSkipIndexes.push(i + 1);
-				return str + ' ' + reasonStrings[i + 1];
-			} else if (str.length > 64 && str.charAt(str.length - 1) !== '.') {
-				reasonSkipIndexes.push(i + 1);
-				return str + ' ' + reasonStrings[i + 1];
-			} else {
-				return str;
-			}
-		})
-		.filter((u) => u !== undefined)
+		.slice(0, stewardCount - stewardCount * 2)
 		.join(' ');
 
+	// List of applicable penalties to check against.
 	const penaltiesArray = [
 		'Time',
 		'Grid',
@@ -263,6 +278,8 @@ export const transformToDecOffDoc = (
 		'Reprimand',
 	];
 	let penaltyType = 'none';
+	// Checking for penalty type in first string of Decision array.
+	// If not found its assumed no penalty was applied.
 	penaltiesArray.forEach((value) => {
 		if (incidentInfo.Decision[0].toLowerCase().includes(value.toLowerCase())) {
 			penaltyType = value;
@@ -270,12 +287,16 @@ export const transformToDecOffDoc = (
 		}
 	});
 
+	// Calculating document UTC timestamp by joining Date and Time,
+	// creating Date object from it, calculating timezone offset,
+	// and substracting it from Date.
 	const dateString = documentInfo.Date + ' ' + documentInfo.Time;
 	const timeOffset = new Date().getTimezoneOffset() * 60000;
 	const dateUTC = new Date(dateString).getTime() - timeOffset;
 	const docDate = new Date(dateUTC);
 
-	const data = {
+	// Returning transformed strings as single formatted data object.
+	const data: TransformedPDFData = {
 		series: series,
 		doc_type: docType,
 		doc_name: fileName,
@@ -285,7 +306,7 @@ export const transformToDecOffDoc = (
 		weekend: weekend,
 		incident_title: incidentTitle,
 		document_info: documentInfo,
-		incident_info: { ...incidentInfo, Reason: reasonText },
+		incident_info: { ...incidentInfo, Reason: reasonContents },
 		stewards: stewards,
 	};
 
