@@ -15,8 +15,15 @@ const Drawer = ({ children }: Props) => {
 
 	useEffect(() => {
 		if (typeof window !== 'undefined') {
-			const toggleScreenIsSmall = () =>
-				window.innerWidth < 576 ? setSmallScreen(true) : setSmallScreen(false);
+			setSmallScreen(window.innerWidth < 576);
+		}
+	}, []);
+
+	useEffect(() => {
+		if (typeof window !== 'undefined') {
+			const toggleScreenIsSmall = () => {
+				setSmallScreen(window.innerWidth < 576);
+			};
 
 			window.addEventListener('resize', toggleScreenIsSmall);
 
@@ -34,25 +41,23 @@ const Drawer = ({ children }: Props) => {
 			${drawer.onLeft ? 'flex-sm-row' : 'flex-sm-column'}`}
 		>
 			<nav
-				className={`d-flex bg-light border-bottom border-end 
-				${drawerIsHidden ? 'custom-nav-hide' : ''} 
-				${drawer.onLeft ? 'flex-column' : 'flex-row'}`}
+				className={`d-lg-flex bg-light border-bottom border-end 
+				${
+					screenIsSmall
+						? 'custom-sm-grid'
+						: drawer.onLeft
+						? 'd-flex flex-column'
+						: 'custom-md-grid'
+				}
+				${drawerIsHidden ? 'custom-nav-hide' : ''}`}
 			>
+				<DrawerLinks screenIsSmall={screenIsSmall} />
+				<DrawerUtilities screenIsSmall={screenIsSmall} />
 				<DrawerControls
 					drawerIsHidden={drawerIsHidden}
+					screenIsSmall={screenIsSmall}
 					toggleDrawerVisiblity={toggleDrawerVisiblity}
 				/>
-				<div
-					className={`flex-grow-1 d-flex flex-column 
-					${drawer.onLeft ? 'flex-lg-column' : 'flex-lg-row'}`}
-				>
-					<DrawerLinks screenIsSmall={screenIsSmall} />
-					<DrawerUtilities
-						drawerIsHidden={drawerIsHidden}
-						screenIsSmall={screenIsSmall}
-						toggleDrawerVisiblity={toggleDrawerVisiblity}
-					/>
-				</div>
 			</nav>
 			<main className='w-100 mx-auto'>{children}</main>
 		</div>
