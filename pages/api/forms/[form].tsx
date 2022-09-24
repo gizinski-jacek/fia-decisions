@@ -9,7 +9,7 @@ import { readPDFPages } from '../../../lib/pdfReader';
 import { transformToDecOffDoc } from '../../../lib/transformToDecOffDoc';
 import * as Yup from 'yup';
 import yupValidation from '../../../lib/yup';
-import { FormContactData } from '../../../types/myTypes';
+import { ContactFormValues } from '../../../types/myTypes';
 
 export const config = {
 	api: {
@@ -21,7 +21,7 @@ export const config = {
 const handler = async (req: NextApiRequest, res: NextApiResponse<string[]>) => {
 	if (req.method === 'POST') {
 		const { form } = req.query;
-		if (form === 'doc-file') {
+		if (form === 'file') {
 			try {
 				const { series } = req.query;
 				let seriesDB = '';
@@ -112,7 +112,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string[]>) => {
 				return res.status(500).json(['Unknown server error.']);
 			}
 		}
-		if (form === 'doc-data') {
+		if (form === 'data') {
 			try {
 				const fields = await parseFields(req);
 				if (!fields.title && !fields.url) {
@@ -175,7 +175,7 @@ const dataFormValidationSchema: Yup.SchemaOf<{ title: string; url: string }> =
 			.url('Link / URL is invalid.'),
 	});
 
-const contactFormValidationSchema: Yup.SchemaOf<FormContactData> =
+const contactFormValidationSchema: Yup.SchemaOf<ContactFormValues> =
 	Yup.object().shape({
 		email: Yup.string()
 			.required('Email is required.')
