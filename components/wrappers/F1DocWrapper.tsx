@@ -13,7 +13,9 @@ const penaltyTypeColors: PenaltyColors = {
 	disqualified: { color: 'white', backgroundColor: 'black' },
 	warning: { color: 'black', backgroundColor: 'yellow' },
 	'drive through': { color: 'white', backgroundColor: 'purple' },
+	'drive-through': { color: 'white', backgroundColor: 'purple' },
 	'pit lane': { color: 'white', backgroundColor: 'brown' },
+	'pit-lane': { color: 'white', backgroundColor: 'brown' },
 	reprimand: { color: 'white', backgroundColor: 'green' },
 	none: { color: 'black', backgroundColor: 'beige' },
 };
