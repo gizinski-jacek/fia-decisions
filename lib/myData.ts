@@ -1,19 +1,15 @@
 import {
 	DatabaseNameList,
 	FiaPageList,
-	FormContactData,
-	FormDocData,
-	FormFileData,
+	ContactFormValues,
+	DataFormValues,
+	FileFormValues,
 } from '../types/myTypes';
 
+// Main FIA domain.
 export const fiaDomain: string = 'https://www.fia.com';
 
-export const dbNameList: DatabaseNameList = {
-	f1_2022_db: '2022_F1_WC_Docs',
-	f2_2022_db: '2022_F2_WC_Docs',
-	f3_2022_db: '2022_F3_WC_Docs',
-};
-
+// FIA page for supported racing series.
 export const fiaPageList: FiaPageList = {
 	f1_2022_page:
 		'https://www.fia.com/documents/championships/fia-formula-one-world-championship-14/season/season-2022-2005',
@@ -23,18 +19,28 @@ export const fiaPageList: FiaPageList = {
 		'https://www.fia.com/documents/championships/fia-formula-3-championship-1012/season/season-2022-2005',
 };
 
-export const defaultFileData: FormFileData = {
+// Database names for each supported racing series.
+export const dbNameList: DatabaseNameList = {
+	f1_2022_db: '2022_F1_WC_Docs',
+	f2_2022_db: '2022_F2_WC_Docs',
+	f3_2022_db: '2022_F3_WC_Docs',
+};
+
+// Default form data state used in FileForm component.
+export const defaultFileData: FileFormValues = {
 	series: '',
 	file: null,
 };
 
-export const defaultDocData: FormDocData = {
+// Default form data state used in DataForm component.
+export const defaultDocData: DataFormValues = {
 	series: '',
 	title: '',
 	url: '',
 };
 
-export const defaultContactData: FormContactData = {
+// Default form data state used in ContactForm component.
+export const defaultContactData: ContactFormValues = {
 	email: '',
 	message: '',
 };
