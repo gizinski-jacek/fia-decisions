@@ -4,27 +4,33 @@ import { Button } from 'react-bootstrap';
 
 interface Props {
 	drawerIsHidden: boolean;
+	screenIsSmall: boolean;
 	toggleDrawerVisiblity: () => void;
 }
 
-const DrawerControls = ({ drawerIsHidden, toggleDrawerVisiblity }: Props) => {
+const DrawerControls = ({
+	drawerIsHidden,
+	screenIsSmall,
+	toggleDrawerVisiblity,
+}: Props) => {
 	const { drawer, toggleDrawerPosition, toggleDrawerSize } =
 		useContext(DrawerContext);
 
 	return (
 		<ul
-			className={`nav nav-tabs d-none d-sm-flex flex-nowrap justify-content-between align-items-center p-2 p-md-2 gap-2 
-					${
-						drawer.onLeft && drawer.isSmall
-							? 'flex-column'
-							: drawer.onLeft && !drawer.isSmall
-							? 'flex-row'
-							: 'flex-column flex-lg-row border-start order-sm-4'
-					}`}
+			className={`nav nav-tabs d-flex flex-nowrap justify-content-between align-items-center p-2 p-md-2 gap-2 
+			${drawer.onLeft ? 'order-first' : ''}
+			${
+				drawer.onLeft && drawer.isSmall
+					? 'flex-column'
+					: drawer.onLeft && !drawer.isSmall
+					? 'flex-row'
+					: 'flex-column flex-lg-row border-start'
+			}`}
 		>
 			<li
-				className={`nav-item d-none d-sm-block 
-						${drawerIsHidden ? 'custom-btn1-show' : ''}
+				className={`nav-item 
+						${drawerIsHidden ? 'custom-btn-show' : ''}
 						${drawer.onLeft ? 'flex-grow-1' : 'order-lg-last'}`}
 			>
 				<Button
@@ -32,17 +38,21 @@ const DrawerControls = ({ drawerIsHidden, toggleDrawerVisiblity }: Props) => {
 					size='sm'
 					className='w-100 fw-bolder'
 					onClick={() =>
-						drawer.onLeft ? toggleDrawerSize() : toggleDrawerVisiblity()
+						screenIsSmall
+							? toggleDrawerVisiblity()
+							: drawer.onLeft
+							? toggleDrawerSize()
+							: toggleDrawerVisiblity()
 					}
 				>
-					{drawer.onLeft ? (
+					{screenIsSmall ? (
+						<i className='bi bi-arrow-bar-up fs-6'></i>
+					) : drawer.onLeft ? (
 						drawer.isSmall ? (
 							<i className='bi bi-arrow-bar-right fs-6'></i>
 						) : (
 							<i className='bi bi-arrow-bar-left fs-6'></i>
 						)
-					) : drawerIsHidden ? (
-						<i className='bi bi-arrow-bar-down fs-6'></i>
 					) : (
 						<i className='bi bi-arrow-bar-up fs-6'></i>
 					)}
