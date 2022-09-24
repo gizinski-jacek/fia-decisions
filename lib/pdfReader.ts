@@ -1,5 +1,6 @@
 const { PdfReader } = require('pdfreader');
 
+// Parsing PDF buffer data and returning document strings in array.
 export const readPDFPages = (buffer: Buffer): Promise<string[]> => {
 	const reader = new PdfReader();
 	return new Promise((resolve, reject) => {
@@ -16,6 +17,7 @@ export const readPDFPages = (buffer: Buffer): Promise<string[]> => {
 	});
 };
 
+// Parsing PDF files from file system and returning document strings in array.
 export const readPDFPagesWithFS = (filePath: string): Promise<string[]> => {
 	const reader = new PdfReader();
 	return new Promise((resolve, reject) => {
