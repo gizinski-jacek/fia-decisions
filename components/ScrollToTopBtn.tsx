@@ -6,9 +6,14 @@ const ScrollToTopBtn = () => {
 	const [fixed, setFixed] = useState(false);
 
 	useEffect(() => {
+		if (typeof window !== 'undefined') {
+			setFixed(window.innerWidth > 1200);
+		}
+	}, []);
+
+	useEffect(() => {
 		const toggleShowBtn = () => {
-			const scrolled = document.documentElement.scrollTop;
-			setShowBtn(scrolled > 300);
+			setShowBtn(document.documentElement.scrollTop > 300);
 		};
 
 		window.addEventListener('scroll', toggleShowBtn);
@@ -19,8 +24,7 @@ const ScrollToTopBtn = () => {
 	useEffect(() => {
 		if (typeof window !== 'undefined') {
 			const togglePosition = () => {
-				const vpWidth = window.innerWidth;
-				setFixed(vpWidth > 1200);
+				setFixed(window.innerWidth > 1200);
 			};
 
 			window.addEventListener('resize', togglePosition);
