@@ -62,6 +62,7 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/deploym
 - Grouping penalties by race weekend
 - Displaying essential information, with more available in modal form
 - Current race calendar for Formula One with track wiki links and highlighted upcoming race
+- Search penalties by driver name or penalty type
 - Contact forms to:
   - Upload PDF file of a missing penalty
   - Send bare minimum information about missing penalty
