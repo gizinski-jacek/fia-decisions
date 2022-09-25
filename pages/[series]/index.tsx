@@ -1,51 +1,140 @@
+import { useState } from 'react';
+import { useRouter } from 'next/router';
 import type { GetServerSidePropsContext, NextPage } from 'next';
 import connectMongo from '../../lib/mongo';
-import { DecisionOffenceModel, GroupedByGP } from '../../types/myTypes';
-import F1DocWrapper from '../../components/wrappers/F1DocWrapper';
 import { dbNameList } from '../../lib/myData';
-import { Accordion } from 'react-bootstrap';
-import { useRouter } from 'next/router';
+import F1DocWrapper from '../../components/wrappers/F1DocWrapper';
+import { DecisionOffenceModel, GroupedByGP } from '../../types/myTypes';
+import { Accordion, Button, Form } from 'react-bootstrap';
 
 interface Props {
 	data: GroupedByGP;
 }
 
-const F1: NextPage<Props> = ({ data }) => {
+const FormulaSeries: NextPage<Props> = ({ data }) => {
+	const [showSearchInput, setShowSearchInput] = useState(false);
+	const [searchInput, setSearchInput] = useState('');
+
 	const router = useRouter();
 
-	const renderDocs = (data: GroupedByGP) => {
-		const gpDocsArray = [];
-		for (const [key, array] of Object.entries(data)) {
-			gpDocsArray.push(
-				<Accordion key={key} id={key} className='p-0 my-2'>
-					<Accordion.Item eventKey='0'>
-						<Accordion.Header>
-							<div className='d-flex flex-column me-2 flex-sm-row w-100 align-items-center'>
-								<h4 className='me-sm-5 fw-bold'>{key}</h4>
-								<h4 className='fw-bold'>
-									{array.find((doc) => doc.weekend)?.weekend}
-								</h4>
-							</div>
-						</Accordion.Header>
-						<Accordion.Body className='bg-light'>
-							{array.map((doc) => (
-								<F1DocWrapper key={doc._id} data={doc} />
-							))}
-						</Accordion.Body>
-					</Accordion.Item>
-				</Accordion>
-			);
-		}
+	const handleShowSearchInput = () => {
+		setShowSearchInput(true);
+	};
 
+	const handleHideSearchInput = () => {
+		setSearchInput('');
+		setShowSearchInput(false);
+	};
+
+	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const { value } = e.target;
+		setSearchInput(value);
+	};
+
+	const renderDocs = (data: GroupedByGP, query: string) => {
+		const gpDocsArray = [];
+		if (query) {
+			let searchData = {} as GroupedByGP;
+			for (const [key, array] of Object.entries(data)) {
+				const filtered = array.filter(
+					(doc) =>
+						doc.penalty_type.toLowerCase().includes(query.toLowerCase()) ||
+						doc.incident_info.Driver.toLowerCase().includes(query.toLowerCase())
+				);
+				if (filtered.length === 0) {
+					continue;
+				} else {
+					searchData[key as keyof GroupedByGP] = filtered;
+				}
+			}
+			for (const [key, array] of Object.entries(searchData)) {
+				gpDocsArray.push(
+					<Accordion key={key} id={key} className='p-0 my-2'>
+						<Accordion.Item eventKey='0'>
+							<Accordion.Header>
+								<div className='d-flex flex-column me-2 flex-sm-row w-100 align-items-center'>
+									<h4 className='me-sm-5 fw-bold'>{key}</h4>
+									<h4 className='fw-bold'>
+										{array.find((doc) => doc.weekend)?.weekend}
+									</h4>
+								</div>
+							</Accordion.Header>
+							<Accordion.Body className='bg-light'>
+								{array.map((doc) => (
+									<F1DocWrapper key={doc._id} data={doc} />
+								))}
+							</Accordion.Body>
+						</Accordion.Item>
+					</Accordion>
+				);
+			}
+		} else {
+			for (const [key, array] of Object.entries(data)) {
+				gpDocsArray.push(
+					<Accordion key={key} id={key} className='p-0 my-2'>
+						<Accordion.Item eventKey='0'>
+							<Accordion.Header>
+								<div className='d-flex flex-column me-2 flex-sm-row w-100 align-items-center'>
+									<h4 className='me-sm-5 fw-bold'>{key}</h4>
+									<h4 className='fw-bold'>
+										{array.find((doc) => doc.weekend)?.weekend}
+									</h4>
+								</div>
+							</Accordion.Header>
+							<Accordion.Body className='bg-light'>
+								{array.map((doc) => (
+									<F1DocWrapper key={doc._id} data={doc} />
+								))}
+							</Accordion.Body>
+						</Accordion.Item>
+					</Accordion>
+				);
+			}
+		}
 		return gpDocsArray;
 	};
 
 	return (
-		<div className='m-2'>
+		<div className='m-2 position-relative'>
+			<div
+				className='position-sticky top-0 start-0 w-25'
+				style={{ zIndex: '5', height: '0' }}
+			>
+				{showSearchInput ? (
+					<Form>
+						<Form.Group className='d-flex'>
+							<Button variant='dark' size='sm' onClick={handleHideSearchInput}>
+								<i className='bi bi-arrow-left fs-6'></i>
+							</Button>
+							<Form.Control
+								className='p-0 mx-1'
+								type='searchInput'
+								name='text'
+								id='searchInput'
+								maxLength={32}
+								onChange={handleInputChange}
+								value={searchInput}
+								placeholder='Driver Name'
+							/>
+							<Button
+								variant='dark'
+								size='sm'
+								onClick={() => setSearchInput('')}
+							>
+								<i className='bi bi-x fs-6'></i>
+							</Button>
+						</Form.Group>
+					</Form>
+				) : (
+					<Button variant='dark' size='sm' onClick={handleShowSearchInput}>
+						<i className='bi bi-search fs-6'></i>
+					</Button>
+				)}
+			</div>
 			<h2 className='text-center text-capitalize fw-bolder fst-italic '>{`Formula ${router.query.series?.slice(
 				-1
 			)} Penalties`}</h2>
-			{renderDocs(data)}
+			{renderDocs(data, searchInput)}
 		</div>
 	);
 };
@@ -113,4 +202,4 @@ export const getServerSideProps = async (
 	}
 };
 
-export default F1;
+export default FormulaSeries;
