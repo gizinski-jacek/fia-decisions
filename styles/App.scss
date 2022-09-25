@@ -12,9 +12,17 @@
 	min-height: 100vh;
 }
 
+input#searchInput {
+	min-width: 100px;
+}
+
 nav {
 	position: static;
 	transition: 0.15s ease-in-out;
+
+	.nav-item {
+		flex-basis: 0 !important;
+	}
 
 	&.custom-sm-grid {
 		display: grid;
