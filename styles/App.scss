@@ -1,3 +1,13 @@
+:root {
+	--slide-down: 300%;
+}
+
+@media only screen and (min-width: 992px) {
+	:root {
+		--slide-down: 150%;
+	}
+}
+
 .custom-main-container {
 	min-height: 100vh;
 }
@@ -51,13 +61,7 @@ nav {
 			}
 
 			100% {
-				transform: translateY(300%) rotateX(180deg);
-			}
-		}
-
-		@media only screen and (min-width: 992px) {
-			.custom-btn-show {
-				top: -150%;
+				transform: translateY(var(--slide-down)) rotateX(180deg);
 			}
 		}
 	}
