@@ -18,7 +18,7 @@ export const config = {
 	},
 };
 
-const handler = async (req: NextApiRequest, res: NextApiResponse<string[]>) => {
+const handler = async (req: NextApiRequest, res: NextApiResponse<string|string[]>) => {
 	if (req.method === 'POST') {
 		const { form } = req.query;
 		if (form === 'file') {
