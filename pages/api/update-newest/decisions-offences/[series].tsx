@@ -204,7 +204,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 			return res.status(401);
 		}
 	}
-	return res.status(404);
+	return res.status(405).json('Method not supported.');
 };
 
 export default handler;

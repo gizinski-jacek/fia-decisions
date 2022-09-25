@@ -35,11 +35,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 					return res.status(401);
 				}
 			} catch (error) {
-				return res.status(404);
+				return res.status(405).json('Job not supported.');
 			}
 		}
 	}
-	return res.status(404);
+	return res.status(405).json('Method not supported.');
 };
 
 export default handler;
