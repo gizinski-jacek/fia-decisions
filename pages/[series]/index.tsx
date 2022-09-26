@@ -97,39 +97,33 @@ const FormulaSeries: NextPage<Props> = ({ data }) => {
 	return (
 		<div className='m-2 position-relative'>
 			<div
-				className='position-sticky top-0 start-0 w-25'
-				style={{ zIndex: '5', height: '0' }}
+				className={`position-sticky top-0 start-0 w-25 custom-search 
+				${showSearchInput ? 'expanded' : ''}`}
 			>
-				{showSearchInput ? (
-					<Form>
-						<Form.Group className='d-flex'>
-							<Button variant='dark' size='sm' onClick={handleHideSearchInput}>
-								<i className='bi bi-arrow-left fs-6'></i>
-							</Button>
-							<Form.Control
-								className='p-0 mx-1'
-								type='searchInput'
-								name='text'
-								id='searchInput'
-								maxLength={32}
-								onChange={handleInputChange}
-								value={searchInput}
-								placeholder='Driver Name'
-							/>
-							<Button
-								variant='dark'
-								size='sm'
-								onClick={() => setSearchInput('')}
-							>
-								<i className='bi bi-x fs-6'></i>
-							</Button>
-						</Form.Group>
-					</Form>
-				) : (
-					<Button variant='dark' size='sm' onClick={handleShowSearchInput}>
-						<i className='bi bi-search fs-6'></i>
-					</Button>
-				)}
+				<Button variant='dark' size='sm' onClick={handleShowSearchInput}>
+					<i className='bi bi-search fs-6'></i>
+				</Button>
+				<Form>
+					<Form.Group className='d-flex'>
+						<Button variant='dark' size='sm' onClick={handleHideSearchInput}>
+							<i className='bi bi-arrow-left fs-6'></i>
+						</Button>
+						<Form.Control
+							className='py-0 px-2 mx-1'
+							type='text'
+							name='searchInput'
+							id='searchInput'
+							maxLength={32}
+							onChange={handleInputChange}
+							value={searchInput}
+							placeholder='Driver Name'
+							disabled={!showSearchInput}
+						/>
+						<Button variant='dark' size='sm' onClick={() => setSearchInput('')}>
+							<i className='bi bi-x fs-6'></i>
+						</Button>
+					</Form.Group>
+				</Form>
 			</div>
 			<h2 className='text-center text-capitalize fw-bolder fst-italic '>{`Formula ${router.query.series?.slice(
 				-1
@@ -181,7 +175,7 @@ export const getServerSideProps = async (
 			};
 		} else {
 			return {
-				props: { data: [] },
+				notFound: true,
 			};
 		}
 		const conn = await connectMongo(seriesDB);
