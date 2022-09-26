@@ -2,12 +2,12 @@ import { useState, useRef } from 'react';
 import { Button, Form } from 'react-bootstrap';
 import axios, { AxiosError } from 'axios';
 import { ContactFormValues } from '../../types/myTypes';
-import { defaultContactData } from '../../lib/myData';
+import { defaultContactValues } from '../../lib/myData';
 import LoadingBar from '../LoadingBar';
 
 const ContactForm = () => {
 	const [formData, setFormData] =
-		useState<ContactFormValues>(defaultContactData);
+		useState<ContactFormValues>(defaultContactValues);
 	const [formErrors, setFormErrors] = useState<string[]>([]);
 	const [sending, setSending] = useState(false);
 	const [submitSuccess, setSubmitSuccess] = useState(false);
@@ -34,7 +34,7 @@ const ContactForm = () => {
 			}
 			setSending(true);
 			await axios.post('/api/forms/contact', uploadData, { timeout: 15000 });
-			setFormData(defaultContactData);
+			setFormData(defaultContactValues);
 			formRef.current?.reset();
 			setSubmitSuccess(true);
 			setSending(false);
@@ -80,6 +80,7 @@ const ContactForm = () => {
 						value={formData.email}
 						placeholder='Email'
 						disabled={sending}
+						required
 						aria-describedby='emailInputHelpText'
 					/>
 					<Form.Text muted id='emailInputHelpText'>
@@ -111,6 +112,7 @@ const ContactForm = () => {
 						value={formData.message}
 						placeholder='Message'
 						disabled={sending}
+						required
 						aria-describedby='messageInputHelpText'
 					/>
 					<Form.Text muted id='messageInputHelpText'>

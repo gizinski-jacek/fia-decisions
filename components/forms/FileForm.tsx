@@ -2,11 +2,11 @@ import { useRef, useState } from 'react';
 import { Button, Form } from 'react-bootstrap';
 import axios, { AxiosError } from 'axios';
 import { FileFormValues } from '../../types/myTypes';
-import { defaultFileData } from '../../lib/myData';
+import { defaultFileValues } from '../../lib/myData';
 import LoadingBar from '../LoadingBar';
 
 const FileForm = () => {
-	const [formData, setFormData] = useState<FileFormValues>(defaultFileData);
+	const [formData, setFormData] = useState<FileFormValues>(defaultFileValues);
 	const [formErrors, setFormErrors] = useState<string[]>([]);
 	const [sending, setSending] = useState(false);
 	const [submitSuccess, setSubmitSuccess] = useState(false);
@@ -60,7 +60,7 @@ const FileForm = () => {
 				uploadData,
 				{ timeout: 15000 }
 			);
-			setFormData(defaultFileData);
+			setFormData(defaultFileValues);
 			formRef.current?.reset();
 			setSubmitSuccess(true);
 			setSending(false);
@@ -117,6 +117,7 @@ const FileForm = () => {
 						onChange={handleSelectChange}
 						value={formData.series}
 						disabled={sending}
+						required
 					>
 						<option value=''>Choose Formula series</option>
 						<option value='formula1'>Formula 1</option>
@@ -142,6 +143,7 @@ const FileForm = () => {
 						accept='.pdf'
 						onChange={handleFileChange}
 						disabled={sending}
+						required
 						aria-describedby='fileSelectHelpText'
 					/>
 					<Form.Text muted id='fileSelectHelpText'>
@@ -175,7 +177,6 @@ const FileForm = () => {
 			<div className='w-100 text-end'>
 				<Button
 					variant='primary'
-					type='submit'
 					className='fw-bolder'
 					disabled={sending}
 					onClick={handleSubmit}
