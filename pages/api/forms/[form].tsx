@@ -1,7 +1,7 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next';
 import connectMongo from '../../../lib/mongo';
-import { dbNameList } from '../../../lib/myData';
+import { dbNameList, supportedSeries } from '../../../lib/myData';
 import multiparty from 'multiparty';
 import { parseFields } from '../../../lib/multiparty';
 import { streamToBuffer } from '../../../lib/streamToBuffer';
@@ -9,7 +9,14 @@ import { readPDFPages } from '../../../lib/pdfReader';
 import { transformToDecOffDoc } from '../../../lib/transformToDecOffDoc';
 import * as Yup from 'yup';
 import yupValidation from '../../../lib/yup';
-import { ContactFormValues } from '../../../types/myTypes';
+import {
+	ContactDocModel,
+	ContactFormValues,
+	DashboardFormValues,
+	DataFormValues,
+	MissingDocModel,
+} from '../../../types/myTypes';
+import jwt from 'jsonwebtoken';
 
 export const config = {
 	api: {
@@ -20,26 +27,25 @@ export const config = {
 
 const handler = async (
 	req: NextApiRequest,
-	res: NextApiResponse<string | string[]>
+	res: NextApiResponse<
+		| string
+		| string[]
+		| { missing: MissingDocModel[]; contact: ContactDocModel[] }
+	>
 ) => {
 	if (req.method === 'POST') {
 		const { form } = req.query;
 		if (form === 'file') {
 			try {
-				const { series } = req.query;
-				let seriesDB = '';
-				if (series === 'formula1') {
-					seriesDB = dbNameList.f1_2022_db;
-				} else if (series === 'formula2') {
-					seriesDB = dbNameList.f2_2022_db;
-				} else if (series === 'formula3') {
-					seriesDB = dbNameList.f3_2022_db;
-				} else {
-					return res.status(422).json(['Unsupported series.']);
-				}
-
+				const { series } = req.query as { series: string };
 				if (!series) {
-					return res.status(422).json(['Must choose a Series.']);
+					return res.status(422).json(['Series is required.']);
+				}
+				const seriesDB = supportedSeries.find(
+					(s) => s.toLowerCase() === series.toLowerCase()
+				);
+				if (!seriesDB) {
+					return res.status(422).json(['Series is not supported.']);
 				}
 
 				const form = new multiparty.Form();
@@ -73,6 +79,7 @@ const handler = async (
 					if (!part) {
 						return res.status(422).json(['Must choose a PDF file.']);
 					}
+
 					const fileBuffer = await streamToBuffer(part);
 					const pdfData = await readPDFPages(fileBuffer);
 					const transformed = transformToDecOffDoc(
@@ -118,11 +125,6 @@ const handler = async (
 		if (form === 'data') {
 			try {
 				const fields = await parseFields(req);
-				if (!fields.title && !fields.url) {
-					return res
-						.status(422)
-						.json(['Must provide at least a Title or a Link / URL.']);
-				}
 				const { errors } = await yupValidation(
 					dataFormValidationSchema,
 					fields
@@ -141,9 +143,6 @@ const handler = async (
 		if (form === 'contact') {
 			try {
 				const fields = await parseFields(req);
-				if (!fields.email && !fields.message) {
-					return res.status(422).json(['Must provide an Email and a Message.']);
-				}
 				const { errors } = await yupValidation(
 					contactFormValidationSchema,
 					fields
@@ -159,14 +158,66 @@ const handler = async (
 				return res.status(500).json(['Unknown server error.']);
 			}
 		}
+		if (form === 'dashboard') {
+			if (
+				!process.env.DASHBOARD_ACCESS_PASSWORD ||
+				!process.env.PAYLOAD_STRING ||
+				!process.env.JWT_STRATEGY_SECRET
+			) {
+				throw new Error(
+					'Please define DASHBOARD_ACCESS_PASSWORD, PAYLOAD_STRING and JWT_STRATEGY_SECRET environment variables inside .env.local'
+				);
+			}
+			try {
+				const fields = await parseFields(req);
+				const { errors } = await yupValidation(
+					dashboardFormValidationSchema,
+					fields
+				);
+				if (errors) {
+					return res.status(422).json(errors);
+				}
+				if (fields.password !== process.env.DASHBOARD_ACCESS_PASSWORD) {
+					return res.status(403).json(['Password is incorrect.']);
+				}
+				const conn = await connectMongo(dbNameList.other_documents_db);
+				const [missing, contact]: [MissingDocModel[], ContactDocModel[]] =
+					await Promise.all([
+						conn.models.Missing_Doc.find({}).exec(),
+						conn.models.Contact_Doc.find({}).exec(),
+					]);
+				const token = jwt.sign(
+					process.env.PAYLOAD_STRING,
+					process.env.JWT_STRATEGY_SECRET
+				);
+				res.setHeader(
+					'Set-Cookie',
+					`token=${token}; Path=/; httpOnly=true; SameSite=strict; Secure=true; Max-Age=900` // 15 minutes
+				);
+				return res.status(200).json({ missing: missing, contact: contact });
+			} catch (error) {
+				return res.status(500).json(['Unknown server error.']);
+			}
+		}
 	}
 	return res.status(405).json('Method not supported.');
 };
 
 export default handler;
 
-const dataFormValidationSchema: Yup.SchemaOf<{ title: string; url: string }> =
+// Forms need fixing
+const dataFormValidationSchema: Yup.SchemaOf<DataFormValues> =
 	Yup.object().shape({
+		series: Yup.string()
+			.required('Series is is required.')
+			.test('is-supported-series', 'Series is not supported.', (val, ctx) => {
+				if (!val) return false;
+				return supportedSeries.find(
+					(s) => s.toLowerCase() === val.toLowerCase()
+				)
+					? true
+					: false;
+			}),
 		title: Yup.string()
 			.required('Title is required.')
 			.min(4, 'Title min 8 characters.')
@@ -189,4 +240,12 @@ const contactFormValidationSchema: Yup.SchemaOf<ContactFormValues> =
 			.required('Message is required.')
 			.min(4, 'Message min 4 characters.')
 			.max(512, 'Message max 512 characters.'),
+	});
+
+const dashboardFormValidationSchema: Yup.SchemaOf<DashboardFormValues> =
+	Yup.object().shape({
+		password: Yup.string()
+			.required('Password is required.')
+			.min(8, 'Password min 8 characters.')
+			.max(64, 'Password max 64 characters.'),
 	});
