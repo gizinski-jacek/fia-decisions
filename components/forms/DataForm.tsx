@@ -2,11 +2,11 @@ import { useState, useRef } from 'react';
 import { Button, Form } from 'react-bootstrap';
 import axios, { AxiosError } from 'axios';
 import { DataFormValues } from '../../types/myTypes';
-import { defaultDocData } from '../../lib/myData';
+import { defaultDocValues } from '../../lib/myData';
 import LoadingBar from '../LoadingBar';
 
 const DataForm = () => {
-	const [formData, setFormData] = useState<DataFormValues>(defaultDocData);
+	const [formData, setFormData] = useState<DataFormValues>(defaultDocValues);
 	const [formErrors, setFormErrors] = useState<string[]>([]);
 	const [sending, setSending] = useState(false);
 	const [submitSuccess, setSubmitSuccess] = useState(false);
@@ -23,8 +23,10 @@ const DataForm = () => {
 		setSubmitSuccess(false);
 		setFormErrors([]);
 		try {
-			if (!formData.title && !formData.url) {
-				setFormErrors(['Must provide at least a Title or a Link / URL.']);
+			if (!formData.series || (!formData.title && !formData.url)) {
+				setFormErrors([
+					'Must choose a Series and provide at least a Title or a Link / URL.',
+				]);
 				return;
 			}
 			const uploadData = new FormData();
@@ -33,7 +35,7 @@ const DataForm = () => {
 			}
 			setSending(true);
 			await axios.post('/api/forms/data', uploadData, { timeout: 15000 });
-			setFormData(defaultDocData);
+			setFormData(defaultDocValues);
 			formRef.current?.reset();
 			setSubmitSuccess(true);
 			setSending(false);
@@ -62,11 +64,19 @@ const DataForm = () => {
 						Select series
 					</Form.Label>
 					<Form.Select
+						className={
+							formErrors.length > 0 && !formData.series
+								? 'outline-error'
+								: !formData.series
+								? 'outline-warning'
+								: 'outline-success'
+						}
 						name='series'
 						id='series'
 						onChange={handleInputChange}
 						value={formData.series}
 						disabled={sending}
+						required
 					>
 						<option value=''>Choose Formula series</option>
 						<option value='formula1'>Formula 1</option>
@@ -104,6 +114,7 @@ const DataForm = () => {
 						value={formData.title}
 						placeholder='Title'
 						disabled={sending}
+						required={(formData.url && formData.url?.length > 0) || true}
 						aria-describedby='titleInputHelpText'
 					/>
 					<Form.Text muted id='titleInputHelpText'>
@@ -137,6 +148,7 @@ const DataForm = () => {
 						value={formData.url}
 						placeholder='Link / URL'
 						disabled={sending}
+						required={(formData.title && formData.title?.length > 0) || true}
 						aria-describedby='urlInputHelpText'
 					/>
 					<Form.Text muted id='urlInputHelpText'>
