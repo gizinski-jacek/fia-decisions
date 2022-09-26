@@ -196,7 +196,6 @@ const DrawerUtilities = ({ screenIsSmall }: Props) => {
 					<Modal.Title className='d-flex gap-5 me-2'>
 						<Button
 							variant={`success ${displayedForm === 'file' ? 'active' : ''}`}
-							type='submit'
 							className='fw-bolder'
 							onClick={() => handleChangeForm('file')}
 						>
@@ -204,7 +203,6 @@ const DrawerUtilities = ({ screenIsSmall }: Props) => {
 						</Button>
 						<Button
 							variant={`success ${displayedForm === 'data' ? 'active' : ''}`}
-							type='submit'
 							className='fw-bolder'
 							onClick={() => handleChangeForm('data')}
 						>
@@ -212,7 +210,6 @@ const DrawerUtilities = ({ screenIsSmall }: Props) => {
 						</Button>
 						<Button
 							variant={`success ${displayedForm === 'contact' ? 'active' : ''}`}
-							type='submit'
 							className='fw-bolder'
 							onClick={() => handleChangeForm('contact')}
 						>
