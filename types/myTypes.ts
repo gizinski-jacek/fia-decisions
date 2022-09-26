@@ -45,6 +45,7 @@ export interface DatabaseNameList {
 	f1_2022_db: string;
 	f2_2022_db: string;
 	f3_2022_db: string;
+	other_documents_db: string;
 }
 
 export interface FiaPageList {
@@ -94,4 +95,7 @@ export interface WeekendData {
 
 export interface PenaltyColors {
 	[key: string]: { color: string; backgroundColor: string };
+}
+export interface DashboardFormValues {
+	password: string;
 }
