@@ -25,7 +25,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 			authorization ===
 			`Bearer ${process.env.CRON_JOB_UPDATE_ALL_DOCS_WITH_FS_SECRET}`
 		) {
-			const { series } = req.query;
+			const { series } = req.query as { series: string };
 			let seriesDB = '';
 			let seriesPageURL = '';
 			if (series === 'formula1') {
