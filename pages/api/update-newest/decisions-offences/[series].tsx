@@ -12,7 +12,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 	if (req.method === 'GET') {
 		if (!process.env.CRON_JOB_SECRET) {
 			throw new Error(
-				'Please define CRON_JOB_SECRET environment variables inside .env.local'
+				'Please define CRON_JOB_SECRET environment variable inside .env.local'
 			);
 		}
 		const { authorization } = req.headers;
