@@ -12,8 +12,38 @@
 	min-height: 100vh;
 }
 
-input#searchInput {
-	min-width: 100px;
+.custom-search {
+	height: 0;
+
+	> button {
+		position: relative;
+		z-index: 3;
+		transition: 0.3s ease;
+		transform-origin: left;
+	}
+
+	form {
+		position: absolute;
+		top: 0;
+		left: 0;
+		transform-origin: left;
+		transition: 0.3s ease;
+		transform: scaleX(0);
+
+		input {
+			min-width: 100px;
+		}
+	}
+
+	&.expanded {
+		> button {
+			transform: scaleX(0);
+		}
+
+		form {
+			transform: scaleX(1);
+		}
+	}
 }
 
 nav {
