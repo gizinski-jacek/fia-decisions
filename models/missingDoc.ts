@@ -5,24 +5,13 @@ const Schema = mongoose.Schema;
 
 const Missing_Doc = new Schema<MissingDocModel>(
 	{
-		series: { type: String, trim: true },
-		title: {
-			type: String,
-			trim: true,
-			minlength: 8,
-			maxlength: 256,
-			required: function (this: MissingDocModel) {
-				return !this.url;
-			},
-		},
-		url: {
+		series: { type: String, trim: true, required: true },
+		description: {
 			type: String,
 			trim: true,
 			minlength: 16,
 			maxlength: 256,
-			required: function (this: MissingDocModel) {
-				return !this.title;
-			},
+			required: true,
 		},
 	},
 	{ timestamps: true }
