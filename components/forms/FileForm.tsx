@@ -2,11 +2,13 @@ import { useRef, useState } from 'react';
 import { Button, Form } from 'react-bootstrap';
 import axios, { AxiosError } from 'axios';
 import { FileFormValues } from '../../types/myTypes';
-import { defaultFileValues } from '../../lib/myData';
+import { defaultFileFormValues, supportedSeries } from '../../lib/myData';
 import LoadingBar from '../LoadingBar';
 
 const FileForm = () => {
-	const [formData, setFormData] = useState<FileFormValues>(defaultFileValues);
+	const [formData, setFormData] = useState<FileFormValues>(
+		defaultFileFormValues
+	);
 	const [formErrors, setFormErrors] = useState<string[]>([]);
 	const [sending, setSending] = useState(false);
 	const [submitSuccess, setSubmitSuccess] = useState(false);
@@ -60,7 +62,7 @@ const FileForm = () => {
 				uploadData,
 				{ timeout: 15000 }
 			);
-			setFormData(defaultFileValues);
+			setFormData(defaultFileFormValues);
 			formRef.current?.reset();
 			setSubmitSuccess(true);
 			setSending(false);
@@ -120,9 +122,11 @@ const FileForm = () => {
 						required
 					>
 						<option value=''>Choose Formula series</option>
-						<option value='formula1'>Formula 1</option>
-						<option value='formula2'>Formula 2</option>
-						<option value='formula3'>Formula 3</option>
+						{supportedSeries.map((s, i) => (
+							<option key={i} value={s} className='text-capitalize'>
+								{s.replace('_', ' ')}
+							</option>
+						))}
 					</Form.Select>
 				</Form.Group>
 				<Form.Group>
@@ -149,30 +153,30 @@ const FileForm = () => {
 					<Form.Text muted id='fileSelectHelpText'>
 						Only PDF files, max size 1MB
 					</Form.Text>
-					{formErrors.length > 0 && (
-						<div className='m-0 mt-4 alert alert-danger alert-dismissible'>
-							{formErrors.map((message, index) => (
-								<div key={index}>{message}</div>
-							))}
-							<button
-								type='button'
-								className='btn btn-close'
-								onClick={() => setFormErrors([])}
-							></button>
-						</div>
-					)}
-					{submitSuccess && (
-						<div className='m-0 mt-4 alert alert-success alert-dismissible'>
-							<strong>File submitted successfully!</strong>
-							<button
-								type='button'
-								className='btn btn-close'
-								onClick={() => setSubmitSuccess(false)}
-							></button>
-						</div>
-					)}
-					{sending && <LoadingBar />}
 				</Form.Group>
+				{formErrors.length > 0 && (
+					<div className='m-0 mt-4 alert alert-danger alert-dismissible'>
+						{formErrors.map((message, index) => (
+							<div key={index}>{message}</div>
+						))}
+						<button
+							type='button'
+							className='btn btn-close'
+							onClick={() => setFormErrors([])}
+						></button>
+					</div>
+				)}
+				{submitSuccess && (
+					<div className='m-0 mt-4 alert alert-success alert-dismissible'>
+						<strong>File submitted successfully!</strong>
+						<button
+							type='button'
+							className='btn btn-close'
+							onClick={() => setSubmitSuccess(false)}
+						></button>
+					</div>
+				)}
+				{sending && <LoadingBar />}
 			</div>
 			<div className='w-100 text-end'>
 				<Button
