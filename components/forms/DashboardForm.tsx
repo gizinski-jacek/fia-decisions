@@ -1,23 +1,17 @@
 import { useRef, useState } from 'react';
 import { Button, Form } from 'react-bootstrap';
-import { defaultDashboardValues } from '../../lib/myData';
-import {
-	ContactDocModel,
-	DashboardFormValues,
-	MissingDocModel,
-} from '../../types/myTypes';
+import { defaultDashboardFormValues } from '../../lib/myData';
+import { DashboardFormValues } from '../../types/myTypes';
 import axios, { AxiosError } from 'axios';
+import LoadingBar from '../LoadingBar';
 
 interface Props {
-	handleSignIn: (data: {
-		missing: MissingDocModel[];
-		contact: ContactDocModel[];
-	}) => void;
+	handleSignIn: () => void;
 }
 
 const DashboardForm = ({ handleSignIn }: Props) => {
 	const [formData, setFormData] = useState<DashboardFormValues>(
-		defaultDashboardValues
+		defaultDashboardFormValues
 	);
 	const [formErrors, setFormErrors] = useState<string[]>([]);
 	const [sending, setSending] = useState(false);
@@ -43,11 +37,11 @@ const DashboardForm = ({ handleSignIn }: Props) => {
 				uploadData.append(key, value);
 			}
 			setSending(true);
-			const res = await axios.post('/api/forms/dashboard', uploadData, {
+			await axios.post('/api/forms/dashboard-sign-in', uploadData, {
 				timeout: 15000,
 			});
 			setSending(false);
-			handleSignIn(res.data);
+			handleSignIn();
 		} catch (error) {
 			setSending(false);
 			if (error instanceof AxiosError) {
@@ -63,17 +57,17 @@ const DashboardForm = ({ handleSignIn }: Props) => {
 	return (
 		<Form
 			ref={formRef}
-			className='my-5 text-center d-flex flex-column justify-content-center align-items-center'
+			className='w-50 mx-auto my-5 px-5 bg-light rounded text-center d-flex flex-column justify-content-center align-items-center'
 		>
 			<h2 className='my-5'>Dashboard Access</h2>
 			<Form.Group>
 				<Form.Label htmlFor=''>Dashboard Password</Form.Label>
 				<Form.Control
 					className={`${
-						formErrors.length > 0 ||
-						formData.password.length < 8 ||
-						formData.password.length > 64
+						formErrors.length > 0 && formData.password
 							? 'outline-error'
+							: formData.password.length < 8 || formData.password.length > 64
+							? 'outline-warning'
 							: 'outline-success'
 					}`}
 					type='password'
@@ -84,24 +78,27 @@ const DashboardForm = ({ handleSignIn }: Props) => {
 					onChange={handleInputChange}
 					value={formData.password}
 					placeholder='Password'
+					disabled={sending}
+					required
 					aria-describedby='dashboardPasswordInputHelpText'
 				/>
 				<Form.Text muted id='dashboardPasswordInputHelpText'>
 					Password 8-64 characters long
 				</Form.Text>
-				{formErrors.length > 0 && (
-					<div className='m-0 mt-4 alert alert-danger alert-dismissible'>
-						{formErrors.map((message, index) => (
-							<div key={index}>{message}</div>
-						))}
-						<button
-							type='button'
-							className='btn btn-close'
-							onClick={() => setFormErrors([])}
-						></button>
-					</div>
-				)}
 			</Form.Group>
+			{formErrors.length > 0 && (
+				<div className='m-0 mt-4 alert alert-danger alert-dismissible'>
+					{formErrors.map((message, index) => (
+						<div key={index}>{message}</div>
+					))}
+					<button
+						type='button'
+						className='btn btn-close'
+						onClick={() => setFormErrors([])}
+					></button>
+				</div>
+			)}
+			{sending && <LoadingBar />}
 			<Button
 				variant='dark'
 				className='fw-bolder my-3'
