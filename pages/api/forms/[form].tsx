@@ -1,7 +1,7 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next';
 import connectMongo from '../../../lib/mongo';
-import { dbNameList, supportedSeries } from '../../../lib/myData';
+import { supportedSeries } from '../../../lib/myData';
 import multiparty from 'multiparty';
 import { parseFields } from '../../../lib/multiparty';
 import { streamToBuffer } from '../../../lib/streamToBuffer';
@@ -31,6 +31,7 @@ const handler = async (
 		| string
 		| string[]
 		| { missing: MissingDocModel[]; contact: ContactDocModel[] }
+		| { success: boolean }
 	>
 ) => {
 	if (req.method === 'POST') {
@@ -85,7 +86,7 @@ const handler = async (
 					const transformed = transformToDecOffDoc(
 						part.filename,
 						pdfData as any,
-						req.query.series as 'formula1' | 'formula2' | 'formula3'
+						series as 'formula1' | 'formula2' | 'formula3'
 					);
 					try {
 						const conn = await connectMongo(seriesDB);
@@ -158,7 +159,7 @@ const handler = async (
 				return res.status(500).json(['Unknown server error.']);
 			}
 		}
-		if (form === 'dashboard') {
+		if (form === 'dashboard-sign-in') {
 			if (
 				!process.env.DASHBOARD_ACCESS_PASSWORD ||
 				!process.env.PAYLOAD_STRING ||
@@ -180,12 +181,6 @@ const handler = async (
 				if (fields.password !== process.env.DASHBOARD_ACCESS_PASSWORD) {
 					return res.status(403).json(['Password is incorrect.']);
 				}
-				const conn = await connectMongo(dbNameList.other_documents_db);
-				const [missing, contact]: [MissingDocModel[], ContactDocModel[]] =
-					await Promise.all([
-						conn.models.Missing_Doc.find({}).exec(),
-						conn.models.Contact_Doc.find({}).exec(),
-					]);
 				const token = jwt.sign(
 					process.env.PAYLOAD_STRING,
 					process.env.JWT_STRATEGY_SECRET
@@ -194,7 +189,7 @@ const handler = async (
 					'Set-Cookie',
 					`token=${token}; Path=/; httpOnly=true; SameSite=strict; Secure=true; Max-Age=900` // 15 minutes
 				);
-				return res.status(200).json({ missing: missing, contact: contact });
+				return res.status(200).json({ success: true });
 			} catch (error) {
 				return res.status(500).json(['Unknown server error.']);
 			}
@@ -205,7 +200,6 @@ const handler = async (
 
 export default handler;
 
-// Forms need fixing
 const dataFormValidationSchema: Yup.SchemaOf<DataFormValues> =
 	Yup.object().shape({
 		series: Yup.string()
@@ -218,22 +212,17 @@ const dataFormValidationSchema: Yup.SchemaOf<DataFormValues> =
 					? true
 					: false;
 			}),
-		title: Yup.string()
-			.required('Title is required.')
-			.min(4, 'Title min 8 characters.')
-			.max(32, 'Title max 256 characters.'),
-		url: Yup.string()
-			.required('Link / URL is required.')
-			.min(4, 'Link / URL min 16 characters.')
-			.max(32, 'Link / URL max 256 characters.')
-			.url('Link / URL is invalid.'),
+		description: Yup.string()
+			.required('Description is is required.')
+			.min(16, 'Description min 16 characters.')
+			.max(256, 'Description max 256 characters.'),
 	});
 
 const contactFormValidationSchema: Yup.SchemaOf<ContactFormValues> =
 	Yup.object().shape({
 		email: Yup.string()
 			.required('Email is required.')
-			.min(8, 'Email min 4 characters.')
+			.min(8, 'Email min 8 characters.')
 			.max(64, 'Email max 64 characters.')
 			.email('Email is invalid.'),
 		message: Yup.string()
