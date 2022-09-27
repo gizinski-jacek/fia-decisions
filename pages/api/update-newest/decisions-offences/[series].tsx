@@ -142,7 +142,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 				});
 
 				if (allDocsHref.length === 0) {
-					console.log('Documents are up to date.');
+					console.log('Documents are up to date. Exiting.');
 					return res.status(200).json('Documents are up to date.');
 				}
 				console.log(`Number of new scrapped documents: ${allDocsHref.length}.`);
