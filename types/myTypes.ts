@@ -61,8 +61,7 @@ export interface FileFormValues {
 
 export interface DataFormValues {
 	series: string;
-	title?: string;
-	url?: string;
+	description: string;
 }
 
 export interface MissingDocModel extends DataFormValues {
