@@ -206,7 +206,7 @@ const DrawerUtilities = ({ screenIsSmall }: Props) => {
 							className='fw-bolder'
 							onClick={() => handleChangeForm('data')}
 						>
-							Send Data
+							Send Info
 						</Button>
 						<Button
 							variant={`success ${displayedForm === 'contact' ? 'active' : ''}`}
