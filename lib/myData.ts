@@ -20,7 +20,11 @@ export const fiaPageList: FiaPageList = {
 		'https://www.fia.com/documents/championships/fia-formula-3-championship-1012/season/season-2022-2005',
 };
 
-export const supportedSeries: string[] = ['formula1', 'formula2', 'formula3'];
+export const supportedSeries: string[] = [
+	'Formula_1',
+	'Formula_2',
+	'Formula_3',
+];
 
 // Database names for each supported racing series.
 export const dbNameList: DatabaseNameList = {
@@ -31,24 +35,23 @@ export const dbNameList: DatabaseNameList = {
 };
 
 // Default form data state used in FileForm component.
-export const defaultFileValues: FileFormValues = {
+export const defaultFileFormValues: FileFormValues = {
 	series: '',
 	file: null,
 };
 
 // Default form data state used in DataForm component.
-export const defaultDocValues: DataFormValues = {
+export const defaultDataFormValues: DataFormValues = {
 	series: '',
-	title: '',
-	url: '',
+	description: '',
 };
 
 // Default form data state used in ContactForm component.
-export const defaultContactValues: ContactFormValues = {
+export const defaultContactFormValues: ContactFormValues = {
 	email: '',
 	message: '',
 };
 
-export const defaultDashboardValues: DashboardFormValues = {
+export const defaultDashboardFormValues: DashboardFormValues = {
 	password: '',
 };
