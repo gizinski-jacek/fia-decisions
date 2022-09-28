@@ -40,25 +40,35 @@ const DataForm = () => {
 			formRef.current?.reset();
 			setSubmitSuccess(true);
 			setSending(false);
-		} catch (error) {
+		} catch (error: any) {
 			setSubmitSuccess(false);
 			setSending(false);
 			if (error instanceof AxiosError) {
 				Array.isArray(error?.response?.data)
-					? setFormErrors(error?.response?.data || ['Unknown server error.'])
-					: setFormErrors([error?.response?.data || 'Unknown server error.']);
+					? setFormErrors(
+							error?.response?.data || [
+								'Unknown server error. If it is a reoccuring error, please use the Contact form to report this issue.',
+							]
+					  )
+					: setFormErrors([
+							error?.response?.data ||
+								'Unknown server error. If it is a reoccuring error, please use the Contact form to report this issue.',
+					  ]);
 			} else {
-				setFormErrors([(error as Error).message || 'Unknown server error.']);
+				setFormErrors([
+					(error as Error).message ||
+						'Unknown server error. If it is a reoccuring error, please use the Contact form to report this issue.',
+				]);
 			}
 		}
 	};
 
 	return (
 		<Form ref={formRef}>
-			<h4>
+			<h5>
 				Use this form to provide information about a penalty You believe is
 				missing from the list.
-			</h4>
+			</h5>
 			<div className='p-3 my-3 rounded-2 bg-light'>
 				<Form.Group className='mb-3'>
 					<Form.Label htmlFor='series' className='fw-bolder'>
@@ -81,15 +91,15 @@ const DataForm = () => {
 					>
 						<option value=''>Choose Formula series</option>
 						{supportedSeries.map((s, i) => (
-							<option key={i} value={s} className='text-capitalize'>
-								{s.replace('_', ' ')}
+							<option key={i} value={s}>
+								{s.replace('formula', 'Formula ')}
 							</option>
 						))}
 					</Form.Select>
 				</Form.Group>
 				<Form.Group>
 					<Form.Label htmlFor='title' className='fw-bolder'>
-						Description or Link
+						Penalty Description
 					</Form.Label>
 					<Form.Control
 						as='textarea'
@@ -98,7 +108,7 @@ const DataForm = () => {
 								? 'outline-error'
 								: !formData.description ||
 								  formData.description.length < 16 ||
-								  formData.description.length > 256
+								  formData.description.length > 512
 								? 'outline-warning'
 								: 'outline-success'
 						}
@@ -106,17 +116,17 @@ const DataForm = () => {
 						name='description'
 						id='description'
 						minLength={8}
-						maxLength={256}
-						rows={formData.description.length <= 128 ? 5 : 7}
+						maxLength={512}
+						rows={formData.description.length <= 256 ? 6 : 12}
 						onChange={handleInputChange}
 						value={formData.description}
-						placeholder='Description or Link'
+						placeholder='Description, Title or Link'
 						disabled={sending}
 						required
-						aria-describedby='descriptionInputHelpText'
+						aria-describedby='informationInputHelpText'
 					/>
-					<Form.Text muted id='descriptionInputHelpText'>
-						16-256 characters long
+					<Form.Text muted id='informationInputHelpText'>
+						Description 16-512 characters long
 					</Form.Text>
 				</Form.Group>
 				{formErrors.length > 0 && (
