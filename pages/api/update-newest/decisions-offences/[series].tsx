@@ -59,13 +59,20 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 							}
 						);
 						return res.status(200).json('Request for update accepted.');
-					} catch (error) {
+					} catch (error: any) {
 						if (error instanceof AxiosError) {
 							return res
 								.status(error?.response?.status || 500)
-								.json(error?.response?.data || 'Unknown server error.');
+								.json(
+									error?.response?.data ||
+										'Unknown server error. If it is a reoccuring error, please use the Contact form to report this issue.'
+								);
 						} else {
-							return res.status(500).json('Unknown server error.');
+							return res
+								.status(500)
+								.json(
+									'Unknown server error. If it is a reoccuring error, please use the Contact form to report this issue.'
+								);
 						}
 					}
 				}
@@ -182,7 +189,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 										manual_upload: false,
 									});
 									resolve(null);
-								} catch (error) {
+								} catch (error: any) {
 									reject(error);
 								}
 							})
@@ -191,20 +198,28 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 
 				console.log('Finished updating.');
 				return res.status(200).json('Finished updating.');
-			} catch (error) {
+			} catch (error: any) {
 				if (error instanceof AxiosError) {
 					return res
 						.status(error?.response?.status || 500)
-						.json(error?.response?.data || 'Unknown server error.');
+						.json(
+							error?.response?.data ||
+								'Unknown server error. If it is a reoccuring error, please use the Contact form to report this issue.'
+						);
 				} else {
-					return res.status(500).json('Unknown server error.');
+					return res
+						.status(500)
+						.json(
+							'Unknown server error. If it is a reoccuring error, please use the Contact form to report this issue.'
+						);
 				}
 			}
 		} else {
-			return res.status(401);
+			return res.status(401).end();
 		}
+	} else {
+		return res.status(405).end();
 	}
-	return res.status(405).json('Method not supported.');
 };
 
 export default handler;

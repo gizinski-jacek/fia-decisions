@@ -167,7 +167,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 											}
 										});
 										resolve(null);
-									} catch (error) {
+									} catch (error: any) {
 										fs.unlink(file.path, (error) => {
 											if (error) {
 												throw error;
@@ -176,7 +176,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 										reject(error);
 									}
 								});
-							} catch (error) {
+							} catch (error: any) {
 								reject(error);
 							}
 						})
@@ -190,20 +190,28 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 					.json(
 						'Request to update all files using file system accepted. This might take a while.'
 					);
-			} catch (error) {
+			} catch (error: any) {
 				if (error instanceof AxiosError) {
 					return res
 						.status(error?.response?.status || 500)
-						.json(error?.response?.data || 'Unknown server error.');
+						.json(
+							error?.response?.data ||
+								'Unknown server error. If it is a reoccuring error, please use the Contact form to report this issue.'
+						);
 				} else {
-					return res.status(500).json('Unknown server error.');
+					return res
+						.status(500)
+						.json(
+							'Unknown server error. If it is a reoccuring error, please use the Contact form to report this issue.'
+						);
 				}
 			}
 		} else {
-			return res.status(401);
+			return res.status(401).end();
 		}
+	} else {
+		return res.status(405).end();
 	}
-	return res.status(405).json('Method not supported.');
 };
 
 export default handler;
