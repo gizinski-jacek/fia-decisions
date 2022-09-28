@@ -66,26 +66,36 @@ const FileForm = () => {
 			formRef.current?.reset();
 			setSubmitSuccess(true);
 			setSending(false);
-		} catch (error) {
+		} catch (error: any) {
 			setSubmitSuccess(false);
 			setSending(false);
 			if (error instanceof AxiosError) {
 				Array.isArray(error?.response?.data)
-					? setFormErrors(error?.response?.data || ['Unknown server error.'])
-					: setFormErrors([error?.response?.data || 'Unknown server error.']);
+					? setFormErrors(
+							error?.response?.data || [
+								'Unknown server error. If it is a reoccuring error, please use the Contact form to report this issue.',
+							]
+					  )
+					: setFormErrors([
+							error?.response?.data ||
+								'Unknown server error. If it is a reoccuring error, please use the Contact form to report this issue.',
+					  ]);
 			} else {
-				setFormErrors([(error as Error).message || 'Unknown server error.']);
+				setFormErrors([
+					(error as Error).message ||
+						'Unknown server error. If it is a reoccuring error, please use the Contact form to report this issue.',
+				]);
 			}
 		}
 	};
 
 	return (
 		<Form ref={formRef}>
-			<h4>
+			<h5>
 				Use this form to send a PDF file of a penalty You believe is missing
 				from the list.
-			</h4>
-			<h4>
+			</h5>
+			<h5>
 				Only official documents from{' '}
 				<a
 					href='https://www.fia.com/documents/championships'
@@ -100,7 +110,12 @@ const FileForm = () => {
 				<b className='text-danger'>fields</b> such as{' '}
 				<b className='text-danger'>Session, Fact, Offence, Decision</b> are
 				supported.
-			</h4>
+			</h5>
+			<h5>
+				<a href='/pdf_example.png' target='_blank'>
+					Example of a valid file.
+				</a>
+			</h5>
 			<div className='p-3 my-3 rounded-2 bg-light'>
 				<Form.Group className='mb-3'>
 					<Form.Label htmlFor='series' className='fw-bolder'>
@@ -123,8 +138,8 @@ const FileForm = () => {
 					>
 						<option value=''>Choose Formula series</option>
 						{supportedSeries.map((s, i) => (
-							<option key={i} value={s} className='text-capitalize'>
-								{s.replace('_', ' ')}
+							<option key={i} value={s}>
+								{s.replace('formula', 'Formula ')}
 							</option>
 						))}
 					</Form.Select>
