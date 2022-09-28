@@ -42,7 +42,7 @@ const DashboardForm = ({ handleSignIn }: Props) => {
 			});
 			setSending(false);
 			handleSignIn();
-		} catch (error) {
+		} catch (error: any) {
 			setSending(false);
 			if (error instanceof AxiosError) {
 				Array.isArray(error?.response?.data)
