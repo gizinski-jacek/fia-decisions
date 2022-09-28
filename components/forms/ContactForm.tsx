@@ -39,24 +39,35 @@ const ContactForm = () => {
 			formRef.current?.reset();
 			setSubmitSuccess(true);
 			setSending(false);
-		} catch (error) {
+		} catch (error: any) {
 			setSubmitSuccess(false);
 			setSending(false);
 			if (error instanceof AxiosError) {
 				Array.isArray(error?.response?.data)
-					? setFormErrors(error?.response?.data || ['Unknown server error.'])
-					: setFormErrors([error?.response?.data || 'Unknown server error.']);
+					? setFormErrors(
+							error?.response?.data || [
+								'Unknown server error. If it is a reoccuring error, please use the Contact form to report this issue.',
+							]
+					  )
+					: setFormErrors([
+							error?.response?.data ||
+								'Unknown server error. If it is a reoccuring error, please use the Contact form to report this issue.',
+					  ]);
 			} else {
-				setFormErrors([(error as Error).message || 'Unknown server error.']);
+				setFormErrors([
+					(error as Error).message ||
+						'Unknown server error. If it is a reoccuring error, please use the Contact form to report this issue.',
+				]);
 			}
 		}
 	};
 
 	return (
 		<Form ref={formRef}>
-			<h4>
-				Use this form to report something or contact me about any other matter.
-			</h4>
+			<h5>
+				Use this form to report issue with the site or contact me about any
+				other matter.
+			</h5>
 			<div className='p-3 my-3 rounded-2 bg-light'>
 				<Form.Group className='mb-3'>
 					<Form.Label htmlFor='email' className='fw-bolder'>
