@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { GetServerSidePropsContext, NextPage } from 'next';
+import { useRouter } from 'next/router';
 import {
 	ContactDocModel,
 	DecisionOffenceModel,
@@ -8,15 +9,17 @@ import {
 import DashboardForm from '../../components/forms/DashboardForm';
 import { Accordion, Button, Form } from 'react-bootstrap';
 import jwt from 'jsonwebtoken';
-import axios from 'axios';
-import { supportedSeries } from '../../lib/myData';
+import axios, { AxiosError } from 'axios';
+import { dbNameList, supportedSeries } from '../../lib/myData';
 import LoadingBar from '../../components/LoadingBar';
+import connectMongo from '../../lib/mongo';
 
 interface Props {
 	validToken: boolean;
+	data: DecisionOffenceModel[] | MissingDocModel[] | ContactDocModel[] | null;
 }
 
-const Dashboard: NextPage<Props> = ({ validToken }) => {
+const Dashboard: NextPage<Props> = ({ validToken, data }) => {
 	const [signedIn, setSignedIn] = useState(validToken);
 	const [chosenDocs, setChosenDocs] = useState<
 		// 'penalties' |
@@ -28,55 +31,113 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 	const [fetching, setFetching] = useState(false);
 	const [requestFailed, setRequestFailed] = useState<false | string>(false);
 
-	const handleSignIn = () => {
+	const router = useRouter();
+
+	const handleSignIn = async () => {
+		await getDocuments(chosenDocs);
 		setSignedIn(true);
 	};
 
-	const getDocuments = async (
-		docType: string
-	): Promise<
-		// DecisionOffenceModel[] |
-		MissingDocModel[] | ContactDocModel[] | null
-	> => {
+	const getDocuments = useCallback(
+		async (docType: string) => {
+			if (!docType) {
+				return null;
+			}
+			try {
+				setFetching(true);
+				const res = await axios.get(`/api/dashboard/${docType}`, {
+					timeout: 15000,
+				});
+				setFetching(false);
+				setRequestFailed(false);
+				setDocsData(res.data);
+			} catch (error: any) {
+				setFetching(false);
+				if (error instanceof AxiosError) {
+					if (error.response?.status === 401) {
+						router.reload();
+					} else {
+						Array.isArray(error?.response?.data)
+							? setRequestFailed(
+									error?.response?.data.join(' ') ||
+										'Unknown server error. Fetching documents failed.'
+							  )
+							: setRequestFailed(
+									error?.response?.data ||
+										'Unknown server error. Fetching documents failed.'
+							  );
+						setDocsData(null);
+					}
+				} else {
+					if (error.status === 401) {
+						router.reload();
+					} else {
+						setRequestFailed(
+							(error as Error).message ||
+								'Unknown server error. Fetching documents failed.'
+						);
+						setDocsData(null);
+					}
+				}
+			}
+		},
+		[router]
+	);
+
+	const deleteDocument = async (docType: string, docId: string) => {
+		if (!docType || !docId) {
+			return;
+		}
 		try {
 			setFetching(true);
-			const res = await axios.get(`/api/dashboard/${docType}`);
+			await axios.delete(`/api/dashboard/${docType}?doc_id=${docId}`);
 			setFetching(false);
-			return res.data;
-		} catch (error) {
-			console.log(error);
+			await getDocuments(chosenDocs);
+		} catch (error: any) {
 			setFetching(false);
-			setRequestFailed('Unknown server error.');
-			return null;
+			if (error instanceof AxiosError) {
+				if (error.response?.status === 401) {
+					router.reload();
+				} else {
+					Array.isArray(error?.response?.data)
+						? setRequestFailed(
+								error?.response?.data.join(' ') ||
+									'Unknown server error. Delete request failed.'
+						  )
+						: setRequestFailed(
+								error?.response?.data ||
+									'Unknown server error. Delete request failed.'
+						  );
+				}
+			} else {
+				if (error.status === 401) {
+					router.reload();
+				} else {
+					setRequestFailed(
+						(error as Error).message ||
+							'Unknown server error. Delete request failed.'
+					);
+				}
+			}
 		}
 	};
 
-	const deleteDocument = async (docType: string, docId: string) => {
-		// try {
-		// 	setFetching(true);
-		// 	await axios.delete(`/api/dashboard/${docType}?doc_id=${docId}`);
-		// 	setFetching(false);
-		// } catch (error) {
-		// 	console.log(error);
-		// 	setFetching(false);
-		// 	setRequestFailed('Unknown server error.');
-		// }
-	};
-
-	const handleInputChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+	const handleInputChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
 		const { value } = e.target as { value: 'missing' | 'contact' };
 		setChosenDocs(value);
 	};
 
 	const handleDocsRefresh = async () => {
-		setDocsData(await getDocuments(chosenDocs));
+		await getDocuments(chosenDocs);
 	};
 
 	useEffect(() => {
-		(async () => {
-			setDocsData(await getDocuments(chosenDocs));
-		})();
-	}, [chosenDocs]);
+		if (signedIn) {
+			(async () => {
+				await getDocuments(chosenDocs);
+			})();
+		}
+	}, [signedIn, chosenDocs, getDocuments]);
 
 	return signedIn ? (
 		<div className='my-3'>
@@ -123,7 +184,7 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 					</Form.Group>
 				</Form>
 				{requestFailed !== false && (
-					<div className='flex-grow-1 m-2 alert alert-danger alert-dismissible'>
+					<div className='w-75 m-2 ms-auto alert alert-danger alert-dismissible'>
 						<strong>{requestFailed}</strong>
 						<button
 							type='button'
@@ -133,78 +194,80 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 					</div>
 				)}
 			</div>
-			{chosenDocs === 'missing' && docsData !== null ? (
-				<Accordion className='col m-2'>
-					<Accordion.Item eventKey='0'>
-						<Accordion.Header>
-							<h4 className='fw-bold'>Missing Penalties</h4>
-						</Accordion.Header>
-						<Accordion.Body>
-							{(docsData as MissingDocModel[]).map((m) => (
-								<div
-									key={m._id}
-									className='p-2 mb-2 bg-light rounded text-break'
-								>
-									<div className='d-flex justify-content-between'>
-										<div>
-											<strong>Series</strong>
-											<p className='text-capitalize'>{m.series}</p>
+			{docsData !== null ? (
+				chosenDocs === 'missing' ? (
+					<Accordion className='col m-2'>
+						<Accordion.Item eventKey='0'>
+							<Accordion.Header>
+								<h4 className='fw-bold'>Missing Penalties</h4>
+							</Accordion.Header>
+							<Accordion.Body>
+								{(docsData as MissingDocModel[]).map((m) => (
+									<div
+										key={m._id}
+										className='p-2 mb-2 bg-light rounded text-break'
+									>
+										<div className='d-flex justify-content-between'>
+											<div>
+												<strong>Series</strong>
+												<p className='text-capitalize'>{m.series}</p>
+											</div>
+											<Button
+												variant='danger'
+												size='sm'
+												className='fw-bolder mt-2 mt-sm-0 custom-button'
+												onClick={() => deleteDocument(chosenDocs, m._id)}
+											>
+												Delete
+											</Button>
 										</div>
-										<Button
-											variant='danger'
-											size='sm'
-											className='fw-bolder mt-2 mt-sm-0 custom-button'
-											onClick={() => deleteDocument(chosenDocs, m._id)}
-										>
-											Delete
-										</Button>
-									</div>
-									<div>
-										<strong>Description</strong>
-										<p className='text-capitalize'>{m.description}</p>
-									</div>
-								</div>
-							))}
-						</Accordion.Body>
-					</Accordion.Item>
-				</Accordion>
-			) : chosenDocs === 'contact' && docsData !== null ? (
-				<Accordion className='col m-2'>
-					<Accordion.Item eventKey='0'>
-						<Accordion.Header>
-							<h4 className='fw-bold'>Contact Messages</h4>
-						</Accordion.Header>
-						<Accordion.Body>
-							{(docsData as ContactDocModel[]).map((c) => (
-								<div
-									key={c._id}
-									className='p-2 mb-2 bg-light rounded text-break'
-								>
-									<div className='d-flex justify-content-between'>
 										<div>
-											<strong>Email</strong>
-											<a href={`mailto:${c.email}`} className='d-block'>
-												{c.email}
-											</a>
+											<strong>Description</strong>
+											<p className='text-capitalize'>{m.description}</p>
 										</div>
-										<Button
-											variant='danger'
-											size='sm'
-											className='fw-bolder mt-2 mt-sm-0 custom-button'
-											onClick={() => deleteDocument(chosenDocs, c._id)}
-										>
-											Delete
-										</Button>
 									</div>
-									<div>
-										<strong>Message</strong>
-										<p className='text-capitalize'>{c.message}</p>
+								))}
+							</Accordion.Body>
+						</Accordion.Item>
+					</Accordion>
+				) : chosenDocs === 'contact' ? (
+					<Accordion className='col m-2'>
+						<Accordion.Item eventKey='1'>
+							<Accordion.Header>
+								<h4 className='fw-bold'>Contact Messages</h4>
+							</Accordion.Header>
+							<Accordion.Body>
+								{(docsData as ContactDocModel[]).map((c) => (
+									<div
+										key={c._id}
+										className='p-2 mb-2 bg-light rounded text-break'
+									>
+										<div className='d-flex justify-content-between'>
+											<div>
+												<strong>Email</strong>
+												<a href={`mailto:${c.email}`} className='d-block'>
+													{c.email}
+												</a>
+											</div>
+											<Button
+												variant='danger'
+												size='sm'
+												className='fw-bolder mt-2 mt-sm-0 custom-button'
+												onClick={() => deleteDocument(chosenDocs, c._id)}
+											>
+												Delete
+											</Button>
+										</div>
+										<div>
+											<strong>Message</strong>
+											<p className='text-capitalize'>{c.message}</p>
+										</div>
 									</div>
-								</div>
-							))}
-						</Accordion.Body>
-					</Accordion.Item>
-				</Accordion>
+								))}
+							</Accordion.Body>
+						</Accordion.Item>
+					</Accordion>
+				) : null
 			) : null}
 		</div>
 	) : (
@@ -224,7 +287,7 @@ export const getServerSideProps = async (
 		const { token } = context.req.cookies;
 		if (!token) {
 			return {
-				props: { validToken: false },
+				props: { validToken: false, data: null },
 			};
 		}
 		const decodedToken = jwt.verify(token, process.env.JWT_STRATEGY_SECRET);
@@ -234,19 +297,29 @@ export const getServerSideProps = async (
 				`token=; Path=/; httpOnly=true; SameSite=strict; Secure=true; Max-Age=0`
 			);
 			return {
-				props: { validToken: false },
+				props: { validToken: false, data: null },
 			};
 		} else {
-			return {
-				props: {
-					validToken: true,
-				},
-			};
+			try {
+				const conn = await connectMongo(dbNameList.other_documents_db);
+				const document_list = await conn.models.Missing_Doc.find({}).exec();
+				return {
+					props: {
+						validToken: true,
+						data: JSON.parse(JSON.stringify(document_list)),
+					},
+				};
+			} catch (error: any) {
+				console.log(error);
+				return {
+					props: { validToken: false, data: null },
+				};
+			}
 		}
-	} catch (error) {
+	} catch (error: any) {
 		console.log(error);
 		return {
-			props: { validToken: false },
+			props: { validToken: false, data: null },
 		};
 	}
 };
