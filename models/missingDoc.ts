@@ -10,7 +10,7 @@ const Missing_Doc = new Schema<MissingDocModel>(
 			type: String,
 			trim: true,
 			minlength: 16,
-			maxlength: 256,
+			maxlength: 512,
 			required: true,
 		},
 	},
