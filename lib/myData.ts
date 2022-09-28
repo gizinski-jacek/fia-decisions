@@ -20,11 +20,7 @@ export const fiaPageList: FiaPageList = {
 		'https://www.fia.com/documents/championships/fia-formula-3-championship-1012/season/season-2022-2005',
 };
 
-export const supportedSeries: string[] = [
-	'Formula_1',
-	'Formula_2',
-	'Formula_3',
-];
+export const supportedSeries: string[] = ['formula1', 'formula2', 'formula3'];
 
 // Database names for each supported racing series.
 export const dbNameList: DatabaseNameList = {
