@@ -1,7 +1,7 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next';
 import connectMongo from '../../../lib/mongo';
-import { supportedSeries } from '../../../lib/myData';
+import { dbNameList, supportedSeries } from '../../../lib/myData';
 import multiparty from 'multiparty';
 import { parseFields } from '../../../lib/multiparty';
 import { streamToBuffer } from '../../../lib/streamToBuffer';
@@ -39,12 +39,21 @@ const handler = async (
 		if (form === 'file') {
 			try {
 				const { series } = req.query as { series: string };
+				console.log(series);
 				if (!series) {
 					return res.status(422).json(['Series is required.']);
 				}
-				const seriesDB = supportedSeries.find(
-					(s) => s.toLowerCase() === series.toLowerCase()
-				);
+				let seriesDB = '';
+				if (series === 'formula1') {
+					seriesDB = dbNameList.f1_2022_db;
+				} else if (series === 'formula2') {
+					seriesDB = dbNameList.f2_2022_db;
+				} else if (series === 'formula3') {
+					seriesDB = dbNameList.f3_2022_db;
+				} else {
+					return res.status(422).json(['Unsupported series.']);
+				}
+
 				if (!seriesDB) {
 					return res.status(422).json(['Series is not supported.']);
 				}
@@ -109,8 +118,12 @@ const handler = async (
 							manual_upload: true,
 						});
 						return res.status(200).json(['Document saved.']);
-					} catch (error) {
-						return res.status(500).json(['Unknown server error.']);
+					} catch (error: any) {
+						return res
+							.status(500)
+							.json([
+								'Unknown server error. If it is a reoccuring error, please use the Contact form to report this issue.',
+							]);
 					}
 				});
 				// Close emitted after form parsed
@@ -119,8 +132,12 @@ const handler = async (
 				});
 				// Parse req
 				form.parse(req);
-			} catch (error) {
-				return res.status(500).json(['Unknown server error.']);
+			} catch (error: any) {
+				return res
+					.status(500)
+					.json([
+						'Unknown server error. If it is a reoccuring error, please use the Contact form to report this issue.',
+					]);
 			}
 		}
 		if (form === 'data') {
@@ -137,8 +154,12 @@ const handler = async (
 				const newReport = new conn.models.Missing_Doc(fields);
 				await newReport.save();
 				return res.status(200).json(['Document saved.']);
-			} catch (error) {
-				return res.status(500).json(['Unknown server error.']);
+			} catch (error: any) {
+				return res
+					.status(500)
+					.json([
+						'Unknown server error. If it is a reoccuring error, please use the Contact form to report this issue.',
+					]);
 			}
 		}
 		if (form === 'contact') {
@@ -155,8 +176,12 @@ const handler = async (
 				const newReport = new conn.models.Contact_Doc(fields);
 				await newReport.save();
 				return res.status(200).json(['Document saved.']);
-			} catch (error) {
-				return res.status(500).json(['Unknown server error.']);
+			} catch (error: any) {
+				return res
+					.status(500)
+					.json([
+						'Unknown server error. If it is a reoccuring error, please use the Contact form to report this issue.',
+					]);
 			}
 		}
 		if (form === 'dashboard-sign-in') {
@@ -190,12 +215,17 @@ const handler = async (
 					`token=${token}; Path=/; httpOnly=true; SameSite=strict; Secure=true; Max-Age=900` // 15 minutes
 				);
 				return res.status(200).json({ success: true });
-			} catch (error) {
-				return res.status(500).json(['Unknown server error.']);
+			} catch (error: any) {
+				return res
+					.status(500)
+					.json([
+						'Unknown server error. If it is a reoccuring error, please use the Contact form to report this issue.',
+					]);
 			}
 		}
+	} else {
+		return res.status(405).end();
 	}
-	return res.status(405).json('Method not supported.');
 };
 
 export default handler;
@@ -215,7 +245,7 @@ const dataFormValidationSchema: Yup.SchemaOf<DataFormValues> =
 		description: Yup.string()
 			.required('Description is is required.')
 			.min(16, 'Description min 16 characters.')
-			.max(256, 'Description max 256 characters.'),
+			.max(512, 'Description max 512 characters.'),
 	});
 
 const contactFormValidationSchema: Yup.SchemaOf<ContactFormValues> =
