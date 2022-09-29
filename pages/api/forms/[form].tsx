@@ -187,11 +187,11 @@ const handler = async (
 		if (form === 'dashboard-sign-in') {
 			if (
 				!process.env.DASHBOARD_ACCESS_PASSWORD ||
-				!process.env.PAYLOAD_STRING ||
+				!process.env.JWT_PAYLOAD_STRING ||
 				!process.env.JWT_STRATEGY_SECRET
 			) {
 				throw new Error(
-					'Please define DASHBOARD_ACCESS_PASSWORD, PAYLOAD_STRING and JWT_STRATEGY_SECRET environment variables inside .env.local'
+					'Please define DASHBOARD_ACCESS_PASSWORD, JWT_PAYLOAD_STRING and JWT_STRATEGY_SECRET environment variables inside .env.local'
 				);
 			}
 			try {
@@ -207,7 +207,7 @@ const handler = async (
 					return res.status(403).json(['Password is incorrect.']);
 				}
 				const token = jwt.sign(
-					process.env.PAYLOAD_STRING,
+					process.env.JWT_PAYLOAD_STRING,
 					process.env.JWT_STRATEGY_SECRET
 				);
 				res.setHeader(
