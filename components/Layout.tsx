@@ -13,8 +13,11 @@ const Layout = ({ children }: Props) => {
 		<ThemeContextProvider>
 			<DrawerContextProvider>
 				<Head>
-					<title>FIA Decisions</title>
-					<meta name='description' content='FIA Decisions' />
+					<title>Track Limits</title>
+					<meta
+						name='description'
+						content='Quickly find out which Formula drivers got hit by penalties.'
+					/>
 					<link rel='icon' href='/favicon.ico' />
 				</Head>
 				<Drawer>{children}</Drawer>
