@@ -200,6 +200,9 @@ const Dashboard: NextPage<Props> = ({ validToken, data }) => {
 						<Accordion.Item eventKey='0'>
 							<Accordion.Header>
 								<h4 className='fw-bold'>Missing Penalties</h4>
+								<h4 className='me-sm-3 fw-bold text-sm-end'>
+									{docsData.length} missing
+								</h4>
 							</Accordion.Header>
 							<Accordion.Body>
 								{(docsData as MissingDocModel[]).map((m) => (
@@ -235,6 +238,10 @@ const Dashboard: NextPage<Props> = ({ validToken, data }) => {
 						<Accordion.Item eventKey='1'>
 							<Accordion.Header>
 								<h4 className='fw-bold'>Contact Messages</h4>
+								<h4 className='me-sm-3 fw-bold text-sm-end'>
+									{docsData.length}{' '}
+									{docsData.length === 1 ? 'message' : 'messages'}
+								</h4>
 							</Accordion.Header>
 							<Accordion.Body>
 								{(docsData as ContactDocModel[]).map((c) => (
@@ -291,7 +298,7 @@ export const getServerSideProps = async (
 			};
 		}
 		const decodedToken = jwt.verify(token, process.env.JWT_STRATEGY_SECRET);
-		if (decodedToken !== process.env.PAYLOAD_STRING) {
+		if (decodedToken !== process.env.JWT_PAYLOAD_STRING) {
 			context.res.setHeader(
 				'Set-Cookie',
 				`token=; Path=/; httpOnly=true; SameSite=strict; Secure=true; Max-Age=0`
