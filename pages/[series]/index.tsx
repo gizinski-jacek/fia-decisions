@@ -103,15 +103,15 @@ const FormulaSeries: NextPage<Props> = ({ data }) => {
 	};
 
 	return (
-		<div className='m-2 position-relative'>
+		<div className='m-2'>
 			<div
-				className={`position-sticky top-0 start-0 custom-search 
+				className={`position-relative custom-search 
 				${showSearchInput ? 'expanded' : ''}`}
 			>
 				<Button variant='dark' size='sm' onClick={handleShowSearchInput}>
 					<i className='bi bi-search fs-6'></i>
 				</Button>
-				<Form>
+				<Form className='position-absolute top-0 start-0 d-flex'>
 					<Form.Group className='d-flex'>
 						<Button variant='dark' size='sm' onClick={handleHideSearchInput}>
 							<i className='bi bi-arrow-left fs-6'></i>
