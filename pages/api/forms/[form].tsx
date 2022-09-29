@@ -51,7 +51,7 @@ const handler = async (
 				} else if (series === 'formula3') {
 					seriesDB = dbNameList.f3_2022_db;
 				} else {
-					return res.status(422).json(['Unsupported series.']);
+					return res.status(422).json(['Series is not supported.']);
 				}
 
 				if (!seriesDB) {
