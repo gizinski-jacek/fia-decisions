@@ -12,9 +12,8 @@ export const verifyToken = (req: NextApiRequest) => {
 		return false;
 	}
 	const decodedToken = jwt.verify(token, process.env.JWT_STRATEGY_SECRET);
-	if (decodedToken !== process.env.PAYLOAD_STRING) {
+	if (decodedToken !== process.env.JWT_PAYLOAD_STRING) {
 		return false;
 	}
-	console.log(2);
 	return true;
 };
