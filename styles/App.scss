@@ -15,6 +15,11 @@
 .custom-search {
 	height: 0;
 
+	@media only screen and (max-width: 500px) {
+		height: fit-content;
+		margin-bottom: 0.25rem;
+	}
+
 	> button {
 		position: relative;
 		z-index: 3;
@@ -23,6 +28,7 @@
 	}
 
 	form {
+		width: 50%;
 		position: absolute;
 		top: 0;
 		left: 0;
@@ -30,12 +36,24 @@
 		transition: 0.3s ease;
 		transform: scaleX(0);
 
-		input {
-			min-width: 100px;
+		@media only screen and (min-width: 992px) {
+			width: 25%;
+		}
+
+		input[type='search'] {
+			min-width: 120px !important;
 		}
 	}
 
 	&.expanded {
+		height: fit-content;
+		margin-bottom: 0.25rem;
+
+		@media only screen and (min-width: 992px) {
+			height: 0;
+			margin-bottom: 0;
+		}
+
 		> button {
 			transform: scaleX(0);
 		}
@@ -49,6 +67,7 @@
 nav {
 	position: static;
 	transition: 0.15s ease-in-out;
+	z-index: 10;
 
 	.nav-item {
 		flex-basis: 0 !important;
@@ -119,6 +138,7 @@ nav {
 
 	:nth-child(2) {
 		min-width: 100px !important;
+		max-width: 100px !important;
 	}
 
 	:nth-child(3) {
