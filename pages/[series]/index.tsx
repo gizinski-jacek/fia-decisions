@@ -105,7 +105,7 @@ const FormulaSeries: NextPage<Props> = ({ data }) => {
 	return (
 		<div className='m-2 position-relative'>
 			<div
-				className={`position-sticky top-0 start-0 w-25 custom-search 
+				className={`position-sticky top-0 start-0 custom-search 
 				${showSearchInput ? 'expanded' : ''}`}
 			>
 				<Button variant='dark' size='sm' onClick={handleShowSearchInput}>
@@ -118,7 +118,7 @@ const FormulaSeries: NextPage<Props> = ({ data }) => {
 						</Button>
 						<Form.Control
 							className='py-0 px-2 mx-1'
-							type='text'
+							type='search'
 							name='searchInput'
 							id='searchInput'
 							maxLength={32}
@@ -133,9 +133,10 @@ const FormulaSeries: NextPage<Props> = ({ data }) => {
 					</Form.Group>
 				</Form>
 			</div>
-			<h2 className='text-center text-capitalize fw-bolder fst-italic '>{`Formula ${router.query.series?.slice(
-				-1
-			)} Penalties`}</h2>
+			<h2
+				className='text-center text-capitalize fw-bolder fst-italic'
+				style={{ lineHeight: '2.15rem !important' }}
+			>{`Formula ${router.query.series?.slice(-1)} Penalties`}</h2>
 			{renderDocs(data, searchInput)}
 		</div>
 	);
@@ -187,9 +188,9 @@ export const getServerSideProps = async (
 			};
 		}
 		const conn = await connectMongo(seriesDB);
-		const docsList: DecisionOffenceModel[] =
+		const document_list: DecisionOffenceModel[] =
 			await conn.models.Decision_Offence.find({}).sort({ doc_date: -1 }).exec();
-		const groupedByGP: GroupedByGP = docsList.reduce((prev, curr) => {
+		const groupedByGP: GroupedByGP = document_list.reduce((prev, curr) => {
 			prev[curr.grand_prix] = prev[curr.grand_prix] || [];
 			prev[curr.grand_prix].push(curr);
 			return prev;
