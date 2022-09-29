@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { Accordion, Button, Modal } from 'react-bootstrap';
 import { DecisionOffenceModel, PenaltyColors } from '../../types/myTypes';
 
 interface Props {
 	data: DecisionOffenceModel;
+	deleteBtn?: ReactElement;
 }
 
 const penaltyTypeColors: PenaltyColors = {
@@ -20,7 +21,7 @@ const penaltyTypeColors: PenaltyColors = {
 	none: { color: 'black', backgroundColor: 'beige' },
 };
 
-const F1DocWrapper = ({ data }: Props) => {
+const F1DocWrapper = ({ data, deleteBtn }: Props) => {
 	const [showDocModal, setShowDocModal] = useState(false);
 
 	const handleOpenModal = () => {
@@ -96,7 +97,7 @@ const F1DocWrapper = ({ data }: Props) => {
 					<Accordion.Header className='p-0 m-0'>
 						<div className='d-flex flex-column w-100 flex-sm-row align-items-center custom-container'>
 							<div
-								className='rounded-pill p-1 me-sm-2 text-uppercase text-center fw-bold'
+								className='rounded-pill p-1 me-sm-1 text-uppercase text-center fw-bold'
 								style={{
 									...penaltyTypeColors[
 										data.penalty_type as keyof PenaltyColors
@@ -105,13 +106,13 @@ const F1DocWrapper = ({ data }: Props) => {
 							>
 								{data.penalty_type}
 							</div>
-							<div className='d-none d-sm-block m-1 me-sm-3 text-center fw-bold text-break'>
+							<div className='d-none d-sm-block m-1 me-sm-2 text-center fw-bold text-break'>
 								{data.incident_info.Session}
 							</div>
-							<div className='m-1 me-sm-3 text-center text-sm-start fw-bold'>
+							<div className='m-1 me-sm-2 text-center text-sm-start fw-bold'>
 								{data.incident_info.Driver}
 							</div>
-							<div className='me-sm-3 d-sm-none d-md-block text-capitalize text-center text-sm-start  flex-grow-1 fw-bold'>
+							<div className='me-sm-2 d-sm-none d-md-block text-capitalize text-center text-sm-start  flex-grow-1 fw-bold'>
 								{data.incident_title}
 							</div>
 						</div>
@@ -151,14 +152,17 @@ const F1DocWrapper = ({ data }: Props) => {
 								})}
 							</div>
 						</div>
-						<Button
-							size='sm'
-							variant='info'
-							className='fw-bolder mt-2 mt-sm-0 custom-button'
-							onClick={handleOpenModal}
-						>
-							Details
-						</Button>
+						<div className='d-flex flex-column'>
+							<Button
+								size='sm'
+								variant='info'
+								className='fw-bolder mt-2 mt-sm-0 custom-button'
+								onClick={handleOpenModal}
+							>
+								Details
+							</Button>
+							{deleteBtn}
+						</div>
 					</Accordion.Body>
 				</Accordion.Item>
 			</Accordion>
