@@ -3,9 +3,9 @@ import { useRouter } from 'next/router';
 import type { GetServerSidePropsContext, NextPage } from 'next';
 import connectMongo from '../../lib/mongo';
 import { dbNameList } from '../../lib/myData';
-import F1DocWrapper from '../../components/wrappers/F1DocWrapper';
 import { DecisionOffenceModel, GroupedByGP } from '../../types/myTypes';
-import { Accordion, Button, Form } from 'react-bootstrap';
+import { Button, Form } from 'react-bootstrap';
+import { renderDocsGroupedByGP } from '../../lib/utils';
 
 interface Props {
 	data: GroupedByGP;
@@ -31,77 +31,6 @@ const FormulaSeries: NextPage<Props> = ({ data }) => {
 		setSearchInput(value);
 	};
 
-	const renderDocs = (data: GroupedByGP, query: string) => {
-		const gpDocsArray = [];
-		if (query) {
-			let searchData = {} as GroupedByGP;
-			for (const [key, array] of Object.entries(data)) {
-				const filtered = array.filter(
-					(doc) =>
-						doc.penalty_type.toLowerCase().includes(query.toLowerCase()) ||
-						doc.incident_info.Driver.toLowerCase().includes(query.toLowerCase())
-				);
-				if (filtered.length === 0) {
-					continue;
-				} else {
-					searchData[key as keyof GroupedByGP] = filtered;
-				}
-			}
-			for (const [key, array] of Object.entries(searchData)) {
-				gpDocsArray.push(
-					<Accordion key={key} id={key} className='p-0 my-2'>
-						<Accordion.Item eventKey='0'>
-							<Accordion.Header>
-								<div className='d-flex flex-column me-2 flex-sm-row w-100 align-items-center'>
-									<h4 className='me-sm-5 fw-bold'>{key}</h4>
-									<h4 className='fw-bold'>
-										{array.find((doc) => doc.weekend)?.weekend}
-									</h4>
-									<h4 className='me-sm-3 fw-bold text-sm-end'>
-										{array.length}{' '}
-										{array.length === 1 ? 'penalty' : 'penalties'}
-									</h4>
-								</div>
-							</Accordion.Header>
-							<Accordion.Body className='bg-light'>
-								{array.map((doc) => (
-									<F1DocWrapper key={doc._id} data={doc} />
-								))}
-							</Accordion.Body>
-						</Accordion.Item>
-					</Accordion>
-				);
-			}
-		} else {
-			for (const [key, array] of Object.entries(data)) {
-				gpDocsArray.push(
-					<Accordion key={key} id={key} className='p-0 my-2'>
-						<Accordion.Item eventKey='1'>
-							<Accordion.Header>
-								<div className='d-flex flex-column flex-sm-row w-100 align-items-center'>
-									<h4 className='me-sm-3 fw-bold'>{key}</h4>
-									<h4 className='me-sm-3 fw-bold'>
-										{array.find((doc) => doc.weekend)?.weekend}
-									</h4>
-									<h4 className='me-sm-3 fw-bold text-sm-end'>
-										{array.length}{' '}
-										{array.length === 1 ? 'penalty' : 'penalties'}
-									</h4>
-								</div>
-							</Accordion.Header>
-							<Accordion.Body className='bg-light'>
-								{array.map((doc) => (
-									<F1DocWrapper key={doc._id} data={doc} />
-								))}
-							</Accordion.Body>
-						</Accordion.Item>
-					</Accordion>
-				);
-			}
-		}
-		return gpDocsArray;
-	};
-
 	return (
 		<div className='m-2'>
 			<div
@@ -124,10 +53,15 @@ const FormulaSeries: NextPage<Props> = ({ data }) => {
 							maxLength={32}
 							onChange={handleInputChange}
 							value={searchInput}
-							placeholder='Driver Name'
-							disabled={!showSearchInput}
+							placeholder='Penalty / Name / Car #'
+							disabled={!showSearchInput || Object.entries(data).length === 0}
 						/>
-						<Button variant='dark' size='sm' onClick={() => setSearchInput('')}>
+						<Button
+							variant='dark'
+							size='sm'
+							disabled={!showSearchInput || Object.entries(data).length === 0}
+							onClick={() => setSearchInput('')}
+						>
 							<i className='bi bi-x fs-6'></i>
 						</Button>
 					</Form.Group>
@@ -135,9 +69,9 @@ const FormulaSeries: NextPage<Props> = ({ data }) => {
 			</div>
 			<h2
 				className='text-center text-capitalize fw-bolder fst-italic'
-				style={{ lineHeight: '2.15rem !important' }}
+				style={{ lineHeight: '2.15rem' }}
 			>{`Formula ${router.query.series?.slice(-1)} Penalties`}</h2>
-			{renderDocs(data, searchInput)}
+			<div>{renderDocsGroupedByGP(data, searchInput)}</div>
 		</div>
 	);
 };
