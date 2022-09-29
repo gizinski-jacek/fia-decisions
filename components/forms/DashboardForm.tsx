@@ -98,7 +98,7 @@ const DashboardForm = ({ handleSignIn }: Props) => {
 					></button>
 				</div>
 			)}
-			{sending && <LoadingBar />}
+			{sending && <LoadingBar width='50%' />}
 			<Button
 				variant='dark'
 				className='fw-bolder my-3'
