@@ -35,6 +35,8 @@ export interface IncidentInfo {
 export interface DecisionOffenceModel extends TransformedPDFData {
 	_id: string;
 	manual_upload: boolean;
+	createdAt: string;
+	updatedAt: string;
 }
 
 export interface GroupedByGP {
@@ -66,6 +68,8 @@ export interface DataFormValues {
 
 export interface MissingDocModel extends DataFormValues {
 	_id: string;
+	createdAt: string;
+	updatedAt: string;
 }
 
 export interface ContactFormValues {
@@ -75,6 +79,8 @@ export interface ContactFormValues {
 
 export interface ContactDocModel extends ContactFormValues {
 	_id: string;
+	createdAt: string;
+	updatedAt: string;
 }
 
 export interface WeekendData {
