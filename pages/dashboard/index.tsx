@@ -3,7 +3,7 @@ import { GetServerSidePropsContext, NextPage } from 'next';
 import { useRouter } from 'next/router';
 import {
 	ContactDocModel,
-	DecisionOffenceModel,
+	GroupedByGP,
 	MissingDocModel,
 } from '../../types/myTypes';
 import DashboardForm from '../../components/forms/DashboardForm';
@@ -13,23 +13,31 @@ import axios, { AxiosError } from 'axios';
 import { dbNameList, supportedSeries } from '../../lib/myData';
 import LoadingBar from '../../components/LoadingBar';
 import connectMongo from '../../lib/mongo';
+import F1DocWrapper from '../../components/wrappers/F1DocWrapper';
 
 interface Props {
 	validToken: boolean;
-	data: DecisionOffenceModel[] | MissingDocModel[] | ContactDocModel[] | null;
+	data: GroupedByGP | MissingDocModel[] | ContactDocModel[] | null;
 }
 
 const Dashboard: NextPage<Props> = ({ validToken, data }) => {
 	const [signedIn, setSignedIn] = useState(validToken);
 	const [chosenDocs, setChosenDocs] = useState<
-		// 'penalties' |
-		'missing' | 'contact'
+		| 'missing'
+		| 'contact'
+		| 'penalties__formula1__manual-upload'
+		| 'penalties__formula2__manual-upload'
+		| 'penalties__formula3__manual-upload'
+		| 'penalties__formula1'
+		| 'penalties__formula2'
+		| 'penalties__formula3'
 	>('contact');
 	const [docsData, setDocsData] = useState<
-		DecisionOffenceModel[] | MissingDocModel[] | ContactDocModel[] | null
+		GroupedByGP | MissingDocModel[] | ContactDocModel[] | null
 	>(null);
 	const [fetching, setFetching] = useState(false);
 	const [requestFailed, setRequestFailed] = useState<false | string>(false);
+	const [searchInput, setSearchInput] = useState('');
 
 	const router = useRouter();
 
@@ -84,14 +92,24 @@ const Dashboard: NextPage<Props> = ({ validToken, data }) => {
 		[router]
 	);
 
-	const deleteDocument = async (docType: string, docId: string) => {
+	const handleDeleteDocument = async (docType: string, docId: string) => {
+		// Error when deleting:
+		// XML Parsing Error: no element found
+		// Location: http://localhost:3000/api/dashboard/missing?doc_id=6334be6da875c7c312b0f82e
+		// Line Number 1, Column 1:
+		if (
+			confirm(
+				'Are you sure You want to delete this document? This is irreversible.'
+			) === false
+		) {
+			return;
+		}
 		if (!docType || !docId) {
 			return;
 		}
 		try {
 			setFetching(true);
 			await axios.delete(`/api/dashboard/${docType}?doc_id=${docId}`);
-			setFetching(false);
 			await getDocuments(chosenDocs);
 		} catch (error: any) {
 			setFetching(false);
@@ -122,7 +140,7 @@ const Dashboard: NextPage<Props> = ({ validToken, data }) => {
 		}
 	};
 
-	const handleInputChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+	const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
 		const { value } = e.target as { value: 'missing' | 'contact' };
 		setChosenDocs(value);
 	};
@@ -139,10 +157,101 @@ const Dashboard: NextPage<Props> = ({ validToken, data }) => {
 		}
 	}, [signedIn, chosenDocs, getDocuments]);
 
+	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const { value } = e.target;
+		setSearchInput(value);
+	};
+
+	const renderDocs = (data: GroupedByGP, query: string) => {
+		const gpDocsArray = [];
+		if (query) {
+			let searchData = {} as GroupedByGP;
+			for (const [key, array] of Object.entries(data)) {
+				const filtered = array.filter(
+					(doc) =>
+						doc.penalty_type.toLowerCase().includes(query.toLowerCase()) ||
+						doc.incident_info.Driver.toLowerCase().includes(query.toLowerCase())
+				);
+				if (filtered.length === 0) {
+					continue;
+				} else {
+					searchData[key as keyof GroupedByGP] = filtered;
+				}
+			}
+			for (const [key, array] of Object.entries(searchData)) {
+				gpDocsArray.push(
+					<Accordion key={key} id={key} className='p-0 my-2'>
+						<Accordion.Item eventKey='2'>
+							<Accordion.Header>
+								<div className='d-flex flex-column me-2 flex-sm-row w-100 align-items-center'>
+									<h4 className='me-sm-5 fw-bold'>{key}</h4>
+									<h4 className='fw-bold'>
+										{array.find((doc) => doc.weekend)?.weekend}
+									</h4>
+									<h4 className='me-sm-3 fw-bold text-sm-end'>
+										{array.length}{' '}
+										{array.length === 1 ? 'penalty' : 'penalties'}
+									</h4>
+								</div>
+							</Accordion.Header>
+							<Accordion.Body className='bg-light'>
+								{array.map((doc) => (
+									<F1DocWrapper key={doc._id} data={doc} />
+								))}
+							</Accordion.Body>
+						</Accordion.Item>
+					</Accordion>
+				);
+			}
+		} else {
+			for (const [key, array] of Object.entries(data)) {
+				gpDocsArray.push(
+					<Accordion key={key} id={key} className='p-0 my-2'>
+						<Accordion.Item eventKey='3'>
+							<Accordion.Header>
+								<div className='d-flex flex-column flex-sm-row w-100 align-items-center'>
+									<h4 className='me-sm-3 fw-bold'>{key}</h4>
+									<h4 className='me-sm-3 fw-bold'>
+										{array.find((doc) => doc.weekend)?.weekend}
+									</h4>
+									<h4 className='me-sm-3 fw-bold text-sm-end'>
+										{array.length}{' '}
+										{array.length === 1 ? 'penalty' : 'penalties'}
+									</h4>
+								</div>
+							</Accordion.Header>
+							<Accordion.Body className='bg-light'>
+								{array.map((doc) => (
+									<F1DocWrapper
+										key={doc._id}
+										data={doc}
+										deleteBtn={
+											<Button
+												size='sm'
+												variant='danger'
+												className='fw-bolder mt-2 custom-button'
+												onClick={() =>
+													handleDeleteDocument(chosenDocs, doc._id)
+												}
+											>
+												Delete
+											</Button>
+										}
+									/>
+								))}
+							</Accordion.Body>
+						</Accordion.Item>
+					</Accordion>
+				);
+			}
+		}
+		return gpDocsArray;
+	};
+
 	return signedIn ? (
-		<div className='my-3'>
-			<div className='d-flex my-3'>
-				<Form className='rounded-2 p-2 m-2 bg-light'>
+		<div className='mt-5 m-2'>
+			<div className='d-flex my-2'>
+				<Form className='rounded-2 p-2 my-2 bg-light'>
 					<Form.Group>
 						<Form.Label
 							htmlFor='documents'
@@ -164,27 +273,28 @@ const Dashboard: NextPage<Props> = ({ validToken, data }) => {
 						<Form.Select
 							name='documents'
 							id='documents'
-							onChange={handleInputChange}
+							onChange={handleSelectChange}
 							value={chosenDocs}
 							disabled={fetching}
 							required
 						>
-							{/* {supportedSeries.map((s, i) => (
-								<option key={i} value={s} className='text-capitalize'>
-									{s.replace('_', ' ')}
+							<option value='contact'>Contact Messages</option>
+							<option value='missing'>Missing Penalties</option>
+							{supportedSeries.map((s, i) => (
+								<option key={i} value={'penalties__' + s + '__manual-upload'}>
+									{s.replace('formula', 'F') + ' Penalties - Uploads'}
 								</option>
-							))} */}
-							<option value='missing' className='text-capitalize'>
-								Missing Penalties
-							</option>
-							<option value='contact' className='text-capitalize'>
-								Contact Messages
-							</option>
+							))}
+							{supportedSeries.map((s, i) => (
+								<option key={i} value={'penalties__' + s}>
+									{s.replace('formula', 'Formula ') + ' Penalties'}
+								</option>
+							))}
 						</Form.Select>
 					</Form.Group>
 				</Form>
 				{requestFailed !== false && (
-					<div className='w-75 m-2 ms-auto alert alert-danger alert-dismissible'>
+					<div className='flex-grow-1 my-2 ms-4 alert alert-danger alert-dismissible'>
 						<strong>{requestFailed}</strong>
 						<button
 							type='button'
@@ -194,14 +304,35 @@ const Dashboard: NextPage<Props> = ({ validToken, data }) => {
 					</div>
 				)}
 			</div>
-			{docsData !== null ? (
-				chosenDocs === 'missing' ? (
+			{chosenDocs !== 'missing' && chosenDocs !== 'contact' ? (
+				<Form className='rounded-2 p-2 my-2 bg-light'>
+					<Form.Group className='d-flex'>
+						<Form.Control
+							className='py-0 px-2 mx-1'
+							type='search'
+							name='searchInput'
+							id='searchInput'
+							maxLength={32}
+							onChange={handleInputChange}
+							value={searchInput}
+							placeholder='Driver Name'
+						/>
+						<Button variant='dark' size='sm' onClick={() => setSearchInput('')}>
+							<i className='bi bi-x fs-6'></i>
+						</Button>
+					</Form.Group>
+				</Form>
+			) : null}
+			{docsData !== null && !fetching ? (
+				chosenDocs.includes('penalties__') ? (
+					renderDocs(docsData as GroupedByGP, searchInput)
+				) : chosenDocs === 'missing' ? (
 					<Accordion className='col m-2'>
 						<Accordion.Item eventKey='0'>
 							<Accordion.Header>
 								<h4 className='fw-bold'>Missing Penalties</h4>
 								<h4 className='me-sm-3 fw-bold text-sm-end'>
-									{docsData.length} missing
+									{`${docsData.length} missing`}
 								</h4>
 							</Accordion.Header>
 							<Accordion.Body>
@@ -219,7 +350,7 @@ const Dashboard: NextPage<Props> = ({ validToken, data }) => {
 												variant='danger'
 												size='sm'
 												className='fw-bolder mt-2 mt-sm-0 custom-button'
-												onClick={() => deleteDocument(chosenDocs, m._id)}
+												onClick={() => handleDeleteDocument(chosenDocs, m._id)}
 											>
 												Delete
 											</Button>
@@ -239,8 +370,9 @@ const Dashboard: NextPage<Props> = ({ validToken, data }) => {
 							<Accordion.Header>
 								<h4 className='fw-bold'>Contact Messages</h4>
 								<h4 className='me-sm-3 fw-bold text-sm-end'>
-									{docsData.length}{' '}
-									{docsData.length === 1 ? 'message' : 'messages'}
+									{`${docsData.length} ${
+										docsData.length === 1 ? 'message' : 'messages'
+									}`}
 								</h4>
 							</Accordion.Header>
 							<Accordion.Body>
@@ -256,11 +388,15 @@ const Dashboard: NextPage<Props> = ({ validToken, data }) => {
 													{c.email}
 												</a>
 											</div>
+											<div>
+												<strong>Timestamp</strong>
+												<p>{new Date(c.createdAt).toLocaleString()}</p>
+											</div>
 											<Button
 												variant='danger'
 												size='sm'
 												className='fw-bolder mt-2 mt-sm-0 custom-button'
-												onClick={() => deleteDocument(chosenDocs, c._id)}
+												onClick={() => handleDeleteDocument(chosenDocs, c._id)}
 											>
 												Delete
 											</Button>
