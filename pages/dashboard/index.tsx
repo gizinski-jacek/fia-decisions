@@ -14,6 +14,9 @@ import { dbNameList, supportedSeries } from '../../lib/myData';
 import LoadingBar from '../../components/LoadingBar';
 import connectMongo from '../../lib/mongo';
 import F1DocWrapper from '../../components/wrappers/F1DocWrapper';
+import { renderDocsGroupedByGP } from '../../lib/utils';
+import MissingDocWrapper from '../../components/wrappers/MissingDocWrapper';
+import ContactDocWrapper from '../../components/wrappers/ContactDocWrapper';
 
 interface Props {
 	validToken: boolean;
@@ -99,7 +102,7 @@ const Dashboard: NextPage<Props> = ({ validToken, data }) => {
 		// Line Number 1, Column 1:
 		if (
 			confirm(
-				'Are you sure You want to delete this document? This is irreversible.'
+				'Are you sure You want to delete this document? This actions is irreversible.'
 			) === false
 		) {
 			return;
@@ -143,6 +146,7 @@ const Dashboard: NextPage<Props> = ({ validToken, data }) => {
 	const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
 		const { value } = e.target as { value: 'missing' | 'contact' };
 		setChosenDocs(value);
+		setDocsData(null);
 	};
 
 	const handleDocsRefresh = async () => {
@@ -162,92 +166,6 @@ const Dashboard: NextPage<Props> = ({ validToken, data }) => {
 		setSearchInput(value);
 	};
 
-	const renderDocs = (data: GroupedByGP, query: string) => {
-		const gpDocsArray = [];
-		if (query) {
-			let searchData = {} as GroupedByGP;
-			for (const [key, array] of Object.entries(data)) {
-				const filtered = array.filter(
-					(doc) =>
-						doc.penalty_type.toLowerCase().includes(query.toLowerCase()) ||
-						doc.incident_info.Driver.toLowerCase().includes(query.toLowerCase())
-				);
-				if (filtered.length === 0) {
-					continue;
-				} else {
-					searchData[key as keyof GroupedByGP] = filtered;
-				}
-			}
-			for (const [key, array] of Object.entries(searchData)) {
-				gpDocsArray.push(
-					<Accordion key={key} id={key} className='p-0 my-2'>
-						<Accordion.Item eventKey='2'>
-							<Accordion.Header>
-								<div className='d-flex flex-column me-2 flex-sm-row w-100 align-items-center'>
-									<h4 className='me-sm-5 fw-bold'>{key}</h4>
-									<h4 className='fw-bold'>
-										{array.find((doc) => doc.weekend)?.weekend}
-									</h4>
-									<h4 className='me-sm-3 fw-bold text-sm-end'>
-										{array.length}{' '}
-										{array.length === 1 ? 'penalty' : 'penalties'}
-									</h4>
-								</div>
-							</Accordion.Header>
-							<Accordion.Body className='bg-light'>
-								{array.map((doc) => (
-									<F1DocWrapper key={doc._id} data={doc} />
-								))}
-							</Accordion.Body>
-						</Accordion.Item>
-					</Accordion>
-				);
-			}
-		} else {
-			for (const [key, array] of Object.entries(data)) {
-				gpDocsArray.push(
-					<Accordion key={key} id={key} className='p-0 my-2'>
-						<Accordion.Item eventKey='3'>
-							<Accordion.Header>
-								<div className='d-flex flex-column flex-sm-row w-100 align-items-center'>
-									<h4 className='me-sm-3 fw-bold'>{key}</h4>
-									<h4 className='me-sm-3 fw-bold'>
-										{array.find((doc) => doc.weekend)?.weekend}
-									</h4>
-									<h4 className='me-sm-3 fw-bold text-sm-end'>
-										{array.length}{' '}
-										{array.length === 1 ? 'penalty' : 'penalties'}
-									</h4>
-								</div>
-							</Accordion.Header>
-							<Accordion.Body className='bg-light'>
-								{array.map((doc) => (
-									<F1DocWrapper
-										key={doc._id}
-										data={doc}
-										deleteBtn={
-											<Button
-												size='sm'
-												variant='danger'
-												className='fw-bolder mt-2 custom-button'
-												onClick={() =>
-													handleDeleteDocument(chosenDocs, doc._id)
-												}
-											>
-												Delete
-											</Button>
-										}
-									/>
-								))}
-							</Accordion.Body>
-						</Accordion.Item>
-					</Accordion>
-				);
-			}
-		}
-		return gpDocsArray;
-	};
-
 	return signedIn ? (
 		<div className='mt-5 m-2'>
 			<div className='d-flex my-2'>
@@ -255,20 +173,17 @@ const Dashboard: NextPage<Props> = ({ validToken, data }) => {
 					<Form.Group>
 						<Form.Label
 							htmlFor='documents'
-							className='fw-bolder w-100 d-flex justify-content-between align-items-center'
+							className='fw-bolder d-flex justify-content-between align-items-center'
 						>
 							Documents
-							<span
-								className='ms-5 flex-grow-1'
+							<h6
+								className='m-0'
 								style={{ cursor: 'pointer' }}
 								onClick={handleDocsRefresh}
 							>
-								{fetching ? (
-									<LoadingBar margin='0' />
-								) : (
-									<i className='bi bi-arrow-repeat fs-6 float-end'></i>
-								)}
-							</span>
+								Refresh
+								<i className='bi bi-arrow-repeat fs-6 ms-1'></i>
+							</h6>
 						</Form.Label>
 						<Form.Select
 							name='documents'
@@ -315,7 +230,8 @@ const Dashboard: NextPage<Props> = ({ validToken, data }) => {
 							maxLength={32}
 							onChange={handleInputChange}
 							value={searchInput}
-							placeholder='Driver Name'
+							placeholder='Penalty / Name / Car #'
+							disabled={fetching}
 						/>
 						<Button variant='dark' size='sm' onClick={() => setSearchInput('')}>
 							<i className='bi bi-x fs-6'></i>
@@ -325,93 +241,23 @@ const Dashboard: NextPage<Props> = ({ validToken, data }) => {
 			) : null}
 			{docsData !== null && !fetching ? (
 				chosenDocs.includes('penalties__') ? (
-					renderDocs(docsData as GroupedByGP, searchInput)
+					renderDocsGroupedByGP(docsData as GroupedByGP, searchInput)
 				) : chosenDocs === 'missing' ? (
-					<Accordion className='col m-2'>
-						<Accordion.Item eventKey='0'>
-							<Accordion.Header>
-								<h4 className='fw-bold'>Missing Penalties</h4>
-								<h4 className='me-sm-3 fw-bold text-sm-end'>
-									{`${docsData.length} missing`}
-								</h4>
-							</Accordion.Header>
-							<Accordion.Body>
-								{(docsData as MissingDocModel[]).map((m) => (
-									<div
-										key={m._id}
-										className='p-2 mb-2 bg-light rounded text-break'
-									>
-										<div className='d-flex justify-content-between'>
-											<div>
-												<strong>Series</strong>
-												<p className='text-capitalize'>{m.series}</p>
-											</div>
-											<Button
-												variant='danger'
-												size='sm'
-												className='fw-bolder mt-2 mt-sm-0 custom-button'
-												onClick={() => handleDeleteDocument(chosenDocs, m._id)}
-											>
-												Delete
-											</Button>
-										</div>
-										<div>
-											<strong>Description</strong>
-											<p className='text-capitalize'>{m.description}</p>
-										</div>
-									</div>
-								))}
-							</Accordion.Body>
-						</Accordion.Item>
-					</Accordion>
+					<MissingDocWrapper
+						data={docsData as MissingDocModel[]}
+						docType={'missing'}
+						handleDelete={handleDeleteDocument}
+					/>
 				) : chosenDocs === 'contact' ? (
-					<Accordion className='col m-2'>
-						<Accordion.Item eventKey='1'>
-							<Accordion.Header>
-								<h4 className='fw-bold'>Contact Messages</h4>
-								<h4 className='me-sm-3 fw-bold text-sm-end'>
-									{`${docsData.length} ${
-										docsData.length === 1 ? 'message' : 'messages'
-									}`}
-								</h4>
-							</Accordion.Header>
-							<Accordion.Body>
-								{(docsData as ContactDocModel[]).map((c) => (
-									<div
-										key={c._id}
-										className='p-2 mb-2 bg-light rounded text-break'
-									>
-										<div className='d-flex justify-content-between'>
-											<div>
-												<strong>Email</strong>
-												<a href={`mailto:${c.email}`} className='d-block'>
-													{c.email}
-												</a>
-											</div>
-											<div>
-												<strong>Timestamp</strong>
-												<p>{new Date(c.createdAt).toLocaleString()}</p>
-											</div>
-											<Button
-												variant='danger'
-												size='sm'
-												className='fw-bolder mt-2 mt-sm-0 custom-button'
-												onClick={() => handleDeleteDocument(chosenDocs, c._id)}
-											>
-												Delete
-											</Button>
-										</div>
-										<div>
-											<strong>Message</strong>
-											<p className='text-capitalize'>{c.message}</p>
-										</div>
-									</div>
-								))}
-							</Accordion.Body>
-						</Accordion.Item>
-					</Accordion>
+					<ContactDocWrapper
+						data={docsData as ContactDocModel[]}
+						docType={'contact'}
+						handleDelete={handleDeleteDocument}
+					/>
 				) : null
-			) : null}
+			) : (
+				<LoadingBar />
+			)}
 		</div>
 	) : (
 		<DashboardForm handleSignIn={handleSignIn} />
