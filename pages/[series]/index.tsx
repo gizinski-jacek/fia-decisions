@@ -57,6 +57,10 @@ const FormulaSeries: NextPage<Props> = ({ data }) => {
 									<h4 className='fw-bold'>
 										{array.find((doc) => doc.weekend)?.weekend}
 									</h4>
+									<h4 className='me-sm-3 fw-bold text-sm-end'>
+										{array.length}{' '}
+										{array.length === 1 ? 'penalty' : 'penalties'}
+									</h4>
 								</div>
 							</Accordion.Header>
 							<Accordion.Body className='bg-light'>
@@ -74,10 +78,14 @@ const FormulaSeries: NextPage<Props> = ({ data }) => {
 					<Accordion key={key} id={key} className='p-0 my-2'>
 						<Accordion.Item eventKey='1'>
 							<Accordion.Header>
-								<div className='d-flex flex-column me-2 flex-sm-row w-100 align-items-center'>
-									<h4 className='me-sm-5 fw-bold'>{key}</h4>
-									<h4 className='fw-bold'>
+								<div className='d-flex flex-column flex-sm-row w-100 align-items-center'>
+									<h4 className='me-sm-3 fw-bold'>{key}</h4>
+									<h4 className='me-sm-3 fw-bold'>
 										{array.find((doc) => doc.weekend)?.weekend}
+									</h4>
+									<h4 className='me-sm-3 fw-bold text-sm-end'>
+										{array.length}{' '}
+										{array.length === 1 ? 'penalty' : 'penalties'}
 									</h4>
 								</div>
 							</Accordion.Header>
