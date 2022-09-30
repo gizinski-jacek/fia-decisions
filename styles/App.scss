@@ -80,7 +80,8 @@ nav {
 }
 
 .custom-search {
-	height: fit-content !important;
+	height: 34px !important;
+	transition: 0.3s ease;
 
 	@media only screen and (min-width: 576px) {
 		height: 0 !important;
@@ -89,14 +90,14 @@ nav {
 	> button {
 		position: relative;
 		z-index: 3;
-		transition: 0.3s ease;
+		transition: 0.15s ease;
 		transform-origin: left;
 	}
 
 	form {
 		width: 50%;
 		transform-origin: left;
-		transition: 0.3s ease;
+		transition: 0.15s ease;
 		transform: scaleX(0);
 
 		@media only screen and (min-width: 992px) {
@@ -109,7 +110,8 @@ nav {
 	}
 
 	&.expanded {
-		height: fit-content !important;
+		height: 34px !important;
+		transition: 0.3s ease;
 
 		@media only screen and (min-width: 992px) {
 			height: 0 !important;
@@ -121,6 +123,7 @@ nav {
 
 		form {
 			transform: scaleX(1);
+			transition: 0.45s ease;
 		}
 	}
 }
