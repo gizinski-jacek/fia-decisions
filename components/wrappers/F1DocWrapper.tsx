@@ -1,27 +1,30 @@
-import { ReactElement, useState } from 'react';
+import { useState } from 'react';
 import { Accordion, Button, Modal } from 'react-bootstrap';
 import { DecisionOffenceModel, PenaltyColors } from '../../types/myTypes';
 
 interface Props {
 	data: DecisionOffenceModel;
-	deleteBtn?: ReactElement;
+	deleteBtnProps?: {
+		deleteHandler: (docType: string, docId: string) => void;
+		docType: string;
+	};
 }
 
 const penaltyTypeColors: PenaltyColors = {
-	time: { color: '#000000', backgroundColor: '#f5eb00' },
-	grid: { color: '#000000', backgroundColor: '#ff3200' },
-	'drive through': { color: '#000000', backgroundColor: '#c832ff' },
-	'drive-through': { color: '#000000', backgroundColor: '#c832ff' },
-	'pit lane': { color: '#ffffff', backgroundColor: '#963c3c' },
-	'pit-lane': { color: '#ffffff', backgroundColor: '#963c3c' },
 	disqualified: { color: '#ffffff', backgroundColor: '#323232' },
+	'drive through': { color: '#000000', backgroundColor: '#963c3c' },
+	'drive-through': { color: '#000000', backgroundColor: '#963c3c' },
+	'pit lane': { color: '#ffffff', backgroundColor: '#c832ff' },
+	'pit-lane': { color: '#ffffff', backgroundColor: '#c832ff' },
+	grid: { color: '#000000', backgroundColor: '#f50000' },
+	time: { color: '#000000', backgroundColor: '#fae100' },
 	fine: { color: '#000000', backgroundColor: '#00c800' },
-	reprimand: { color: '#000000', backgroundColor: '#00afff' },
-	warning: { color: '#000000', backgroundColor: '#ff4baf' },
-	none: { color: '#ffffff', backgroundColor: '#7d7d7d' },
+	warning: { color: '#000000', backgroundColor: '#ff64c8' },
+	reprimand: { color: '#000000', backgroundColor: '#32c8fa' },
+	none: { color: '#000000', backgroundColor: '#f0f0f0' },
 };
 
-const F1DocWrapper = ({ data, deleteBtn }: Props) => {
+const F1DocWrapper = ({ data, deleteBtnProps }: Props) => {
 	const [showDocModal, setShowDocModal] = useState(false);
 
 	const handleOpenModal = () => {
@@ -97,7 +100,7 @@ const F1DocWrapper = ({ data, deleteBtn }: Props) => {
 					<Accordion.Header className='p-0 m-0'>
 						<div className='d-flex flex-column w-100 flex-sm-row align-items-center custom-container'>
 							<div
-								className='rounded-pill p-1 me-sm-1 text-uppercase text-center fw-bold'
+								className='rounded-pill border border-dark p-1 me-sm-1 text-uppercase text-center fw-bold'
 								style={{
 									...penaltyTypeColors[
 										data.penalty_type as keyof PenaltyColors
@@ -161,7 +164,21 @@ const F1DocWrapper = ({ data, deleteBtn }: Props) => {
 							>
 								Details
 							</Button>
-							{deleteBtn}
+							{deleteBtnProps && (
+								<Button
+									size='sm'
+									variant='danger'
+									className='fw-bolder mt-2 custom-button'
+									onClick={() =>
+										deleteBtnProps.deleteHandler(
+											deleteBtnProps.docType,
+											data._id
+										)
+									}
+								>
+									Delete
+								</Button>
+							)}
 						</div>
 					</Accordion.Body>
 				</Accordion.Item>
