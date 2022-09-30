@@ -32,10 +32,10 @@ const FormulaSeries: NextPage<Props> = ({ data }) => {
 	};
 
 	return (
-		<div className='m-2'>
+		<div className='m-2 my-lg-3'>
 			<div
-				className={`position-relative custom-search 
-				${showSearchInput ? 'expanded' : ''}`}
+				className={`position-relative custom-search mb-2  
+				${showSearchInput ? 'expanded mb-lg-0' : 'mb-sm-0'}`}
 			>
 				<Button variant='dark' size='sm' onClick={handleShowSearchInput}>
 					<i className='bi bi-search fs-6'></i>
@@ -71,7 +71,7 @@ const FormulaSeries: NextPage<Props> = ({ data }) => {
 				className='text-center text-capitalize fw-bolder fst-italic'
 				style={{ lineHeight: '2.15rem' }}
 			>{`Formula ${router.query.series?.slice(-1)} Penalties`}</h2>
-			<div>{renderDocsGroupedByGP(data, searchInput)}</div>
+			<div className='my-lg-3'>{renderDocsGroupedByGP(data, searchInput)}</div>
 		</div>
 	);
 };
