@@ -7,13 +7,12 @@ import {
 	MissingDocModel,
 } from '../../types/myTypes';
 import DashboardForm from '../../components/forms/DashboardForm';
-import { Accordion, Button, Form } from 'react-bootstrap';
+import { Button, Form } from 'react-bootstrap';
 import jwt from 'jsonwebtoken';
 import axios, { AxiosError } from 'axios';
 import { dbNameList, supportedSeries } from '../../lib/myData';
 import LoadingBar from '../../components/LoadingBar';
 import connectMongo from '../../lib/mongo';
-import F1DocWrapper from '../../components/wrappers/F1DocWrapper';
 import { renderDocsGroupedByGP } from '../../lib/utils';
 import MissingDocWrapper from '../../components/wrappers/MissingDocWrapper';
 import ContactDocWrapper from '../../components/wrappers/ContactDocWrapper';
@@ -26,18 +25,20 @@ interface Props {
 const Dashboard: NextPage<Props> = ({ validToken, data }) => {
 	const [signedIn, setSignedIn] = useState(validToken);
 	const [chosenDocs, setChosenDocs] = useState<
-		| 'missing'
-		| 'contact'
+		| 'contact-message'
+		| 'missing-info'
+		| 'penalties__missing-file'
+		| 'penalties__formula1__manual-upload'
 		| 'penalties__formula1__manual-upload'
 		| 'penalties__formula2__manual-upload'
 		| 'penalties__formula3__manual-upload'
 		| 'penalties__formula1'
 		| 'penalties__formula2'
 		| 'penalties__formula3'
-	>('contact');
+	>('contact-message');
 	const [docsData, setDocsData] = useState<
 		GroupedByGP | MissingDocModel[] | ContactDocModel[] | null
-	>(null);
+	>(data);
 	const [fetching, setFetching] = useState(false);
 	const [requestFailed, setRequestFailed] = useState<false | string>(false);
 	const [searchInput, setSearchInput] = useState('');
@@ -108,6 +109,7 @@ const Dashboard: NextPage<Props> = ({ validToken, data }) => {
 			return;
 		}
 		if (!docType || !docId) {
+			setRequestFailed('Document Type and Id is required.');
 			return;
 		}
 		try {
@@ -144,7 +146,19 @@ const Dashboard: NextPage<Props> = ({ validToken, data }) => {
 	};
 
 	const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-		const { value } = e.target as { value: 'missing' | 'contact' };
+		const { value } = e.target as {
+			value:
+				| 'contact-message'
+				| 'missing-info'
+				| 'penalties__missing-file'
+				| 'penalties__formula1__manual-upload'
+				| 'penalties__formula1__manual-upload'
+				| 'penalties__formula2__manual-upload'
+				| 'penalties__formula3__manual-upload'
+				| 'penalties__formula1'
+				| 'penalties__formula2'
+				| 'penalties__formula3';
+		};
 		setChosenDocs(value);
 		setDocsData(null);
 	};
@@ -193,8 +207,9 @@ const Dashboard: NextPage<Props> = ({ validToken, data }) => {
 							disabled={fetching}
 							required
 						>
-							<option value='contact'>Contact Messages</option>
-							<option value='missing'>Missing Penalties</option>
+							<option value='contact-message'>Contact Messages</option>
+							<option value='missing-info'>Missing - Info</option>
+							<option value='penalties__missing-file'>Missing - Files</option>
 							{supportedSeries.map((s, i) => (
 								<option key={i} value={'penalties__' + s + '__manual-upload'}>
 									{s.replace('formula', 'F') + ' Penalties - Uploads'}
@@ -219,7 +234,7 @@ const Dashboard: NextPage<Props> = ({ validToken, data }) => {
 					</div>
 				)}
 			</div>
-			{chosenDocs !== 'missing' && chosenDocs !== 'contact' ? (
+			{chosenDocs !== 'contact-message' && chosenDocs !== 'missing-info' ? (
 				<Form className='rounded-2 p-2 my-2 bg-light'>
 					<Form.Group className='d-flex'>
 						<Form.Control
@@ -241,17 +256,20 @@ const Dashboard: NextPage<Props> = ({ validToken, data }) => {
 			) : null}
 			{docsData !== null && !fetching ? (
 				chosenDocs.includes('penalties__') ? (
-					renderDocsGroupedByGP(docsData as GroupedByGP, searchInput)
-				) : chosenDocs === 'missing' ? (
+					renderDocsGroupedByGP(docsData as GroupedByGP, searchInput, {
+						deleteHandler: handleDeleteDocument,
+						docType: chosenDocs,
+					})
+				) : chosenDocs === 'missing-info' ? (
 					<MissingDocWrapper
 						data={docsData as MissingDocModel[]}
-						docType={'missing'}
+						docType={chosenDocs}
 						handleDelete={handleDeleteDocument}
 					/>
-				) : chosenDocs === 'contact' ? (
+				) : chosenDocs === 'contact-message' ? (
 					<ContactDocWrapper
 						data={docsData as ContactDocModel[]}
-						docType={'contact'}
+						docType={chosenDocs}
 						handleDelete={handleDeleteDocument}
 					/>
 				) : null
