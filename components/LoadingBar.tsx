@@ -7,7 +7,7 @@ const LoadingBar: React.FC<{ margin?: string; width?: string }> = ({
 	return (
 		<div
 			className={style.loading_bar_container}
-			style={{ margin: margin || '', width: width || '' }}
+			style={{ margin: margin || 'auto', width: width || 'auto' }}
 		>
 			<div className={style.loading_bar}></div>
 		</div>
