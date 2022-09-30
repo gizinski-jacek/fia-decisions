@@ -12,52 +12,6 @@
 	min-height: 100vh;
 }
 
-.custom-search {
-	height: fit-content !important;
-
-	@media only screen and (min-width: 576px) {
-		height: 0 !important;
-	}
-
-	> button {
-		position: relative;
-		z-index: 3;
-		transition: 0.3s ease;
-		transform-origin: left;
-	}
-
-	form {
-		width: 50%;
-		transform-origin: left;
-		transition: 0.3s ease;
-		transform: scaleX(0);
-
-		@media only screen and (min-width: 992px) {
-			width: 25%;
-		}
-
-		input[type='search'] {
-			min-width: 190px !important;
-		}
-	}
-
-	&.expanded {
-		height: fit-content !important;
-
-		@media only screen and (min-width: 992px) {
-			height: 0 !important;
-		}
-
-		> button {
-			transform: scaleX(0);
-		}
-
-		form {
-			transform: scaleX(1);
-		}
-	}
-}
-
 nav {
 	position: static;
 	transition: 0.15s ease-in-out;
@@ -121,6 +75,52 @@ nav {
 		.custom-border {
 			border-left: var(--bs-border-width) var(--bs-border-style)
 				var(--bs-border-color) !important;
+		}
+	}
+}
+
+.custom-search {
+	height: fit-content !important;
+
+	@media only screen and (min-width: 576px) {
+		height: 0 !important;
+	}
+
+	> button {
+		position: relative;
+		z-index: 3;
+		transition: 0.3s ease;
+		transform-origin: left;
+	}
+
+	form {
+		width: 50%;
+		transform-origin: left;
+		transition: 0.3s ease;
+		transform: scaleX(0);
+
+		@media only screen and (min-width: 992px) {
+			width: 25%;
+		}
+
+		input[type='search'] {
+			min-width: 190px !important;
+		}
+	}
+
+	&.expanded {
+		height: fit-content !important;
+
+		@media only screen and (min-width: 992px) {
+			height: 0 !important;
+		}
+
+		> button {
+			transform: scaleX(0);
+		}
+
+		form {
+			transform: scaleX(1);
 		}
 	}
 }
