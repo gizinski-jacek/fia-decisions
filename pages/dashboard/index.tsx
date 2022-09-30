@@ -299,14 +299,12 @@ export const getServerSideProps = async (
 					},
 				};
 			} catch (error: any) {
-				console.log(error);
 				return {
 					props: { validToken: false, data: null },
 				};
 			}
 		}
 	} catch (error: any) {
-		console.log(error);
 		return {
 			props: { validToken: false, data: null },
 		};

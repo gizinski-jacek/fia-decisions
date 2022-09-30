@@ -82,7 +82,6 @@ const handler = async (
 				const document_list = await conn.models.Missing_Doc.find({}).exec();
 				return res.status(200).json(document_list);
 			} catch (error: any) {
-				console.log(error);
 				return res
 					.status(404)
 					.json(

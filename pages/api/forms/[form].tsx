@@ -39,7 +39,6 @@ const handler = async (
 		if (form === 'file') {
 			try {
 				const { series } = req.query as { series: string };
-				console.log(series);
 				if (!series) {
 					return res.status(422).json(['Series is required.']);
 				}
