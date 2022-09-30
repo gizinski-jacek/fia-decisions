@@ -144,7 +144,7 @@ const FileForm = () => {
 						))}
 					</Form.Select>
 				</Form.Group>
-				<Form.Group>
+				<Form.Group className='mb-3'>
 					<Form.Label htmlFor='file' className='fw-bolder'>
 						Select file
 					</Form.Label>

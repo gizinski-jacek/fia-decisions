@@ -99,7 +99,7 @@ const ContactForm = () => {
 						Valid email, 8-64 characters long
 					</Form.Text>
 				</Form.Group>
-				<Form.Group>
+				<Form.Group className='mb-3'>
 					<Form.Label htmlFor='message' className='fw-bolder'>
 						Message
 					</Form.Label>

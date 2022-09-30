@@ -58,7 +58,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 								timeout: 15000,
 							}
 						);
-						return res.status(200).json('Request for update accepted.');
+						return res.status(200).end();
 					} catch (error: any) {
 						if (error instanceof AxiosError) {
 							return res
@@ -149,8 +149,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 				});
 
 				if (allDocsHref.length === 0) {
-					console.log('Documents are up to date. Exiting.');
-					return res.status(200).json('Documents are up to date.');
+					return res.status(200).end();
 				}
 				console.log(`Number of new scrapped documents: ${allDocsHref.length}.`);
 
@@ -197,7 +196,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 				);
 
 				console.log('Finished updating.');
-				return res.status(200).json('Finished updating.');
+				return res.status(200).end();
 			} catch (error: any) {
 				if (error instanceof AxiosError) {
 					return res

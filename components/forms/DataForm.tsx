@@ -35,7 +35,7 @@ const DataForm = () => {
 				uploadData.append(key, value);
 			}
 			setSending(true);
-			await axios.post('/api/forms/data', uploadData, { timeout: 15000 });
+			await axios.post('/api/forms/info', uploadData, { timeout: 15000 });
 			setFormData(defaultDataFormValues);
 			formRef.current?.reset();
 			setSubmitSuccess(true);
@@ -97,7 +97,7 @@ const DataForm = () => {
 						))}
 					</Form.Select>
 				</Form.Group>
-				<Form.Group>
+				<Form.Group className='mb-3'>
 					<Form.Label htmlFor='title' className='fw-bolder'>
 						Penalty Description
 					</Form.Label>

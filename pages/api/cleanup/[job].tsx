@@ -10,11 +10,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 				const { authorization } = req.headers;
 				if (authorization === `Bearer ${process.env.CRON_JOB_CLEANUP_SECRET}`) {
 					const files = fs.readdirSync('./pdfreader/');
-
 					if (files.length === 0) {
-						return res.status(200).json('No files to clean up.');
+						return res.status(200).end();
 					}
-
 					await Promise.all(
 						files.map(
 							(file) =>
@@ -28,9 +26,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 								})
 						)
 					);
-
-					console.log('Finished cleanup.');
-					return res.status(200).json('Finished cleanup.');
+					return res.status(200).end();
 				} else {
 					return res.status(401);
 				}

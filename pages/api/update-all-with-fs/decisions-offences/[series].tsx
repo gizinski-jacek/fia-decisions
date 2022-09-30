@@ -89,7 +89,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 				});
 
 				if (allDocsHref.length === 0) {
-					return res.status(200).json('Documents are up to date.');
+					return res.status(200).end();
 				}
 				console.log(
 					`Total number of scrapped documents: ${allDocsHref.length}.`
@@ -180,10 +180,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 								reject(error);
 							}
 						})
-				);
-
-				console.log(
-					'Request to update all files using file system accepted. This might take a while.'
 				);
 				return res
 					.status(200)

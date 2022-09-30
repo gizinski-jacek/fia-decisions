@@ -98,10 +98,10 @@ const DashboardForm = ({ handleSignIn }: Props) => {
 					></button>
 				</div>
 			)}
-			{sending && <LoadingBar width='50%' />}
+			{sending && <LoadingBar margin='1rem 0' width='50%' />}
 			<Button
 				variant='dark'
-				className='fw-bolder my-3'
+				className='fw-bolder my-2'
 				disabled={sending}
 				onClick={handleSubmit}
 			>
