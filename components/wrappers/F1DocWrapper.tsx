@@ -8,17 +8,17 @@ interface Props {
 }
 
 const penaltyTypeColors: PenaltyColors = {
-	time: { color: 'black', backgroundColor: 'lime' },
-	grid: { color: 'black', backgroundColor: 'red' },
-	fine: { color: 'black', backgroundColor: 'pink' },
-	disqualified: { color: 'white', backgroundColor: 'black' },
-	warning: { color: 'black', backgroundColor: 'yellow' },
-	'drive through': { color: 'white', backgroundColor: 'purple' },
-	'drive-through': { color: 'white', backgroundColor: 'purple' },
-	'pit lane': { color: 'white', backgroundColor: 'brown' },
-	'pit-lane': { color: 'white', backgroundColor: 'brown' },
-	reprimand: { color: 'white', backgroundColor: 'green' },
-	none: { color: 'black', backgroundColor: 'beige' },
+	time: { color: '#000000', backgroundColor: '#f5eb00' },
+	grid: { color: '#000000', backgroundColor: '#ff3200' },
+	'drive through': { color: '#000000', backgroundColor: '#c832ff' },
+	'drive-through': { color: '#000000', backgroundColor: '#c832ff' },
+	'pit lane': { color: '#ffffff', backgroundColor: '#963c3c' },
+	'pit-lane': { color: '#ffffff', backgroundColor: '#963c3c' },
+	disqualified: { color: '#ffffff', backgroundColor: '#323232' },
+	fine: { color: '#000000', backgroundColor: '#00c800' },
+	reprimand: { color: '#000000', backgroundColor: '#00afff' },
+	warning: { color: '#000000', backgroundColor: '#ff4baf' },
+	none: { color: '#ffffff', backgroundColor: '#7d7d7d' },
 };
 
 const F1DocWrapper = ({ data, deleteBtn }: Props) => {
