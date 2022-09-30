@@ -1,4 +1,5 @@
 import mongoose, { MongooseOptions } from 'mongoose';
+import { dbNameList } from './myData';
 
 const MONGODB_URI =
 	process.env.NODE_ENV === 'production'
@@ -32,12 +33,15 @@ const connectMongo = async (dbName: string) => {
 			MONGODB_URI + dbName + '?retryWrites=true&w=majority',
 			opts
 		);
-		if (dbName === 'otherDocs') {
+		if (dbName === dbNameList.other_documents_db) {
 			if (!client.models.Missing_Doc) {
 				client.model('Missing_Doc', require('../models/missingDoc'));
 			}
 			if (!client.models.Contact_Doc) {
 				client.model('Contact_Doc', require('../models/contactDoc'));
+			}
+			if (!client.models.Decision_Offence) {
+				client.model('Decision_Offence', require('../models/decisionOffence'));
 			}
 		} else {
 			if (!client.models.Decision_Offence) {
@@ -55,12 +59,15 @@ const connectMongo = async (dbName: string) => {
 			MONGODB_URI + dbName + '?retryWrites=true&w=majority',
 			opts
 		);
-		if (dbName === 'otherDocs') {
+		if (dbName === dbNameList.other_documents_db) {
 			if (!conn.models.Missing_Doc) {
 				conn.model('Missing_Doc', require('../models/missingDoc'));
 			}
 			if (!conn.models.Contact_Doc) {
 				conn.model('Contact_Doc', require('../models/contactDoc'));
+			}
+			if (!conn.models.Decision_Offence) {
+				conn.model('Decision_Offence', require('../models/decisionOffence'));
 			}
 		} else {
 			if (!conn.models.Decision_Offence) {
