@@ -266,15 +266,15 @@ export const transformToDecOffDoc = (
 
 	// List of applicable penalties to check against.
 	const penaltiesArray = [
-		'time',
-		'grid',
-		'fine',
 		'disqualified',
+		'drive through',
+		'drive-through',
+		'pit lane',
+		'pit-lane',
+		'grid',
+		'time',
+		'fine',
 		'warning',
-		'drive Through',
-		'drive-Through',
-		'pit Lane',
-		'pit-Lane',
 		'reprimand',
 	];
 	let penaltyType = 'none';
