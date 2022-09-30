@@ -49,16 +49,13 @@ const handler = async (
 					return res.status(422).json(['Series is required.']);
 				}
 				let seriesDB = '';
-				if (series === 'formula1') {
-					seriesDB = dbNameList.f1_2022_db;
-				} else if (series === 'formula2') {
-					seriesDB = dbNameList.f2_2022_db;
-				} else if (series === 'formula3') {
-					seriesDB = dbNameList.f3_2022_db;
-				} else {
-					return res.status(422).json(['Series is not supported.']);
+				if (
+					supportedSeries.find(
+						(s) => s.toLocaleLowerCase() === series.toLowerCase()
+					)
+				) {
+					seriesDB = dbNameList.other_documents_db;
 				}
-
 				if (!seriesDB) {
 					return res.status(422).json(['Series is not supported.']);
 				}
@@ -103,21 +100,7 @@ const handler = async (
 						series as 'formula1' | 'formula2' | 'formula3'
 					);
 					try {
-						const conn = await connectMongo(seriesDB);
-						const docExists = await conn.models.Decision_Offence.findOne({
-							doc_type: transformed.doc_type,
-							doc_name: transformed.doc_name,
-							doc_date: transformed.doc_date,
-							penalty_type: transformed.penalty_type,
-							grand_prix: transformed.grand_prix,
-						});
-						if (docExists) {
-							return res
-								.status(403)
-								.json([
-									'Document already exists. If you believe this to be a mistake please use Contact form to let me know about this issue.',
-								]);
-						}
+						const conn = await connectMongo(dbNameList.other_documents_db);
 						await conn.models.Decision_Offence.create({
 							...transformed,
 							manual_upload: true,
@@ -155,7 +138,7 @@ const handler = async (
 				if (errors) {
 					return res.status(422).json(errors);
 				}
-				const conn = await connectMongo('otherDocs');
+				const conn = await connectMongo(dbNameList.other_documents_db);
 				const newReport = new conn.models.Missing_Doc(fields);
 				await newReport.save();
 				return res.status(200).end();
@@ -177,7 +160,7 @@ const handler = async (
 				if (errors) {
 					return res.status(422).json(errors);
 				}
-				const conn = await connectMongo('otherDocs');
+				const conn = await connectMongo(dbNameList.other_documents_db);
 				const newReport = new conn.models.Contact_Doc(fields);
 				await newReport.save();
 				return res.status(200).end();
