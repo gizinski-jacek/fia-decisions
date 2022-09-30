@@ -21,7 +21,14 @@ export const verifyToken = (req: NextApiRequest) => {
 	return true;
 };
 
-export const renderDocsGroupedByGP = (data: GroupedByGP, query: string) => {
+export const renderDocsGroupedByGP = (
+	data: GroupedByGP,
+	query: string,
+	deleteBtnProps?: {
+		deleteHandler: (docType: string, docId: string) => void;
+		docType: string;
+	}
+) => {
 	if (Object.entries(data).length === 0) {
 		return (
 			<div className='m-5 text-center'>
@@ -86,7 +93,11 @@ export const renderDocsGroupedByGP = (data: GroupedByGP, query: string) => {
 						</Accordion.Header>
 						<Accordion.Body className='bg-light'>
 							{array.map((doc) => (
-								<F1DocWrapper key={doc._id} data={doc} />
+								<F1DocWrapper
+									key={doc._id}
+									data={doc}
+									deleteBtnProps={deleteBtnProps}
+								/>
 							))}
 						</Accordion.Body>
 					</Accordion.Item>
