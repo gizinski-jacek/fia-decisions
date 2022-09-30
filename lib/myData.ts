@@ -27,7 +27,7 @@ export const dbNameList: DatabaseNameList = {
 	f1_2022_db: '2022_F1_WC_Docs',
 	f2_2022_db: '2022_F2_WC_Docs',
 	f3_2022_db: '2022_F3_WC_Docs',
-	other_documents_db: 'otherDocs',
+	other_documents_db: 'Other_Docs',
 };
 
 // Default form data state used in FileForm component.
