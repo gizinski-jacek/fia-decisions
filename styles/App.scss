@@ -14,7 +14,7 @@
 
 nav {
 	position: static;
-	transition: 0.15s ease-in-out;
+	transition: 0.15s ease;
 	z-index: 10;
 
 	.nav-item {
@@ -57,7 +57,7 @@ nav {
 		.custom-btn-show {
 			position: relative;
 			top: 0;
-			animation: slideBtnDown 0.3s ease-in-out forwards;
+			animation: slideBtnDown 0.3s ease forwards;
 		}
 
 		@keyframes slideBtnDown {
