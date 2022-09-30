@@ -31,14 +31,11 @@ const handler = async (
 				seriesDB = dbNameList.f2_2022_db;
 			} else if (docTypeStrings[1] === 'formula3') {
 				seriesDB = dbNameList.f3_2022_db;
+			} else if (docTypeStrings[1] === 'missing-file') {
+				seriesDB = dbNameList.other_documents_db;
 			} else {
 				return res.status(422).json('Series is not supported.');
 			}
-
-			if (!seriesDB) {
-				return res.status(422).json('Series is not supported.');
-			}
-
 			try {
 				const tokenValid = verifyToken(req);
 				if (!tokenValid) {
@@ -68,7 +65,7 @@ const handler = async (
 					);
 			}
 		}
-		if (docTypeStrings[0] === 'missing') {
+		if (docTypeStrings[0] === 'missing-info') {
 			try {
 				const tokenValid = verifyToken(req);
 				if (!tokenValid) {
@@ -89,7 +86,7 @@ const handler = async (
 					);
 			}
 		}
-		if (docTypeStrings[0] === 'contact') {
+		if (docTypeStrings[0] === 'contact-message') {
 			try {
 				const tokenValid = verifyToken(req);
 				if (!tokenValid) {
@@ -124,14 +121,11 @@ const handler = async (
 				seriesDB = dbNameList.f2_2022_db;
 			} else if (docTypeStrings[1] === 'formula3') {
 				seriesDB = dbNameList.f3_2022_db;
+			} else if (docTypeStrings[1] === 'missing-file') {
+				seriesDB = dbNameList.other_documents_db;
 			} else {
 				return res.status(422).json('Series is not supported.');
 			}
-
-			if (!seriesDB) {
-				return res.status(422).json('Series is not supported.');
-			}
-
 			try {
 				const tokenValid = verifyToken(req);
 				if (!tokenValid) {
@@ -140,6 +134,9 @@ const handler = async (
 						`token=; Path=/; httpOnly=true; SameSite=strict; Secure=true; Max-Age=0`
 					);
 					return res.status(401).end();
+				}
+				if (!doc_id) {
+					return res.status(403).json('Document Id is required.');
 				}
 				const conn = await connectMongo(seriesDB);
 				await conn.models.Decision_Offence.findByIdAndDelete(doc_id).exec();
@@ -152,7 +149,7 @@ const handler = async (
 					);
 			}
 		}
-		if (docTypeStrings[0] === 'missing') {
+		if (docTypeStrings[0] === 'missing-info') {
 			try {
 				const tokenValid = verifyToken(req);
 				if (!tokenValid) {
@@ -176,7 +173,7 @@ const handler = async (
 					);
 			}
 		}
-		if (docTypeStrings[0] === 'contact') {
+		if (docTypeStrings[0] === 'contact-message') {
 			try {
 				const tokenValid = verifyToken(req);
 				if (!tokenValid) {
