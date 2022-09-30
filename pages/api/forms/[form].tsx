@@ -38,6 +38,12 @@ const handler = async (
 		const { form } = req.query;
 		if (form === 'file') {
 			try {
+				//
+				//	Refactor to save to "Uploaded_Files" collection for verifying.
+				//	Add dashboard functionality to confirm files and save them
+				//	to correct Formula docs database.
+				//	Add cron job to automatically push them to said db?
+				//
 				const { series } = req.query as { series: string };
 				if (!series) {
 					return res.status(422).json(['Series is required.']);
@@ -116,7 +122,7 @@ const handler = async (
 							...transformed,
 							manual_upload: true,
 						});
-						return res.status(200).json(['Document saved.']);
+						return res.status(200).end();
 					} catch (error: any) {
 						return res
 							.status(500)
@@ -139,7 +145,7 @@ const handler = async (
 					]);
 			}
 		}
-		if (form === 'data') {
+		if (form === 'info') {
 			try {
 				const fields = await parseFields(req);
 				const { errors } = await yupValidation(
@@ -152,7 +158,7 @@ const handler = async (
 				const conn = await connectMongo('otherDocs');
 				const newReport = new conn.models.Missing_Doc(fields);
 				await newReport.save();
-				return res.status(200).json(['Document saved.']);
+				return res.status(200).end();
 			} catch (error: any) {
 				return res
 					.status(500)
@@ -174,7 +180,7 @@ const handler = async (
 				const conn = await connectMongo('otherDocs');
 				const newReport = new conn.models.Contact_Doc(fields);
 				await newReport.save();
-				return res.status(200).json(['Document saved.']);
+				return res.status(200).end();
 			} catch (error: any) {
 				return res
 					.status(500)
@@ -213,7 +219,7 @@ const handler = async (
 					'Set-Cookie',
 					`token=${token}; Path=/; httpOnly=true; SameSite=strict; Secure=true; Max-Age=900` // 15 minutes
 				);
-				return res.status(200).json({ success: true });
+				return res.status(200).end();
 			} catch (error: any) {
 				return res
 					.status(500)
