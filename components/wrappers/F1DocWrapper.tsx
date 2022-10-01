@@ -108,7 +108,15 @@ const F1DocWrapper = ({ data, cmsProps }: Props) => {
 									],
 								}}
 							>
-								{data.penalty_type}
+								{data.penalty_type === 'grid'
+									? data.incident_info.Decision[0].match(
+											/\(?[0-9]{1,2}.(grid)\)?/gi
+									  )
+										? data.incident_info.Decision[0].match(
+												/\(?[0-9]{1,2}.(grid)\)?/gi
+										  )![0]
+										: data.penalty_type
+									: data.penalty_type}
 							</div>
 							<div className='d-none d-sm-block m-1 me-sm-2 text-center fw-bold text-break'>
 								{data.incident_info.Session}
