@@ -98,21 +98,18 @@ const FileForm = () => {
 			<h5>
 				Only official documents from{' '}
 				<a
+					className='fw-bold'
 					href='https://www.fia.com/documents/championships'
 					target='_blank'
 					rel='noreferrer'
 				>
 					FIA site
 				</a>{' '}
-				containing words <b className='text-success'>Decision</b> and{' '}
-				<b className='text-success'>Offence</b> in the{' '}
-				<b className='text-success'>title</b> and{' '}
-				<b className='text-danger'>fields</b> such as{' '}
-				<b className='text-danger'>Session, Fact, Offence, Decision</b> are
-				supported.
+				marked as <b className='text-danger'>Decision</b> or{' '}
+				<b className='text-danger'>Offence</b> are supported.
 			</h5>
 			<h5>
-				<a href='/pdf_example.png' target='_blank'>
+				<a className='fw-bold' href='/pdf_example.png' target='_blank'>
 					Example of a valid file.
 				</a>
 			</h5>
