@@ -24,9 +24,10 @@ export const verifyToken = (req: NextApiRequest) => {
 export const renderDocsGroupedByGP = (
 	data: GroupedByGP,
 	query: string,
-	deleteBtnProps?: {
+	cmsProps?: {
 		deleteHandler: (docType: string, docId: string) => void;
 		docType: string;
+		acceptHandler: (series: string, docId: string) => void;
 	}
 ) => {
 	if (Object.entries(data).length === 0) {
@@ -57,8 +58,8 @@ export const renderDocsGroupedByGP = (
 					<Accordion.Item eventKey='0'>
 						<Accordion.Header>
 							<div className='d-flex flex-column me-2 flex-sm-row w-100 align-items-center'>
-								<h4 className='me-sm-5 fw-bold'>{key}</h4>
-								<h4 className='fw-bold'>
+								<h4 className='me-sm-3 fw-bold'>{key}</h4>
+								<h4 className='me-sm-3 fw-bold'>
 									{array.find((doc) => doc.weekend)?.weekend}
 								</h4>
 								<h4 className='me-sm-3 fw-bold text-sm-end'>
@@ -68,7 +69,7 @@ export const renderDocsGroupedByGP = (
 						</Accordion.Header>
 						<Accordion.Body className='bg-light'>
 							{array.map((doc) => (
-								<F1DocWrapper key={doc._id} data={doc} />
+								<F1DocWrapper key={doc._id} data={doc} cmsProps={cmsProps} />
 							))}
 						</Accordion.Body>
 					</Accordion.Item>
@@ -93,11 +94,7 @@ export const renderDocsGroupedByGP = (
 						</Accordion.Header>
 						<Accordion.Body className='bg-light'>
 							{array.map((doc) => (
-								<F1DocWrapper
-									key={doc._id}
-									data={doc}
-									deleteBtnProps={deleteBtnProps}
-								/>
+								<F1DocWrapper key={doc._id} data={doc} cmsProps={cmsProps} />
 							))}
 						</Accordion.Body>
 					</Accordion.Item>
