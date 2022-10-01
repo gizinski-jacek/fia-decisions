@@ -103,7 +103,7 @@ const Dashboard: NextPage<Props> = ({ validToken, data }) => {
 		// Line Number 1, Column 1:
 		if (
 			confirm(
-				'Are you sure You want to delete this document? This actions is irreversible.'
+				'Are you sure You want to Delete this document? This action is irreversible.'
 			) === false
 		) {
 			return;
@@ -115,6 +115,51 @@ const Dashboard: NextPage<Props> = ({ validToken, data }) => {
 		try {
 			setFetching(true);
 			await axios.delete(`/api/dashboard/${docType}?doc_id=${docId}`);
+			await getDocuments(chosenDocs);
+		} catch (error: any) {
+			setFetching(false);
+			if (error instanceof AxiosError) {
+				if (error.response?.status === 401) {
+					router.reload();
+				} else {
+					Array.isArray(error?.response?.data)
+						? setRequestFailed(
+								error?.response?.data.join(' ') ||
+									'Unknown server error. Delete request failed.'
+						  )
+						: setRequestFailed(
+								error?.response?.data ||
+									'Unknown server error. Delete request failed.'
+						  );
+				}
+			} else {
+				if (error.status === 401) {
+					router.reload();
+				} else {
+					setRequestFailed(
+						(error as Error).message ||
+							'Unknown server error. Delete request failed.'
+					);
+				}
+			}
+		}
+	};
+
+	const handleAcceptDocument = async (series: string, docId: string) => {
+		// Error when deleting:
+		// XML Parsing Error: no element found
+		// Location: http://localhost:3000/api/dashboard/missing?doc_id=6334be6da875c7c312b0f82e
+		// Line Number 1, Column 1:
+		if (confirm('Are you sure You want to Accept this document?') === false) {
+			return;
+		}
+		if (!series || !docId) {
+			setRequestFailed('Document Type and Id is required.');
+			return;
+		}
+		try {
+			setFetching(true);
+			await axios.put(`/api/dashboard/${series}?doc_id=${docId}`);
 			await getDocuments(chosenDocs);
 		} catch (error: any) {
 			setFetching(false);
@@ -259,6 +304,7 @@ const Dashboard: NextPage<Props> = ({ validToken, data }) => {
 					renderDocsGroupedByGP(docsData as GroupedByGP, searchInput, {
 						deleteHandler: handleDeleteDocument,
 						docType: chosenDocs,
+						acceptHandler: handleAcceptDocument,
 					})
 				) : chosenDocs === 'missing-info' ? (
 					<MissingDocWrapper
