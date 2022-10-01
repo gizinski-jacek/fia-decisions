@@ -4,9 +4,10 @@ import { DecisionOffenceModel, PenaltyColors } from '../../types/myTypes';
 
 interface Props {
 	data: DecisionOffenceModel;
-	deleteBtnProps?: {
+	cmsProps?: {
 		deleteHandler: (docType: string, docId: string) => void;
 		docType: string;
+		acceptHandler: (series: string, docId: string) => void;
 	};
 }
 
@@ -24,7 +25,7 @@ const penaltyTypeColors: PenaltyColors = {
 	none: { color: '#000000', backgroundColor: '#f0f0f0' },
 };
 
-const F1DocWrapper = ({ data, deleteBtnProps }: Props) => {
+const F1DocWrapper = ({ data, cmsProps }: Props) => {
 	const [showDocModal, setShowDocModal] = useState(false);
 
 	const handleOpenModal = () => {
@@ -164,20 +165,31 @@ const F1DocWrapper = ({ data, deleteBtnProps }: Props) => {
 							>
 								Details
 							</Button>
-							{deleteBtnProps && (
-								<Button
-									size='sm'
-									variant='danger'
-									className='fw-bolder mt-2 custom-button'
-									onClick={() =>
-										deleteBtnProps.deleteHandler(
-											deleteBtnProps.docType,
-											data._id
-										)
-									}
-								>
-									Delete
-								</Button>
+							{cmsProps && (
+								<>
+									<Button
+										size='sm'
+										variant='danger'
+										className='fw-bolder mt-2 custom-button'
+										onClick={() =>
+											cmsProps.deleteHandler(cmsProps.docType, data._id)
+										}
+									>
+										Delete
+									</Button>
+									{cmsProps.docType === 'penalties__missing-file' && (
+										<Button
+											size='sm'
+											variant='success'
+											className='fw-bolder mt-2 custom-button'
+											onClick={() =>
+												cmsProps.acceptHandler(data.series, data._id)
+											}
+										>
+											Accept
+										</Button>
+									)}
+								</>
 							)}
 						</div>
 					</Accordion.Body>
