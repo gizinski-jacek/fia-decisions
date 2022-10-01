@@ -139,7 +139,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 							' ' +
 							dateAndTime[1];
 						if (
-							new Date(reformattedDate).getTime() + 7200000 >=
+							new Date(reformattedDate).getTime() + 24 * 60 * 60 * 1000 >=
 							new Date(docList[0].doc_date).getTime()
 						) {
 							allDocsHref.push(link.href);
