@@ -121,11 +121,11 @@ const F1DocWrapper = ({ data, cmsProps }: Props) => {
 										: data.penalty_type
 									: data.penalty_type === 'time'
 									? data.incident_info.Decision[0].match(
-											/\d{1,2}.*second.*time\)?/gim
+											/\d{1,2}.{1,12}second.{1,12}time\)?/gim
 									  )
 										? '+ ' +
 										  data.incident_info.Decision[0]
-												.match(/\d{1,2}.*second.*time\)?/gim)![0]
+												.match(/\d{1,2}.{1,12}second.{1,12}time\)?/gim)![0]
 												.toLowerCase()
 												.replace(' second', 's')
 										: data.penalty_type
@@ -168,11 +168,7 @@ const F1DocWrapper = ({ data, cmsProps }: Props) => {
 											</div>
 										);
 									} else {
-										return (
-											<p className='' key={i}>
-												{s}
-											</p>
-										);
+										return <p key={i}>{s}</p>;
 									}
 								})}
 							</div>
