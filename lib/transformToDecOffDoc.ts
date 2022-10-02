@@ -1,5 +1,3 @@
-//@ts-nocheck
-
 import {
 	DocumentInfo,
 	IncidentInfo,
@@ -12,7 +10,7 @@ export const transformToDecOffDoc = (
 	// Array of strings parsed from FIA Decision or Offence, but not Reprimand, documents parsed with pdfReader.
 	pdfDataArray: string[],
 	// Info to determine number of strings to slice off, F1 has 4 stewards, F2 and F3 has 3 stewards.
-	series: 'formula1' | 'formula2' | 'formula3'
+	series: 'f1' | 'f2' | 'f3'
 ): TransformedPDFData => {
 	let fileName: string;
 	// Checking if string value comes from file name or from anchors href.
@@ -25,7 +23,7 @@ export const transformToDecOffDoc = (
 	}
 	// Extracting end part of filename, matching against common duplicate file suffixes.
 	// Removing suffix if present.
-	const regexMatch = fileName.slice(-5).match(/(_|-| )?\(?[0-9]{1,2}\)?/);
+	const regexMatch = fileName.slice(-3).match(/(_|-| )?\(?[0-9]{1,2}\)?/);
 	if (regexMatch) {
 		fileName = fileName.slice(0, -regexMatch[0].length);
 	}
@@ -135,9 +133,22 @@ export const transformToDecOffDoc = (
 		.filter((u) => u !== undefined);
 
 	// Extracting first index, which is race weekend date, and removing it from array.
-	const weekend = incidentInfoStrings[0] as string;
-	const incidentInfoStringsWithoutWeekend = incidentInfoStrings.slice(1);
-
+	let weekend: string;
+	let incidentInfoStringsWithoutWeekend: string[];
+	// Checking for edge case where date might be split into two strings.
+	if ((incidentInfoStrings[0] as string).length < 12) {
+		weekend = ((incidentInfoStrings[0] as string).trim() +
+			' ' +
+			incidentInfoStrings[1]) as string;
+		incidentInfoStringsWithoutWeekend = incidentInfoStrings.slice(
+			2
+		) as string[];
+	} else {
+		weekend = incidentInfoStrings[0] as string;
+		incidentInfoStringsWithoutWeekend = incidentInfoStrings.slice(
+			1
+		) as string[];
+	}
 	const incidentInfo = {} as IncidentInfo;
 	// Extracting opening statement string, joining them, and removing them from array.
 	incidentInfo.Headline = incidentInfoStringsWithoutWeekend
@@ -250,7 +261,7 @@ export const transformToDecOffDoc = (
 
 	// Checking which series we're working on to know how many string to
 	// skip at the end of array, F1 has one steward more than F2 and F3.
-	const stewardCount = series === 'formula1' ? 4 : 3;
+	const stewardCount = series === 'f1' ? 4 : 3;
 	// Extracting stewards names and "The Stewards" string from the end of document.
 	const stewards = trimmedStringsArray
 		.filter((str) => str !== 'The Stewards')
