@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { GetServerSidePropsContext, NextPage } from 'next';
+import { GetServerSidePropsContext, NextApiRequest, NextPage } from 'next';
 import { useRouter } from 'next/router';
 import {
 	ContactDocModel,
@@ -13,7 +13,7 @@ import axios, { AxiosError } from 'axios';
 import { dbNameList, supportedSeries } from '../../lib/myData';
 import LoadingBar from '../../components/LoadingBar';
 import connectMongo from '../../lib/mongo';
-import { renderDocsGroupedByGP } from '../../lib/utils';
+import { renderDocsGroupedByGP, verifyToken } from '../../lib/utils';
 import MissingDocWrapper from '../../components/wrappers/MissingDocWrapper';
 import ContactDocWrapper from '../../components/wrappers/ContactDocWrapper';
 
@@ -299,26 +299,32 @@ const Dashboard: NextPage<Props> = ({ validToken, data }) => {
 					</Form.Group>
 				</Form>
 			) : null}
-			{docsData !== null && !fetching ? (
-				chosenDocs.includes('penalties__') ? (
-					renderDocsGroupedByGP(docsData as GroupedByGP, searchInput, {
-						deleteHandler: handleDeleteDocument,
-						docType: chosenDocs,
-						acceptHandler: handleAcceptDocument,
-					})
-				) : chosenDocs === 'missing-info' ? (
-					<MissingDocWrapper
-						data={docsData as MissingDocModel[]}
-						docType={chosenDocs}
-						handleDelete={handleDeleteDocument}
-					/>
-				) : chosenDocs === 'contact-message' ? (
-					<ContactDocWrapper
-						data={docsData as ContactDocModel[]}
-						docType={chosenDocs}
-						handleDelete={handleDeleteDocument}
-					/>
-				) : null
+			{chosenDocs !== null && docsData !== null && !fetching ? (
+				docsData.length !== 0 ? (
+					chosenDocs.includes('penalties__') ? (
+						renderDocsGroupedByGP(docsData as GroupedByGP, searchInput, {
+							deleteHandler: handleDeleteDocument,
+							docType: chosenDocs,
+							acceptHandler: handleAcceptDocument,
+						})
+					) : chosenDocs === 'missing-info' ? (
+						<MissingDocWrapper
+							data={docsData as MissingDocModel[]}
+							docType={chosenDocs}
+							handleDelete={handleDeleteDocument}
+						/>
+					) : chosenDocs === 'contact-message' ? (
+						<ContactDocWrapper
+							data={docsData as ContactDocModel[]}
+							docType={chosenDocs}
+							handleDelete={handleDeleteDocument}
+						/>
+					) : null
+				) : (
+					<div className='m-5 text-center'>
+						<h3>No Documents Found</h3>
+					</div>
+				)
 			) : (
 				<LoadingBar />
 			)}
@@ -337,22 +343,8 @@ export const getServerSideProps = async (
 				'Please define JWT_STRATEGY_SECRET environment variable inside .env.local'
 			);
 		}
-		const { token } = context.req.cookies;
-		if (!token) {
-			return {
-				props: { validToken: false, data: null },
-			};
-		}
-		const decodedToken = jwt.verify(token, process.env.JWT_STRATEGY_SECRET);
-		if (decodedToken !== process.env.JWT_PAYLOAD_STRING) {
-			context.res.setHeader(
-				'Set-Cookie',
-				`token=; Path=/; httpOnly=true; SameSite=strict; Secure=true; Max-Age=0`
-			);
-			return {
-				props: { validToken: false, data: null },
-			};
-		} else {
+		const tokenValid = verifyToken(context.req as NextApiRequest);
+		if (tokenValid) {
 			try {
 				const conn = await connectMongo(dbNameList.other_documents_db);
 				const document_list = await conn.models.Missing_Doc.find({}).exec();
@@ -367,6 +359,14 @@ export const getServerSideProps = async (
 					props: { validToken: false, data: null },
 				};
 			}
+		} else {
+			context.res.setHeader(
+				'Set-Cookie',
+				`token=; Path=/; httpOnly=true; SameSite=strict; Secure=true; Max-Age=0`
+			);
+			return {
+				props: { validToken: false, data: null },
+			};
 		}
 	} catch (error: any) {
 		return {
