@@ -33,7 +33,7 @@ export const renderDocsGroupedByGP = (
 	if (Object.entries(data).length === 0) {
 		return (
 			<div className='m-5 text-center'>
-				<h4>No Documents Found</h4>
+				<h3>No Documents Found</h3>
 			</div>
 		);
 	}
