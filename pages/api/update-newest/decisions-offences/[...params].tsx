@@ -17,23 +17,26 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 		}
 		const { authorization } = req.headers;
 		if (authorization === `Bearer ${process.env.CRON_JOB_SECRET}`) {
-			const { series } = req.query as { series: string };
-			let seriesDB = '';
-			let seriesPageURL = '';
-			if (series === 'formula1') {
-				seriesDB = dbNameList.f1_2022_db;
-				seriesPageURL = fiaPageList.f1_2022_page;
-			} else if (series === 'formula2') {
-				seriesDB = dbNameList.f2_2022_db;
-				seriesPageURL = fiaPageList.f2_2022_page;
-			} else if (series === 'formula3') {
-				seriesDB = dbNameList.f3_2022_db;
-				seriesPageURL = fiaPageList.f3_2022_page;
+			const { params } = req.query as { params: string[] };
+			let seriesYearDB = '';
+			let seriesYearPageURL = '';
+			if (params[0] === 'f1') {
+				seriesYearDB = dbNameList[`f1_${params[1]}_db`];
+				seriesYearPageURL = fiaPageList[`f1_${params[1]}_page`];
+			} else if (params[0] === 'f2') {
+				seriesYearDB = dbNameList[`f2_${params[1]}_db`];
+				seriesYearPageURL = fiaPageList[`f2_${params[1]}_page`];
+			} else if (params[0] === 'f3') {
+				seriesYearDB = dbNameList[`f3_${params[1]}_db`];
+				seriesYearPageURL = fiaPageList[`f3_${params[1]}_page`];
 			} else {
 				return res.status(422).json('Unsupported series.');
 			}
+			if (!seriesYearDB) {
+				return res.status(422).json('Unsupported year.');
+			}
 			try {
-				const conn = await connectMongo(seriesDB);
+				const conn = await connectMongo(seriesYearDB);
 				const docList = await conn.models.Decision_Offence.find({})
 					.sort({ doc_date: -1 })
 					.limit(1)
@@ -50,7 +53,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 							);
 						}
 						await axios.get(
-							`${appURI}/api/f1/update-all/decisions-offences/${series}`,
+							`${appURI}/api/f1/update-all/decisions-offences/${params[0]}`,
 							{
 								headers: {
 									authorization: `Bearer ${process.env.CRON_JOB_UPDATE_ALL_DOCS_SECRET}`,
@@ -63,20 +66,15 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 						if (error instanceof AxiosError) {
 							return res
 								.status(error?.response?.status || 500)
-								.json(
-									error?.response?.data ||
-										'Unknown server error. If it is a reoccuring error, please use the Contact form to report this issue.'
-								);
+								.json(error?.response?.data || 'Unknown server error.');
 						} else {
-							return res
-								.status(500)
-								.json(
-									'Unknown server error. If it is a reoccuring error, please use the Contact form to report this issue.'
-								);
+							return res.status(500).json('Unknown server error.');
 						}
 					}
 				}
-				const responseSite = await axios.get(seriesPageURL, { timeout: 15000 });
+				const responseSite = await axios.get(seriesYearPageURL, {
+					timeout: 15000,
+				});
 				const { document } = new JSDOM(responseSite.data).window;
 				const listView: HTMLElement | null =
 					document.getElementById('list-view');
@@ -161,16 +159,17 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 									responseType: 'stream',
 									timeout: 15000,
 								});
+
 								const fileBuffer = await streamToBuffer(responseFile.data);
 								const readPDF = await readPDFPages(fileBuffer);
 								const transformed = transformToDecOffDoc(
 									href,
 									readPDF as any,
-									series as 'formula1' | 'formula2' | 'formula3'
+									params[0] as 'f1' | 'f2' | 'f3'
 								);
 								try {
 									const docExists = await conn.models.Decision_Offence.findOne({
-										series: series,
+										series: params[0],
 										doc_type: transformed.doc_type,
 										doc_name: transformed.doc_name,
 										doc_date: transformed.doc_date,
