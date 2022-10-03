@@ -19,23 +19,49 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 		if (
 			authorization === `Bearer ${process.env.CRON_JOB_UPDATE_ALL_DOCS_SECRET}`
 		) {
-			const { series } = req.query as { series: string };
-			let seriesDB = '';
-			let seriesPageURL = '';
-			if (series === 'formula1') {
-				seriesDB = dbNameList.f1_2022_db;
-				seriesPageURL = fiaPageList.f1_2022_page;
-			} else if (series === 'formula2') {
-				seriesDB = dbNameList.f2_2022_db;
-				seriesPageURL = fiaPageList.f2_2022_page;
-			} else if (series === 'formula3') {
-				seriesDB = dbNameList.f3_2022_db;
-				seriesPageURL = fiaPageList.f3_2022_page;
+			const { params } = req.query as { params: string[] };
+			let seriesYearDB = '';
+			let seriesYearPageURL = '';
+			if (params[0] === 'f1') {
+				if (params[1]) {
+					seriesYearDB = dbNameList[`f1_${params[1]}_db`];
+					seriesYearPageURL = fiaPageList[`f1_${params[1]}_page`];
+				} else {
+					seriesYearDB =
+						dbNameList[`f1_${new Date().getFullYear().toString()}_db`];
+					seriesYearPageURL =
+						fiaPageList[`f1_${new Date().getFullYear().toString()}_page`];
+				}
+			} else if (params[0] === 'f2') {
+				if (params[1]) {
+					seriesYearDB = dbNameList[`f2_${params[1]}_db`];
+					seriesYearPageURL = fiaPageList[`f2_${params[1]}_page`];
+				} else {
+					seriesYearDB =
+						dbNameList[`f2_${new Date().getFullYear().toString()}_db`];
+					seriesYearPageURL =
+						fiaPageList[`f2_${new Date().getFullYear().toString()}_page`];
+				}
+			} else if (params[0] === 'f3') {
+				if (params[1]) {
+					seriesYearDB = dbNameList[`f3_${params[1]}_db`];
+					seriesYearPageURL = fiaPageList[`f3_${params[1]}_page`];
+				} else {
+					seriesYearDB =
+						dbNameList[`f3_${new Date().getFullYear().toString()}_db`];
+					seriesYearPageURL =
+						fiaPageList[`f3_${new Date().getFullYear().toString()}_page`];
+				}
 			} else {
 				return res.status(422).json('Unsupported series.');
 			}
+			if (!seriesYearDB) {
+				return res.status(422).json('Unsupported year.');
+			}
 			try {
-				const responseSite = await axios.get(seriesPageURL, { timeout: 15000 });
+				const responseSite = await axios.get(seriesYearPageURL, {
+					timeout: 15000,
+				});
 				const { document } = new JSDOM(responseSite.data).window;
 				const listView: HTMLElement | null =
 					document.getElementById('list-view');
@@ -64,6 +90,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 						'set a time',
 						'permission to start',
 						'protest lodged',
+						'protest',
 						'cover',
 						'alledgedly score',
 						'right of review',
@@ -81,32 +108,30 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 						allDocsHref.push(link.href);
 					}
 				});
-
 				if (allDocsHref.length === 0) {
 					return res.status(200).end();
 				}
 				console.log(
-					`Total number of scrapped documents: ${allDocsHref.length}.`
+					`Total number of scraped documents: ${allDocsHref.length}.`
 				);
-
-				const conn = await connectMongo(seriesDB);
-				allDocsHref.forEach(
-					(href) =>
+				const conn = await connectMongo(seriesYearDB);
+				allDocsHref.forEach((href, i) =>
+					setTimeout(() => {
 						new Promise(async (resolve, reject) => {
-							const responseFile = await axios.get(fiaDomain + href, {
-								responseType: 'stream',
-								timeout: 15000,
-							});
-							const fileBuffer = await streamToBuffer(responseFile.data);
-							const readPDF = await readPDFPages(fileBuffer);
-							const transformed = transformToDecOffDoc(
-								href,
-								readPDF as any,
-								series as 'formula1' | 'formula2' | 'formula3'
-							);
 							try {
+								const responseFile = await axios.get(fiaDomain + href, {
+									responseType: 'stream',
+									timeout: 15000,
+								});
+								const fileBuffer = await streamToBuffer(responseFile.data);
+								const readPDF = await readPDFPages(fileBuffer);
+								const transformed = transformToDecOffDoc(
+									href,
+									readPDF as any,
+									params[0] as 'f1' | 'f2' | 'f3'
+								);
 								const docExists = await conn.models.Decision_Offence.findOne({
-									series: series,
+									series: params[0],
 									doc_type: transformed.doc_type,
 									doc_name: transformed.doc_name,
 									doc_date: transformed.doc_date,
@@ -127,27 +152,22 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 							} catch (error: any) {
 								reject(error);
 							}
-						})
+						});
+					}, 2000 * i)
 				);
+
 				return res
 					.status(200)
 					.json(
-						'Request to update all files accepted. This might take a while.'
+						'Request to update all files accepted. This might take up to several minutes depending on amount of documents.'
 					);
 			} catch (error: any) {
 				if (error instanceof AxiosError) {
 					return res
 						.status(error?.response?.status || 500)
-						.json(
-							error?.response?.data ||
-								'Unknown server error. If it is a reoccuring error, please use the Contact form to report this issue.'
-						);
+						.json(error?.response?.data || 'Unknown server error.');
 				} else {
-					return res
-						.status(500)
-						.json(
-							'Unknown server error. If it is a reoccuring error, please use the Contact form to report this issue.'
-						);
+					return res.status(500).json('Unknown server error.');
 				}
 			}
 		} else {

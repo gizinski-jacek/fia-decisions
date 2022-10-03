@@ -1,19 +1,22 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import type { GetServerSidePropsContext, NextPage } from 'next';
-import connectMongo from '../../lib/mongo';
-import { dbNameList } from '../../lib/myData';
-import { DecisionOffenceModel, GroupedByGP } from '../../types/myTypes';
+import type { NextPage } from 'next';
+import { GroupedByGP } from '../../types/myTypes';
 import { Button, Form } from 'react-bootstrap';
 import { renderDocsGroupedByGP } from '../../lib/utils';
+import axios, { AxiosError } from 'axios';
+import LoadingBar from '../../components/LoadingBar';
+import { dbNameList } from '../../lib/myData';
 
-interface Props {
-	data: GroupedByGP;
-}
-
-const FormulaSeries: NextPage<Props> = ({ data }) => {
+const FormulaSeries: NextPage = () => {
+	const [docsData, setDocsData] = useState<GroupedByGP | null>(null);
 	const [showSearchInput, setShowSearchInput] = useState(false);
 	const [searchInput, setSearchInput] = useState('');
+	const [selectInput, setSelectInput] = useState(
+		new Date().getFullYear().toString()
+	);
+	const [fetching, setFetching] = useState(false);
+	const [fetchingError, setFetchingError] = useState<string | null>(null);
 
 	const router = useRouter();
 
@@ -31,39 +34,103 @@ const FormulaSeries: NextPage<Props> = ({ data }) => {
 		setSearchInput(value);
 	};
 
+	const handleSelectChange = async (
+		e: React.ChangeEvent<HTMLSelectElement>
+	) => {
+		const { value } = e.target;
+		setSelectInput(value);
+	};
+
+	const getDocuments = useCallback(async () => {
+		try {
+			setFetchingError(null);
+			setFetching(true);
+			const res = await axios.get(
+				`/api/document/${router.query.series}/${selectInput}`
+			);
+			setFetching(false);
+			setDocsData(res.data);
+		} catch (error: any) {
+			setFetchingError(
+				'Failed to get documents. Try refreshing the page. If this issue persists, please use the Contact form to report this issue.'
+			);
+			setDocsData(null);
+		}
+	}, [selectInput, router]);
+
+	useEffect(() => {
+		if (selectInput) {
+			getDocuments();
+		}
+	}, [selectInput, getDocuments]);
+
+	useEffect(() => {
+		setSearchInput('');
+		setSelectInput(new Date().getFullYear().toString());
+	}, [router.query.series]);
+
 	return (
 		<div className='m-2 my-lg-3'>
-			<div
-				className={`position-relative custom-search mb-2  
-				${showSearchInput ? 'expanded mb-lg-0' : 'mb-sm-0'}`}
-			>
-				<Button variant='dark' size='sm' onClick={handleShowSearchInput}>
-					<i className='bi bi-search fs-6'></i>
-				</Button>
-				<Form className='position-absolute top-0 start-0 d-flex'>
-					<Form.Group className='d-flex'>
-						<Button variant='dark' size='sm' onClick={handleHideSearchInput}>
-							<i className='bi bi-arrow-left fs-6'></i>
-						</Button>
-						<Form.Control
-							className='py-0 px-2 mx-1'
-							type='search'
-							name='searchInput'
-							id='searchInput'
-							maxLength={32}
-							onChange={handleInputChange}
-							value={searchInput}
-							placeholder='Penalty / Name / Car #'
-							disabled={!showSearchInput || Object.entries(data).length === 0}
-						/>
-						<Button
-							variant='dark'
-							size='sm'
-							disabled={!showSearchInput || Object.entries(data).length === 0}
-							onClick={() => setSearchInput('')}
+			<div className='position-relative'>
+				<div
+					className={`custom-search mb-2 
+					${showSearchInput ? 'expanded mb-lg-0' : 'mb-sm-0'}`}
+				>
+					<Button variant='dark' size='sm' onClick={handleShowSearchInput}>
+						<i className='bi bi-search fs-6'></i>
+					</Button>
+					<Form className='position-absolute top-0 start-0 d-flex'>
+						<Form.Group className='d-flex'>
+							<Button variant='dark' size='sm' onClick={handleHideSearchInput}>
+								<i className='bi bi-arrow-left fs-6'></i>
+							</Button>
+							<Form.Control
+								className='py-0 px-2 mx-1'
+								type='search'
+								name='searchInput'
+								id='searchInput'
+								maxLength={32}
+								onChange={handleInputChange}
+								value={searchInput}
+								placeholder='Penalty / Name / Car #'
+								disabled={!showSearchInput || !docsData}
+							/>
+							<Button
+								variant='dark'
+								size='sm'
+								disabled={!showSearchInput || !docsData}
+								onClick={() => setSearchInput('')}
+							>
+								<i className='bi bi-x fs-6'></i>
+							</Button>
+						</Form.Group>
+					</Form>
+				</div>
+				<Form className='position-absolute top-0 end-0 mb-2 custom-select'>
+					<Form.Group>
+						<Form.Select
+							className='py-0 px-1 fs-5'
+							name='selectInput'
+							id='selectInput'
+							onChange={handleSelectChange}
+							value={selectInput}
+							disabled={fetching}
 						>
-							<i className='bi bi-x fs-6'></i>
-						</Button>
+							{(() => {
+								const seriesDbList = [];
+								for (const key of Object.keys(dbNameList)) {
+									if (key.includes(router.query.series as string)) {
+										seriesDbList.push(key);
+									}
+								}
+								const yearsList = seriesDbList.map((s) => s.split('_')[1]);
+								return yearsList.map((y, i) => (
+									<option key={i} value={y}>
+										{y}
+									</option>
+								));
+							})()}
+						</Form.Select>
 					</Form.Group>
 				</Form>
 			</div>
@@ -71,72 +138,30 @@ const FormulaSeries: NextPage<Props> = ({ data }) => {
 				className='text-center text-capitalize fw-bolder fst-italic'
 				style={{ lineHeight: '2.15rem' }}
 			>{`Formula ${router.query.series?.slice(-1)} Penalties`}</h2>
-			<div className='my-lg-3'>{renderDocsGroupedByGP(data, searchInput)}</div>
+			<div className='my-lg-3'>
+				{fetching ? (
+					<LoadingBar margin='5rem 10rem' />
+				) : docsData ? (
+					renderDocsGroupedByGP(docsData, searchInput)
+				) : fetchingError ? (
+					<div className='m-0 mt-4 alert alert-danger alert-dismissible'>
+						<strong>{fetchingError}</strong>
+						<Button
+							variant='primary'
+							className='position-absolute top-0 end-0 m-2'
+							onClick={getDocuments}
+						>
+							Refresh
+						</Button>
+					</div>
+				) : (
+					<div className='m-5 text-center'>
+						<h3>No Documents Found</h3>
+					</div>
+				)}
+			</div>
 		</div>
 	);
-};
-
-export const getServerSideProps = async (
-	context: GetServerSidePropsContext
-) => {
-	try {
-		let seriesDB = '';
-		const { series } = context.params as { series: string };
-		if (series === 'f1') {
-			seriesDB = dbNameList.f1_2022_db;
-		} else if (series === 'f2') {
-			seriesDB = dbNameList.f2_2022_db;
-		} else if (series === 'f3') {
-			seriesDB = dbNameList.f3_2022_db;
-		} else if (series === 'formula') {
-			return {
-				redirect: {
-					destination: '/f1',
-					permanent: false,
-				},
-			};
-		} else if (series === 'formula1') {
-			return {
-				redirect: {
-					destination: '/f1',
-					permanent: false,
-				},
-			};
-		} else if (series === 'formula2') {
-			return {
-				redirect: {
-					destination: '/f2',
-					permanent: false,
-				},
-			};
-		} else if (series === 'formula3') {
-			return {
-				redirect: {
-					destination: '/f3',
-					permanent: false,
-				},
-			};
-		} else {
-			return {
-				notFound: true,
-			};
-		}
-		const conn = await connectMongo(seriesDB);
-		const document_list: DecisionOffenceModel[] =
-			await conn.models.Decision_Offence.find({}).sort({ doc_date: -1 }).exec();
-		const groupedByGP: GroupedByGP = document_list.reduce((prev, curr) => {
-			prev[curr.grand_prix] = prev[curr.grand_prix] || [];
-			prev[curr.grand_prix].push(curr);
-			return prev;
-		}, Object.create(null));
-		return {
-			props: { data: JSON.parse(JSON.stringify(groupedByGP)) },
-		};
-	} catch (error: any) {
-		return {
-			props: { data: [] },
-		};
-	}
 };
 
 export default FormulaSeries;

@@ -12,49 +12,56 @@ export const transformToDecOffDoc = (
 	// Array of strings parsed from FIA Decision or Offence, but not Reprimand, documents parsed with pdfReader.
 	pdfDataArray: string[],
 	// Info to determine number of strings to slice off, F1 has 4 stewards, F2 and F3 has 3 stewards.
-	series: 'formula1' | 'formula2' | 'formula3'
+	series: 'f1' | 'f2' | 'f3'
 ): TransformedPDFData => {
 	let fileName: string;
+
 	// Checking if string value comes from file name or from anchors href.
 	if (string.lastIndexOf('/') === -1) {
-		// Removing just file extension.
-		fileName = string.slice(0, -4);
+		// Removing file extension.
+		fileName = string.slice(0, -4).replaceAll('_', ' ').toLowerCase();
 	} else {
 		// Extracting file name from href, removing extension.
-		fileName = string.slice(string.lastIndexOf('/') + 1).slice(0, -4);
+		fileName = string
+			.slice(string.lastIndexOf('/') + 1)
+			.slice(0, -4)
+			.replaceAll('_', ' ')
+			.toLowerCase();
 	}
 	// Extracting end part of filename, matching against common duplicate file suffixes.
 	// Removing suffix if present.
-	const regexMatch = fileName.slice(-5).match(/(_|-| )?\(?[0-9]{1,2}\)?/);
-	if (regexMatch) {
-		fileName = fileName.slice(0, -regexMatch[0].length);
-	}
-	fileName.trim();
-
+	const unsuffixedFilename = fileName
+		.replace(/(_|-| ){1,}?\(?\d{1,}\)?$/gm, '')
+		.trim();
 	// Extracting grand prix name.
-	const gpName = fileName.slice(0, fileName.indexOf('-')).trim();
+	const grandPrixName = unsuffixedFilename
+		.slice(0, unsuffixedFilename.indexOf('-'))
+		.trim();
 	// Checking if document file name is title offence or decision.
 	const docType = (() => {
-		const str = fileName.replace(gpName, '').slice(0, 10).toLowerCase();
+		const str = unsuffixedFilename
+			.replace(grandPrixName, '')
+			.trim()
+			.slice(0, 10);
 		return str.includes('offence')
-			? 'Offence'
+			? 'offence'
 			: str.includes('decision')
-			? 'Decision'
-			: 'Wrong Doc Type';
+			? 'decision'
+			: 'wrong doc type';
 	})();
 
-	const incidentTitle = [fileName].map((string) => {
+	const incidentTitle = [unsuffixedFilename].map((string) => {
 		// Removing grand prix name from filename string.
-		let str = string.replace(gpName, '').trim();
+		let str = string.replace(grandPrixName, '').trim();
 		// Checking for a dash, removing it and trimming whitespaces.
 		if (str.charAt(0) === '-') {
 			str = str.slice(1).trim();
 		}
 		// Checking for "offence" word, removing it and trimming whitespaces.
-		if (str.slice(0, 7).toLowerCase().trim() === 'offence') {
+		if (str.slice(0, 7).trim() === 'offence') {
 			str = str.slice(7).trim();
 		}
-		if (str.slice(0, 8).toLowerCase().trim() === 'decision') {
+		if (str.slice(0, 8).trim() === 'decision') {
 			// Checking for "decision" word, removing it and trimming whitespaces.
 			str = str.slice(8).trim();
 		}
@@ -135,9 +142,22 @@ export const transformToDecOffDoc = (
 		.filter((u) => u !== undefined);
 
 	// Extracting first index, which is race weekend date, and removing it from array.
-	const weekend = incidentInfoStrings[0] as string;
-	const incidentInfoStringsWithoutWeekend = incidentInfoStrings.slice(1);
-
+	let weekend: string;
+	let incidentInfoStringsWithoutWeekend: string[];
+	// Checking for edge case where date might be split into two strings.
+	if ((incidentInfoStrings[0] as string).length < 12) {
+		weekend = ((incidentInfoStrings[0] as string).trim() +
+			' ' +
+			incidentInfoStrings[1]) as string;
+		incidentInfoStringsWithoutWeekend = incidentInfoStrings.slice(
+			2
+		) as string[];
+	} else {
+		weekend = incidentInfoStrings[0] as string;
+		incidentInfoStringsWithoutWeekend = incidentInfoStrings.slice(
+			1
+		) as string[];
+	}
 	const incidentInfo = {} as IncidentInfo;
 	// Extracting opening statement string, joining them, and removing them from array.
 	incidentInfo.Headline = incidentInfoStringsWithoutWeekend
@@ -147,6 +167,23 @@ export const transformToDecOffDoc = (
 		incidentInfoStringsWithoutWeekend.slice(
 			incidentInfoStringsWithoutWeekend.indexOf('Driver')
 		);
+
+	// Checking for edge case where document might be marked as Decision or Offence
+	// but still has different format than the one we allow.
+	const valid = [
+		'competitor',
+		'time',
+		'session',
+		'fact',
+		'offence',
+		'decision',
+	].map((word) =>
+		pdfDataArray.some((string) => string.toLowerCase().includes(word))
+	);
+	if (!valid.every((v) => v === true)) {
+		console.log(`Incorrect document format: ${fileName}`);
+		throw new Error('Incorrect document format.');
+	}
 
 	// The array should now only contain detailed incident data strings.
 	// Strings after Fact and before Offence describe facts about incident,
@@ -250,7 +287,7 @@ export const transformToDecOffDoc = (
 
 	// Checking which series we're working on to know how many string to
 	// skip at the end of array, F1 has one steward more than F2 and F3.
-	const stewardCount = series === 'formula1' ? 4 : 3;
+	const stewardCount = series === 'f1' ? 4 : 3;
 	// Extracting stewards names and "The Stewards" string from the end of document.
 	const stewards = trimmedStringsArray
 		.filter((str) => str !== 'The Stewards')
@@ -264,7 +301,7 @@ export const transformToDecOffDoc = (
 		.slice(0, stewardCount - stewardCount * 2)
 		.join(' ');
 
-	// List of applicable penalties to check against.
+	// List of applicable penalties to check against in order of most to least severe.
 	const penaltiesArray = [
 		'disqualified',
 		'drive through',
@@ -279,13 +316,14 @@ export const transformToDecOffDoc = (
 	];
 	let penaltyType = 'none';
 	// Checking for penalty type in first string of Decision array.
-	// If not found its assumed no penalty was applied.
-	penaltiesArray.forEach((value) => {
-		if (incidentInfo.Decision[0].toLowerCase().includes(value.toLowerCase())) {
-			penaltyType = value;
-			return;
+	// Exiting on first penalty found to prevent overwriting with lesser penalty.
+	// If not found it is assumed no penalty was applied.
+	for (let i = 0; i < penaltiesArray.length; i++) {
+		if (incidentInfo.Decision[0].toLowerCase().includes(penaltiesArray[i])) {
+			penaltyType = penaltiesArray[i];
+			break;
 		}
-	});
+	}
 
 	// Calculating document UTC timestamp by joining Date and Time,
 	// creating Date object from it, calculating timezone offset,
@@ -299,9 +337,9 @@ export const transformToDecOffDoc = (
 	const data: TransformedPDFData = {
 		series: series,
 		doc_type: docType,
-		doc_name: fileName,
+		doc_name: unsuffixedFilename,
 		doc_date: docDate,
-		grand_prix: gpName,
+		grand_prix: grandPrixName,
 		penalty_type: penaltyType,
 		weekend: weekend,
 		incident_title: incidentTitle,
