@@ -4,8 +4,9 @@ import type { NextPage } from 'next';
 import { GroupedByGP } from '../../types/myTypes';
 import { Button, Form } from 'react-bootstrap';
 import { renderDocsGroupedByGP } from '../../lib/utils';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import LoadingBar from '../../components/LoadingBar';
+import { dbNameList } from '../../lib/myData';
 
 const FormulaSeries: NextPage = () => {
 	const [docsData, setDocsData] = useState<GroupedByGP | null>(null);
@@ -15,6 +16,7 @@ const FormulaSeries: NextPage = () => {
 		new Date().getFullYear().toString()
 	);
 	const [fetching, setFetching] = useState(false);
+	const [fetchingError, setFetchingError] = useState<string | null>('null');
 
 	const router = useRouter();
 
@@ -47,7 +49,18 @@ const FormulaSeries: NextPage = () => {
 			);
 			setFetching(false);
 			setDocsData(res.data);
-		} catch (error) {
+		} catch (error: any) {
+			if (error instanceof AxiosError) {
+				setFetchingError(
+					error?.response?.data ||
+						'Failed to get documents. If this issue persists, please use the Contact form to report this issue.'
+				);
+			} else {
+				setFetchingError(
+					(error as Error).message ||
+						'Failed to get documents. If this issue persists, please use the Contact form to report this issue.'
+				);
+			}
 			setDocsData(null);
 		}
 	}, [selectInput, router]);
@@ -57,6 +70,10 @@ const FormulaSeries: NextPage = () => {
 			getDocuments();
 		}
 	}, [selectInput, getDocuments]);
+
+	useEffect(() => {
+		setSelectInput(new Date().getFullYear().toString());
+	}, [router.query.series]);
 
 	return (
 		<div className='m-2 my-lg-3'>
@@ -98,22 +115,27 @@ const FormulaSeries: NextPage = () => {
 				<Form className='position-absolute top-0 end-0 mb-2 custom-select'>
 					<Form.Group>
 						<Form.Select
-							className='py-0 px-1 me-2 fs-5'
+							className='py-0 px-1 fs-5'
 							name='selectInput'
 							id='selectInput'
 							onChange={handleSelectChange}
 							value={selectInput}
 							disabled={fetching}
 						>
-							<option value='2022'>2022</option>
-							<option value='2021'>2021</option>
-							<option value='2020'>2020</option>
-							<option value='2019'>2019</option>
-							{/* {supportedSeries.map((s, i) => (
-								<option key={i} value={s}>
-									{s.replace('formula', 'Formula ')}
-								</option>
-							))} */}
+							{(() => {
+								const seriesDbList = [];
+								for (const key of Object.keys(dbNameList)) {
+									if (key.includes(router.query.series as string)) {
+										seriesDbList.push(key);
+									}
+								}
+								const yearsList = seriesDbList.map((s) => s.split('_')[1]);
+								return yearsList.map((y, i) => (
+									<option key={i} value={y}>
+										{y}
+									</option>
+								));
+							})()}
 						</Form.Select>
 					</Form.Group>
 				</Form>
@@ -127,6 +149,15 @@ const FormulaSeries: NextPage = () => {
 					<LoadingBar margin='5rem 10rem' />
 				) : docsData ? (
 					renderDocsGroupedByGP(docsData, searchInput)
+				) : fetchingError ? (
+					<div className='m-0 mt-4 alert alert-danger alert-dismissible'>
+						<h3>{fetchingError}</h3>
+						<button
+							type='button'
+							className='btn btn-close'
+							onClick={() => setFetchingError(null)}
+						></button>
+					</div>
 				) : (
 					<div className='m-5 text-center'>
 						<h3>No Documents Found</h3>
