@@ -117,8 +117,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 						.trim()
 						.toLowerCase();
 
-					// Tried doing this check with regex match but it would sometimes hang up.
-					// Maybe my regex was wrong, will check again later.
 					const disallowedWordsInDocName = [
 						'reprimand',
 						'withdrawal',
