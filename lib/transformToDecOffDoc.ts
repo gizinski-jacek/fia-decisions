@@ -1,3 +1,5 @@
+//@ts-nocheck
+
 import {
 	DocumentInfo,
 	IncidentInfo,
@@ -16,10 +18,14 @@ export const transformToDecOffDoc = (
 	// Checking if string value comes from file name or from anchors href.
 	if (string.lastIndexOf('/') === -1) {
 		// Removing just file extension.
-		fileName = string.slice(0, -4);
+		fileName = string.slice(0, -4).replaceAll('_', ' ').toLowerCase();
 	} else {
 		// Extracting file name from href, removing extension.
-		fileName = string.slice(string.lastIndexOf('/') + 1).slice(0, -4);
+		fileName = string
+			.slice(string.lastIndexOf('/') + 1)
+			.slice(0, -4)
+			.replaceAll('_', ' ')
+			.toLowerCase();
 	}
 	// Extracting end part of filename, matching against common duplicate file suffixes.
 	// Removing suffix if present.
@@ -28,17 +34,16 @@ export const transformToDecOffDoc = (
 		fileName = fileName.slice(0, -regexMatch[0].length);
 	}
 	fileName.trim();
-
 	// Extracting grand prix name.
 	const gpName = fileName.slice(0, fileName.indexOf('-')).trim();
 	// Checking if document file name is title offence or decision.
 	const docType = (() => {
-		const str = fileName.replace(gpName, '').slice(0, 10).toLowerCase();
+		const str = fileName.replace(gpName, '').trim().slice(0, 10).toLowerCase();
 		return str.includes('offence')
-			? 'Offence'
+			? 'offence'
 			: str.includes('decision')
-			? 'Decision'
-			: 'Wrong Doc Type';
+			? 'decision'
+			: 'wrong doc type';
 	})();
 
 	const incidentTitle = [fileName].map((string) => {
