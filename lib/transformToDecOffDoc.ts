@@ -15,6 +15,7 @@ export const transformToDecOffDoc = (
 	series: 'f1' | 'f2' | 'f3'
 ): TransformedPDFData => {
 	let fileName: string;
+
 	// Checking if string value comes from file name or from anchors href.
 	if (string.lastIndexOf('/') === -1) {
 		// Removing just file extension.
@@ -29,7 +30,7 @@ export const transformToDecOffDoc = (
 	}
 	// Extracting end part of filename, matching against common duplicate file suffixes.
 	// Removing suffix if present.
-	const regexMatch = fileName.slice(-3).match(/(_|-| )?\(?[0-9]{1,2}\)?/);
+	const regexMatch = fileName.replace(/(_|-| ){1,}?\(?\d{1,}\)?$/gm, '');
 	if (regexMatch) {
 		fileName = fileName.slice(0, -regexMatch[0].length);
 	}
@@ -163,6 +164,23 @@ export const transformToDecOffDoc = (
 		incidentInfoStringsWithoutWeekend.slice(
 			incidentInfoStringsWithoutWeekend.indexOf('Driver')
 		);
+
+	// Checking for edge case where document might be marked as Decision or Offence
+	// but still has different format than the one we allow.
+	const valid = [
+		'competitor',
+		'time',
+		'session',
+		'fact',
+		'offence',
+		'decision',
+	].map((word) =>
+		pdfDataArray.some((string) => string.toLowerCase().includes(word))
+	);
+	if (!valid.every((v) => v === true)) {
+		console.log(`Incorrect document format: ${fileName}`);
+		throw new Error('Incorrect document format.');
+	}
 
 	// The array should now only contain detailed incident data strings.
 	// Strings after Fact and before Offence describe facts about incident,
