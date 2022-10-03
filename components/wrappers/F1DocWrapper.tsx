@@ -13,8 +13,8 @@ interface Props {
 
 const penaltyTypeColors: PenaltyColors = {
 	disqualified: { color: '#ffffff', backgroundColor: '#323232' },
-	'drive through': { color: '#000000', backgroundColor: '#963c3c' },
-	'drive-through': { color: '#000000', backgroundColor: '#963c3c' },
+	'drive through': { color: '#ffffff', backgroundColor: '#af4b4b' },
+	'drive-through': { color: '#ffffff', backgroundColor: '#af4b4b' },
 	'pit lane': { color: '#000000', backgroundColor: '#c832ff' },
 	'pit-lane': { color: '#000000', backgroundColor: '#c832ff' },
 	grid: { color: '#000000', backgroundColor: '#f50000' },
@@ -39,7 +39,7 @@ const F1DocWrapper = ({ data, cmsProps }: Props) => {
 	const modalDataRender = (obj: DecisionOffenceModel) => {
 		const content = [];
 		content.push(
-			<h4 key={'title'} className='fw-bold'>
+			<h4 key={'title'} className='text-capitalize fw-bold'>
 				{obj.doc_name}
 			</h4>
 		);
@@ -109,14 +109,14 @@ const F1DocWrapper = ({ data, cmsProps }: Props) => {
 								}}
 							>
 								{data.penalty_type === 'grid'
-									? data.incident_info.Decision[0].match(/\d{1,2}.grid\)?/gim)
+									? data.incident_info.Decision[0].match(
+											/\d{1,2}.{1,16}grid\)?/gim
+									  )
 										? '+ ' +
 										  data.incident_info.Decision[0].match(
-												/\d{1,2}.grid\)?/gim
+												/\d{1,2}.{1,16}grid\)?/gim
 										  )![0]
-										: data.incident_info.Decision[0].match(
-												/back.*starting.*grid?/gim
-										  )
+										: data.incident_info.Decision[0].match(/back.*grid?/gim)
 										? 'Back of grid'
 										: data.penalty_type
 									: data.penalty_type === 'time'
