@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Accordion, Button, Modal } from 'react-bootstrap';
+import { formatPenalty } from '../../lib/utils';
 import { DecisionOffenceModel, PenaltyColors } from '../../types/myTypes';
 
 interface Props {
@@ -19,7 +20,7 @@ const penaltyTypeColors: PenaltyColors = {
 	'pit-lane': { color: '#000000', backgroundColor: '#c832ff' },
 	grid: { color: '#000000', backgroundColor: '#f50000' },
 	time: { color: '#000000', backgroundColor: '#fae100' },
-	fine: { color: '#000000', backgroundColor: '#00c800' },
+	fine: { color: '#000000', backgroundColor: '#00f000' },
 	warning: { color: '#000000', backgroundColor: '#ff64c8' },
 	reprimand: { color: '#000000', backgroundColor: '#32c8fa' },
 	none: { color: '#000000', backgroundColor: '#f0f0f0' },
@@ -108,28 +109,10 @@ const F1DocWrapper = ({ data, cmsProps }: Props) => {
 									],
 								}}
 							>
-								{data.penalty_type === 'grid'
-									? data.incident_info.Decision[0].match(
-											/\d{1,2}.{1,16}grid\)?/gim
-									  )
-										? '+ ' +
-										  data.incident_info.Decision[0].match(
-												/\d{1,2}.{1,16}grid\)?/gim
-										  )![0]
-										: data.incident_info.Decision[0].match(/back.*grid?/gim)
-										? 'Back of grid'
-										: data.penalty_type
-									: data.penalty_type === 'time'
-									? data.incident_info.Decision[0].match(
-											/\d{1,2}.{1,12}second.{1,12}time\)?/gim
-									  )
-										? '+ ' +
-										  data.incident_info.Decision[0]
-												.match(/\d{1,2}.{1,12}second.{1,12}time\)?/gim)![0]
-												.toLowerCase()
-												.replace(' second', 's')
-										: data.penalty_type
-									: data.penalty_type}
+								{formatPenalty(
+									data.penalty_type,
+									data.incident_info.Decision[0]
+								)}
 							</div>
 							<div className='d-none d-sm-block m-1 me-sm-2 text-center fw-bold text-break'>
 								{data.incident_info.Session}
