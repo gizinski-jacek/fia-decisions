@@ -109,7 +109,7 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 		}
 		try {
 			setFetching(true);
-			await axios.delete(`/api/dashboard/${docType}?doc_id=${docId}`);
+			await axios.delete(`/api/dashboard/${docType}/${docId}`);
 			await getDocuments(chosenDocs);
 		} catch (error: any) {
 			setFetching(false);
@@ -154,7 +154,7 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 		}
 		try {
 			setFetching(true);
-			await axios.put(`/api/dashboard/${series}?doc_id=${docId}`);
+			await axios.put(`/api/dashboard/${series}/${docId}`);
 			await getDocuments(chosenDocs);
 		} catch (error: any) {
 			setFetching(false);
@@ -230,7 +230,7 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 	};
 
 	const upd1 = async () => {
-		await axios.get('/api/update-all/decisions-offences/f1', {
+		await axios.get('/api/update-all/decisions-offences/f1/2022', {
 			headers: {
 				authorization: `Bearer IoGMwf7Wf4alc6mIIFDzdhJRQmpO5eGKSxLrdrDWzUv27XOAiopdv68wjsqbwvfT`,
 			},
@@ -239,7 +239,7 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 	};
 
 	const upd2 = async () => {
-		await axios.get('/api/update-all/decisions-offences/f2', {
+		await axios.get('/api/update-all/decisions-offences/f2/2022', {
 			headers: {
 				authorization: `Bearer IoGMwf7Wf4alc6mIIFDzdhJRQmpO5eGKSxLrdrDWzUv27XOAiopdv68wjsqbwvfT`,
 			},
@@ -248,7 +248,7 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 	};
 
 	const upd3 = async () => {
-		await axios.get('/api/update-all/decisions-offences/f3', {
+		await axios.get('/api/update-all/decisions-offences/f3/2022', {
 			headers: {
 				authorization: `Bearer IoGMwf7Wf4alc6mIIFDzdhJRQmpO5eGKSxLrdrDWzUv27XOAiopdv68wjsqbwvfT`,
 			},
