@@ -301,7 +301,7 @@ export const transformToDecOffDoc = (
 		.slice(0, stewardCount - stewardCount * 2)
 		.join(' ');
 
-	// List of applicable penalties to check against.
+	// List of applicable penalties to check against in order of most to least severe.
 	const penaltiesArray = [
 		'disqualified',
 		'drive through',
@@ -316,13 +316,14 @@ export const transformToDecOffDoc = (
 	];
 	let penaltyType = 'none';
 	// Checking for penalty type in first string of Decision array.
-	// If not found its assumed no penalty was applied.
-	penaltiesArray.forEach((value) => {
-		if (incidentInfo.Decision[0].toLowerCase().includes(value.toLowerCase())) {
-			penaltyType = value;
-			return;
+	// Exiting on first penalty found to prevent overwriting with lesser penalty.
+	// If not found it is assumed no penalty was applied.
+	for (let i = 0; i < penaltiesArray.length; i++) {
+		if (incidentInfo.Decision[0].toLowerCase().includes(penaltiesArray[i])) {
+			penaltyType = penaltiesArray[i];
+			break;
 		}
-	});
+	}
 
 	// Calculating document UTC timestamp by joining Date and Time,
 	// creating Date object from it, calculating timezone offset,
