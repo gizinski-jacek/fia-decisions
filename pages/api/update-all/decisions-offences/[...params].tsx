@@ -23,14 +23,35 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 			let seriesYearDB = '';
 			let seriesYearPageURL = '';
 			if (params[0] === 'f1') {
-				seriesYearDB = dbNameList[`f1_${params[1]}_db`];
-				seriesYearPageURL = fiaPageList[`f1_${params[1]}_page`];
+				if (params[1]) {
+					seriesYearDB = dbNameList[`f1_${params[1]}_db`];
+					seriesYearPageURL = fiaPageList[`f1_${params[1]}_page`];
+				} else {
+					seriesYearDB =
+						dbNameList[`f1_${new Date().getFullYear().toString()}_db`];
+					seriesYearPageURL =
+						fiaPageList[`f1_${new Date().getFullYear().toString()}_page`];
+				}
 			} else if (params[0] === 'f2') {
-				seriesYearDB = dbNameList[`f2_${params[1]}_db`];
-				seriesYearPageURL = fiaPageList[`f2_${params[1]}_page`];
+				if (params[1]) {
+					seriesYearDB = dbNameList[`f2_${params[1]}_db`];
+					seriesYearPageURL = fiaPageList[`f2_${params[1]}_page`];
+				} else {
+					seriesYearDB =
+						dbNameList[`f2_${new Date().getFullYear().toString()}_db`];
+					seriesYearPageURL =
+						fiaPageList[`f2_${new Date().getFullYear().toString()}_page`];
+				}
 			} else if (params[0] === 'f3') {
-				seriesYearDB = dbNameList[`f3_${params[1]}_db`];
-				seriesYearPageURL = fiaPageList[`f3_${params[1]}_page`];
+				if (params[1]) {
+					seriesYearDB = dbNameList[`f3_${params[1]}_db`];
+					seriesYearPageURL = fiaPageList[`f3_${params[1]}_page`];
+				} else {
+					seriesYearDB =
+						dbNameList[`f3_${new Date().getFullYear().toString()}_db`];
+					seriesYearPageURL =
+						fiaPageList[`f3_${new Date().getFullYear().toString()}_page`];
+				}
 			} else {
 				return res.status(422).json('Unsupported series.');
 			}
@@ -86,30 +107,28 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 						allDocsHref.push(link.href);
 					}
 				});
-
 				if (allDocsHref.length === 0) {
 					return res.status(200).end();
 				}
 				console.log(
-					`Total number of scrapped documents: ${allDocsHref.length}.`
+					`Total number of scraped documents: ${allDocsHref.length}.`
 				);
-
 				const conn = await connectMongo(seriesYearDB);
-				allDocsHref.forEach(
-					(href) =>
+				allDocsHref.forEach((href, i) =>
+					setTimeout(() => {
 						new Promise(async (resolve, reject) => {
-							const responseFile = await axios.get(fiaDomain + href, {
-								responseType: 'stream',
-								timeout: 15000,
-							});
-							const fileBuffer = await streamToBuffer(responseFile.data);
-							const readPDF = await readPDFPages(fileBuffer);
-							const transformed = transformToDecOffDoc(
-								href,
-								readPDF as any,
-								params[0] as 'f1' | 'f2' | 'f3'
-							);
 							try {
+								const responseFile = await axios.get(fiaDomain + href, {
+									responseType: 'stream',
+									timeout: 15000,
+								});
+								const fileBuffer = await streamToBuffer(responseFile.data);
+								const readPDF = await readPDFPages(fileBuffer);
+								const transformed = transformToDecOffDoc(
+									href,
+									readPDF as any,
+									params[0] as 'f1' | 'f2' | 'f3'
+								);
 								const docExists = await conn.models.Decision_Offence.findOne({
 									series: params[0],
 									doc_type: transformed.doc_type,
@@ -132,15 +151,16 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 							} catch (error: any) {
 								reject(error);
 							}
-						})
+						});
+					}, 2000 * i)
 				);
+
 				return res
 					.status(200)
 					.json(
-						'Request to update all files accepted. This might take a while.'
+						'Request to update all files accepted. This might take up to several minutes depending on amount of documents.'
 					);
 			} catch (error: any) {
-				console.log(error.response.config.url);
 				if (error instanceof AxiosError) {
 					return res
 						.status(error?.response?.status || 500)
