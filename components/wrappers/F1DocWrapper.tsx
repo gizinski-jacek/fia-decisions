@@ -102,7 +102,7 @@ const F1DocWrapper = ({ data, cmsProps }: Props) => {
 					<Accordion.Header className='p-0 m-0'>
 						<div className='d-flex flex-column w-100 flex-sm-row align-items-center custom-container'>
 							<div
-								className='rounded-pill border border-dark p-1 me-sm-1 text-capitalize text-center fw-bold'
+								className='rounded-pill border border-dark p-1 me-sm-1 text-capitalize text-center text-nowrap fw-bold'
 								style={{
 									...penaltyTypeColors[
 										data.penalty_type as keyof PenaltyColors
