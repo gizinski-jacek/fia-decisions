@@ -2,9 +2,10 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import connectMongo from '../../../lib/mongo';
 import mongoose from 'mongoose';
-import { dbNameList } from '../../../lib/myData';
+import { dbNameList, supportedSeries } from '../../../lib/myData';
 import {
 	ContactDocModel,
+	DecisionOffenceModel,
 	GroupedByGP,
 	MissingDocModel,
 } from '../../../types/myTypes';
@@ -19,15 +20,15 @@ const handler = async (
 	const tokenValid = verifyToken(req);
 	if (tokenValid) {
 		if (req.method === 'GET') {
-			const { doc_type } = req.query as { doc_type: string };
-			const docTypeStrings = doc_type.split('__');
+			const { params } = req.query as { params: string[] };
+			const docTypeStrings = params[0].split('__');
 			if (docTypeStrings[0] === 'penalties') {
 				let seriesDB = '';
-				if (docTypeStrings[1] === 'formula1') {
+				if (docTypeStrings[1] === 'f1') {
 					seriesDB = dbNameList.f1_2022_db;
-				} else if (docTypeStrings[1] === 'formula2') {
+				} else if (docTypeStrings[1] === 'f2') {
 					seriesDB = dbNameList.f2_2022_db;
-				} else if (docTypeStrings[1] === 'formula3') {
+				} else if (docTypeStrings[1] === 'f3') {
 					seriesDB = dbNameList.f3_2022_db;
 				} else if (docTypeStrings[1] === 'missing-file') {
 					seriesDB = dbNameList.other_documents_db;
@@ -40,9 +41,10 @@ const handler = async (
 						docTypeStrings[2] === 'manual-upload'
 							? { manual_upload: true }
 							: {};
-					const document_list = await conn.models.Decision_Offence.find(query)
-						.sort({ doc_date: -1 })
-						.exec();
+					const document_list: DecisionOffenceModel[] =
+						await conn.models.Decision_Offence.find(query)
+							.sort({ createdAt: -1 })
+							.exec();
 					const groupedByGP: GroupedByGP = document_list.reduce(
 						(prev, curr) => {
 							prev[curr.grand_prix] = prev[curr.grand_prix] || [];
@@ -83,18 +85,18 @@ const handler = async (
 				}
 			}
 		} else if (req.method === 'DELETE') {
-			const { doc_type, doc_id } = req.query as {
-				doc_type: string;
-				doc_id: string;
-			};
-			const docTypeStrings = doc_type.split('__');
+			const { params } = req.query as { params: string[] };
+			if (!params[1]) {
+				return res.status(403).json('Document Id is required.');
+			}
+			const docTypeStrings = params[0].split('__');
 			if (docTypeStrings[0] === 'penalties') {
 				let seriesDB = '';
-				if (docTypeStrings[1] === 'formula1') {
+				if (docTypeStrings[1] === 'f1') {
 					seriesDB = dbNameList.f1_2022_db;
-				} else if (docTypeStrings[1] === 'formula2') {
+				} else if (docTypeStrings[1] === 'f2') {
 					seriesDB = dbNameList.f2_2022_db;
-				} else if (docTypeStrings[1] === 'formula3') {
+				} else if (docTypeStrings[1] === 'f3') {
 					seriesDB = dbNameList.f3_2022_db;
 				} else if (docTypeStrings[1] === 'missing-file') {
 					seriesDB = dbNameList.other_documents_db;
@@ -102,11 +104,10 @@ const handler = async (
 					return res.status(422).json('Series is not supported.');
 				}
 				try {
-					if (!doc_id) {
-						return res.status(403).json('Document Id is required.');
-					}
 					const conn = await connectMongo(seriesDB);
-					await conn.models.Decision_Offence.findByIdAndDelete(doc_id).exec();
+					await conn.models.Decision_Offence.findByIdAndDelete(
+						params[1]
+					).exec();
 					return res.status(200).end();
 				} catch (error: any) {
 					return res
@@ -116,11 +117,8 @@ const handler = async (
 			}
 			if (docTypeStrings[0] === 'missing-info') {
 				try {
-					if (!doc_id) {
-						return res.status(403).json('Document Id is required.');
-					}
 					const conn = await connectMongo(dbNameList.other_documents_db);
-					await conn.models.Missing_Doc.findByIdAndDelete(doc_id).exec();
+					await conn.models.Missing_Doc.findByIdAndDelete(params[1]).exec();
 					return res.status(200).end();
 				} catch (error: any) {
 					return res
@@ -130,11 +128,8 @@ const handler = async (
 			}
 			if (docTypeStrings[0] === 'contact-message') {
 				try {
-					if (!doc_id) {
-						return res.status(403).json('Document Id is required.');
-					}
 					const conn = await connectMongo(dbNameList.other_documents_db);
-					await conn.models.Contact_Doc.findByIdAndDelete(doc_id).exec();
+					await conn.models.Contact_Doc.findByIdAndDelete(params[1]).exec();
 					return res.status(200).end();
 				} catch (error: any) {
 					return res
@@ -143,31 +138,25 @@ const handler = async (
 				}
 			}
 		} else if (req.method === 'PUT') {
-			const { doc_type: series, doc_id } = req.query as {
-				doc_type: string;
-				doc_id: string;
-			};
-			let seriesDB = '';
-			if (series === 'f1') {
-				seriesDB = dbNameList.f1_2022_db;
-			} else if (series === 'f2') {
-				seriesDB = dbNameList.f2_2022_db;
-			} else if (series === 'f3') {
-				seriesDB = dbNameList.f3_2022_db;
-			} else {
-				return res.status(422).json('Series is not supported.');
+			const { params } = req.query as { params: string[] };
+			if (!params[1]) {
+				return res.status(403).json('Document Id is required.');
 			}
 			try {
-				if (!doc_id) {
-					return res.status(403).json('Document Id is required.');
+				if (!supportedSeries.some((s) => s === params[0])) {
+					return res.status(422).json('Series is not supported.');
 				}
 				const connOtherDB = await connectMongo(dbNameList.other_documents_db);
-				const connSeriesDB = await connectMongo(seriesDB);
 				const document = await connOtherDB.models.Decision_Offence.findById(
-					doc_id
+					params[1]
 				).exec();
+
+				const docYear = new Date(document.doc_date).getFullYear().toString();
+				const seriesDB = dbNameList[`${params[0]}_${docYear}_db`];
+
+				const connSeriesDB = await connectMongo(seriesDB);
 				const docExists = await connSeriesDB.models.Decision_Offence.findOne({
-					series: series,
+					series: params[0],
 					doc_type: document.doc_type,
 					doc_name: document.doc_name,
 					doc_date: document.doc_date,
@@ -179,7 +168,7 @@ const handler = async (
 					return res.status(403).json('Document already exists.');
 				}
 				await connOtherDB.models.Decision_Offence.findByIdAndDelete(
-					doc_id
+					params[1]
 				).exec();
 				document._id = new mongoose.Types.ObjectId();
 				document.isNew = true;
