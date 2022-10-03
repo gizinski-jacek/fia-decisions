@@ -21,14 +21,35 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 			let seriesYearDB = '';
 			let seriesYearPageURL = '';
 			if (params[0] === 'f1') {
-				seriesYearDB = dbNameList[`f1_${params[1]}_db`];
-				seriesYearPageURL = fiaPageList[`f1_${params[1]}_page`];
+				if (params[1]) {
+					seriesYearDB = dbNameList[`f1_${params[1]}_db`];
+					seriesYearPageURL = fiaPageList[`f1_${params[1]}_page`];
+				} else {
+					seriesYearDB =
+						dbNameList[`f1_${new Date().getFullYear().toString()}_db`];
+					seriesYearPageURL =
+						fiaPageList[`f1_${new Date().getFullYear().toString()}_page`];
+				}
 			} else if (params[0] === 'f2') {
-				seriesYearDB = dbNameList[`f2_${params[1]}_db`];
-				seriesYearPageURL = fiaPageList[`f2_${params[1]}_page`];
+				if (params[1]) {
+					seriesYearDB = dbNameList[`f2_${params[1]}_db`];
+					seriesYearPageURL = fiaPageList[`f2_${params[1]}_page`];
+				} else {
+					seriesYearDB =
+						dbNameList[`f2_${new Date().getFullYear().toString()}_db`];
+					seriesYearPageURL =
+						fiaPageList[`f2_${new Date().getFullYear().toString()}_page`];
+				}
 			} else if (params[0] === 'f3') {
-				seriesYearDB = dbNameList[`f3_${params[1]}_db`];
-				seriesYearPageURL = fiaPageList[`f3_${params[1]}_page`];
+				if (params[1]) {
+					seriesYearDB = dbNameList[`f3_${params[1]}_db`];
+					seriesYearPageURL = fiaPageList[`f3_${params[1]}_page`];
+				} else {
+					seriesYearDB =
+						dbNameList[`f3_${new Date().getFullYear().toString()}_db`];
+					seriesYearPageURL =
+						fiaPageList[`f3_${new Date().getFullYear().toString()}_page`];
+				}
 			} else {
 				return res.status(422).json('Unsupported series.');
 			}
@@ -145,29 +166,26 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 						}
 					}
 				});
-
 				if (allDocsHref.length === 0) {
 					return res.status(200).end();
 				}
-				console.log(`Number of new scrapped documents: ${allDocsHref.length}.`);
-
+				console.log(`Number of new scraped documents: ${allDocsHref.length}.`);
 				await Promise.all(
 					allDocsHref.map(
 						(href) =>
 							new Promise(async (resolve, reject) => {
-								const responseFile = await axios.get(fiaDomain + href, {
-									responseType: 'stream',
-									timeout: 15000,
-								});
-
-								const fileBuffer = await streamToBuffer(responseFile.data);
-								const readPDF = await readPDFPages(fileBuffer);
-								const transformed = transformToDecOffDoc(
-									href,
-									readPDF as any,
-									params[0] as 'f1' | 'f2' | 'f3'
-								);
 								try {
+									const responseFile = await axios.get(fiaDomain + href, {
+										responseType: 'stream',
+										timeout: 15000,
+									});
+									const fileBuffer = await streamToBuffer(responseFile.data);
+									const readPDF = await readPDFPages(fileBuffer);
+									const transformed = transformToDecOffDoc(
+										href,
+										readPDF as any,
+										params[0] as 'f1' | 'f2' | 'f3'
+									);
 									const docExists = await conn.models.Decision_Offence.findOne({
 										series: params[0],
 										doc_type: transformed.doc_type,
