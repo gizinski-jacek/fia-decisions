@@ -66,3 +66,17 @@ export const defaultContactFormValues: ContactFormValues = {
 export const defaultDashboardFormValues: DashboardFormValues = {
 	password: '',
 };
+
+export const disallowedWordsInDocName = [
+	'reprimand',
+	'withdrawal',
+	'schedule',
+	'set a time',
+	'permission to start',
+	'protest lodged',
+	'protest',
+	'cover',
+	'alledgedly score',
+	'right of review',
+	'petition to review',
+];
