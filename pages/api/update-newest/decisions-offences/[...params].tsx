@@ -126,6 +126,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 						'set a time',
 						'permission to start',
 						'protest lodged',
+						'protest',
 						'cover',
 						'alledgedly score',
 						'right of review',
