@@ -97,7 +97,7 @@ const handler = async (
 					const transformed = transformToDecOffDoc(
 						part.filename,
 						pdfData as any,
-						series as 'formula1' | 'formula2' | 'formula3'
+						series as 'f1' | 'f2' | 'f3'
 					);
 					try {
 						const conn = await connectMongo(dbNameList.other_documents_db);
