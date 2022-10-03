@@ -28,6 +28,26 @@ export const transformToDecOffDoc = (
 			.replaceAll('_', ' ')
 			.toLowerCase();
 	}
+
+	// Checking for edge case where document might be marked as Decision or Offence
+	// but still has different format than the one we allow.
+	const requiredWords = [
+		'competitor',
+		'time',
+		'session',
+		'fact',
+		'offence',
+		'decision',
+		'reason',
+	];
+	const valid = requiredWords.map((word) =>
+		pdfDataArray.some((string) => string.toLowerCase().includes(word))
+	);
+	if (!valid.every((v) => v)) {
+		console.log(`Incorrect document format: ${fileName}`);
+		throw new Error('Incorrect document format.');
+	}
+
 	// Extracting end part of filename, matching against common duplicate file suffixes.
 	// Removing suffix if present.
 	const unsuffixedFilename = fileName
@@ -120,17 +140,15 @@ export const transformToDecOffDoc = (
 			trimmedStringsArray.lastIndexOf('Reason')
 		)
 		.map((str, i, arr) => {
-			if (i !== 0 && str.length > 3) {
-				if (
-					str.toLowerCase().includes('no') &&
-					str.toLowerCase().includes('driver')
-				) {
+			if (i !== 0 && str.length > 2) {
+				if (str.match(/no.\/.driver/im)) {
 					return 'Driver';
 				} else if (
 					i + 1 !== arr.length &&
 					str.toLowerCase().trim() === 'team' &&
 					arr[i + 1].toLowerCase().trim() === 'manager'
 				) {
+					console.log(`Not a driver penalty: ${unsuffixedFilename}`);
 					throw new Error('Not a driver penalty. Skipping.');
 				} else if (str === 'The Stewards') {
 					return;
@@ -168,23 +186,6 @@ export const transformToDecOffDoc = (
 			incidentInfoStringsWithoutWeekend.indexOf('Driver')
 		);
 
-	// Checking for edge case where document might be marked as Decision or Offence
-	// but still has different format than the one we allow.
-	const valid = [
-		'competitor',
-		'time',
-		'session',
-		'fact',
-		'offence',
-		'decision',
-	].map((word) =>
-		pdfDataArray.some((string) => string.toLowerCase().includes(word))
-	);
-	if (!valid.every((v) => v === true)) {
-		console.log(`Incorrect document format: ${fileName}`);
-		throw new Error('Incorrect document format.');
-	}
-
 	// The array should now only contain detailed incident data strings.
 	// Strings after Fact and before Offence describe facts about incident,
 	// they can be single line or several lines long, or a list of changed
@@ -208,7 +209,7 @@ export const transformToDecOffDoc = (
 				if (
 					i === index &&
 					incidentInfoStringsWithoutHeadline[i]?.charAt(
-						(incidentInfoStringsWithoutHeadline[i]?.length as number) - 1
+						incidentInfoStringsWithoutHeadline[i].length - 1
 					) !== ':'
 				) {
 					while (incidentInfoStringsWithoutHeadline[i] !== 'Offence') {
@@ -254,7 +255,7 @@ export const transformToDecOffDoc = (
 				let i = index;
 				if (
 					incidentInfoStringsWithoutHeadline[i]?.charAt(
-						(incidentInfoStringsWithoutHeadline[i]?.length as number) - 1
+						incidentInfoStringsWithoutHeadline[i]?.length - 1
 					) === ':'
 				) {
 					while (incidentInfoStringsWithoutHeadline[i]) {
@@ -311,10 +312,14 @@ export const transformToDecOffDoc = (
 		'grid',
 		'drop of one position',
 		'time',
+		'seconds',
 		'fine',
 		'warning',
 		'reprimand',
 	];
+	//
+	//	Include stop & go penalties
+	//
 	let penaltyType = 'none';
 	// Checking for penalty type in first string of Decision array.
 	// Exiting on first penalty found to prevent overwriting with lesser penalty.
@@ -323,6 +328,10 @@ export const transformToDecOffDoc = (
 		if (incidentInfo.Decision[0].toLowerCase().includes(penaltiesArray[i])) {
 			if (penaltiesArray[i] === 'drop of one position') {
 				penaltyType = 'grid';
+				break;
+			}
+			if (penaltiesArray[i] === 'seconds') {
+				penaltyType = 'time';
 				break;
 			} else {
 				penaltyType = penaltiesArray[i];
