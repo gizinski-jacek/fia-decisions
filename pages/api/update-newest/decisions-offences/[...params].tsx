@@ -3,7 +3,12 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { JSDOM } from 'jsdom';
 import axios, { AxiosError } from 'axios';
 import connectMongo from '../../../../lib/mongo';
-import { dbNameList, fiaDomain, fiaPageList } from '../../../../lib/myData';
+import {
+	dbNameList,
+	disallowedWordsInDocName,
+	fiaDomain,
+	fiaPageList,
+} from '../../../../lib/myData';
 import { streamToBuffer } from '../../../../lib/streamToBuffer';
 import { readPDFPages } from '../../../../lib/pdfReader';
 import { transformToDecOffDoc } from '../../../../lib/transformToDecOffDoc';
@@ -108,7 +113,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 				if (!mainDoc) {
 					return res.status(500).json('Error getting list.');
 				}
-
 				const allDocAnchors: NodeList = mainDoc.querySelectorAll('a');
 				const allDocsHref: string[] = [];
 				allDocAnchors.forEach((link: any) => {
@@ -116,20 +120,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 						.slice(link.href.lastIndexOf('/') + 1)
 						.trim()
 						.toLowerCase();
-
-					const disallowedWordsInDocName = [
-						'reprimand',
-						'withdrawal',
-						'schedule',
-						'set a time',
-						'permission to start',
-						'protest lodged',
-						'protest',
-						'cover',
-						'alledgedly score',
-						'right of review',
-						'petition to review',
-					];
 					const disallowedDoc = disallowedWordsInDocName.some((str) =>
 						fileName.toLowerCase().includes(str)
 					);
