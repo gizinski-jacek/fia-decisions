@@ -8,21 +8,18 @@ import {
 } from '../../types/myTypes';
 import DashboardForm from '../../components/forms/DashboardForm';
 import { Button, Form } from 'react-bootstrap';
-import jwt from 'jsonwebtoken';
 import axios, { AxiosError } from 'axios';
 import { dbNameList, supportedSeries } from '../../lib/myData';
 import LoadingBar from '../../components/LoadingBar';
-import connectMongo from '../../lib/mongo';
 import { renderDocsGroupedByGP, verifyToken } from '../../lib/utils';
 import MissingDocWrapper from '../../components/wrappers/MissingDocWrapper';
 import ContactDocWrapper from '../../components/wrappers/ContactDocWrapper';
 
 interface Props {
 	validToken: boolean;
-	data: GroupedByGP | MissingDocModel[] | ContactDocModel[] | null;
 }
 
-const Dashboard: NextPage<Props> = ({ validToken, data }) => {
+const Dashboard: NextPage<Props> = ({ validToken }) => {
 	const [signedIn, setSignedIn] = useState(validToken);
 	const [chosenDocs, setChosenDocs] = useState<
 		| 'contact-message'
@@ -38,7 +35,7 @@ const Dashboard: NextPage<Props> = ({ validToken, data }) => {
 	>('contact-message');
 	const [docsData, setDocsData] = useState<
 		GroupedByGP | MissingDocModel[] | ContactDocModel[] | null
-	>(data);
+	>(null);
 	const [fetching, setFetching] = useState(false);
 	const [fetchingError, setFetchingError] = useState<string | null>(null);
 	const [searchInput, setSearchInput] = useState('');
@@ -213,6 +210,8 @@ const Dashboard: NextPage<Props> = ({ validToken, data }) => {
 	useEffect(() => {
 		if (signedIn) {
 			(async () => {
+				setSearchInput('');
+				setSelectInput(new Date().getFullYear().toString());
 				await getDocuments(chosenDocs);
 			})();
 		}
@@ -231,7 +230,7 @@ const Dashboard: NextPage<Props> = ({ validToken, data }) => {
 	};
 
 	const upd1 = async () => {
-		await axios.get('/api/update-all/decisions-offences/f1/2020', {
+		await axios.get('/api/update-all/decisions-offences/f1', {
 			headers: {
 				authorization: `Bearer IoGMwf7Wf4alc6mIIFDzdhJRQmpO5eGKSxLrdrDWzUv27XOAiopdv68wjsqbwvfT`,
 			},
@@ -399,43 +398,24 @@ const Dashboard: NextPage<Props> = ({ validToken, data }) => {
 	);
 };
 
-export const getServerSideProps = async (
-	context: GetServerSidePropsContext
-) => {
-	try {
-		if (!process.env.JWT_STRATEGY_SECRET) {
-			throw new Error(
-				'Please define JWT_STRATEGY_SECRET environment variable inside .env.local'
-			);
-		}
-		const tokenValid = verifyToken(context.req as NextApiRequest);
-		if (tokenValid) {
-			try {
-				const conn = await connectMongo(dbNameList.other_documents_db);
-				const document_list = await conn.models.Missing_Doc.find({}).exec();
-				return {
-					props: {
-						validToken: true,
-						data: JSON.parse(JSON.stringify(document_list)),
-					},
-				};
-			} catch (error: any) {
-				return {
-					props: { validToken: false, data: null },
-				};
-			}
-		} else {
-			context.res.setHeader(
-				'Set-Cookie',
-				`token=; Path=/; httpOnly=true; SameSite=strict; Secure=true; Max-Age=0`
-			);
-			return {
-				props: { validToken: false, data: null },
-			};
-		}
-	} catch (error: any) {
+export const getServerSideProps = (context: GetServerSidePropsContext) => {
+	if (!process.env.JWT_STRATEGY_SECRET) {
+		throw new Error(
+			'Please define JWT_STRATEGY_SECRET environment variable inside .env.local'
+		);
+	}
+	const tokenValid = verifyToken(context.req as NextApiRequest);
+	if (tokenValid) {
 		return {
-			props: { validToken: false, data: null },
+			props: { validToken: true },
+		};
+	} else {
+		context.res.setHeader(
+			'Set-Cookie',
+			`token=; Path=/; httpOnly=true; SameSite=strict; Secure=true; Max-Age=0`
+		);
+		return {
+			props: { validToken: false },
 		};
 	}
 };
