@@ -146,16 +146,18 @@ export const formatPenalty = (type: string, string: string): string => {
 			replacedWordWithNumber = string;
 		}
 		const matchGridNumber = replacedWordWithNumber.match(
-			/\d{1,2}.{1,16}grid\)?/im
+			/\d{1,2}.{1,16}(grid|position)\)?/im
 		);
 		if (matchGridNumber) {
 			const matchExtraText = matchGridNumber[0].match(
 				/(?<=\d\b)(.*)(?=grid)/im
 			);
 			if (matchExtraText) {
-				return `+ ${matchGridNumber[0].replace(matchExtraText[0], ' ')} Places`;
+				return `+ ${matchGridNumber[0]
+					.replace(matchExtraText[0], ' ')
+					.replace('position', 'grid')} Places`;
 			} else {
-				return `+ ${matchGridNumber[0]} Places`;
+				return `+ ${matchGridNumber[0].replace('position', 'grid')} Places`;
 			}
 		}
 		const matchBackOfTheGrid = replacedWordWithNumber.match(/back.*grid?/im);
