@@ -12,11 +12,26 @@ const handler = async (
 		const { params } = req.query as { params: string[] };
 		let seriesYearDB = '';
 		if (params[0] === 'f1') {
-			seriesYearDB = dbNameList[`f1_${params[1]}_db`];
+			if (params[1]) {
+				seriesYearDB = dbNameList[`f1_${params[1]}_db`];
+			} else {
+				seriesYearDB =
+					dbNameList[`f1_${new Date().getFullYear().toString()}_db`];
+			}
 		} else if (params[0] === 'f2') {
-			seriesYearDB = dbNameList[`f2_${params[1]}_db`];
+			if (params[1]) {
+				seriesYearDB = dbNameList[`f2_${params[1]}_db`];
+			} else {
+				seriesYearDB =
+					dbNameList[`f2_${new Date().getFullYear().toString()}_db`];
+			}
 		} else if (params[0] === 'f3') {
-			seriesYearDB = dbNameList[`f3_${params[1]}_db`];
+			if (params[1]) {
+				seriesYearDB = dbNameList[`f3_${params[1]}_db`];
+			} else {
+				seriesYearDB =
+					dbNameList[`f3_${new Date().getFullYear().toString()}_db`];
+			}
 		} else {
 			return res.status(422).json('Unsupported series.');
 		}
