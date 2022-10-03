@@ -28,20 +28,23 @@ const Dashboard: NextPage<Props> = ({ validToken, data }) => {
 		| 'contact-message'
 		| 'missing-info'
 		| 'penalties__missing-file'
-		| 'penalties__formula1__manual-upload'
-		| 'penalties__formula1__manual-upload'
-		| 'penalties__formula2__manual-upload'
-		| 'penalties__formula3__manual-upload'
-		| 'penalties__formula1'
-		| 'penalties__formula2'
-		| 'penalties__formula3'
+		| 'penalties__f1__manual-upload'
+		| 'penalties__f1__manual-upload'
+		| 'penalties__f2__manual-upload'
+		| 'penalties__f3__manual-upload'
+		| 'penalties__f1'
+		| 'penalties__f2'
+		| 'penalties__f3'
 	>('contact-message');
 	const [docsData, setDocsData] = useState<
 		GroupedByGP | MissingDocModel[] | ContactDocModel[] | null
 	>(data);
 	const [fetching, setFetching] = useState(false);
-	const [requestFailed, setRequestFailed] = useState<false | string>(false);
+	const [fetchingError, setFetchingError] = useState<string | null>(null);
 	const [searchInput, setSearchInput] = useState('');
+	const [selectInput, setSelectInput] = useState(
+		new Date().getFullYear().toString()
+	);
 
 	const router = useRouter();
 
@@ -61,7 +64,7 @@ const Dashboard: NextPage<Props> = ({ validToken, data }) => {
 					timeout: 15000,
 				});
 				setFetching(false);
-				setRequestFailed(false);
+				setFetchingError(null);
 				setDocsData(res.data);
 			} catch (error: any) {
 				setFetching(false);
@@ -69,22 +72,17 @@ const Dashboard: NextPage<Props> = ({ validToken, data }) => {
 					if (error.response?.status === 401) {
 						router.reload();
 					} else {
-						Array.isArray(error?.response?.data)
-							? setRequestFailed(
-									error?.response?.data.join(' ') ||
-										'Unknown server error. Fetching documents failed.'
-							  )
-							: setRequestFailed(
-									error?.response?.data ||
-										'Unknown server error. Fetching documents failed.'
-							  );
+						setFetchingError(
+							error?.response?.data ||
+								'Unknown server error. Fetching documents failed.'
+						);
 						setDocsData(null);
 					}
 				} else {
 					if (error.status === 401) {
 						router.reload();
 					} else {
-						setRequestFailed(
+						setFetchingError(
 							(error as Error).message ||
 								'Unknown server error. Fetching documents failed.'
 						);
@@ -109,7 +107,7 @@ const Dashboard: NextPage<Props> = ({ validToken, data }) => {
 			return;
 		}
 		if (!docType || !docId) {
-			setRequestFailed('Document Type and Id is required.');
+			setFetchingError('Document Type and Id is required.');
 			return;
 		}
 		try {
@@ -123,11 +121,11 @@ const Dashboard: NextPage<Props> = ({ validToken, data }) => {
 					router.reload();
 				} else {
 					Array.isArray(error?.response?.data)
-						? setRequestFailed(
+						? setFetchingError(
 								error?.response?.data.join(' ') ||
 									'Unknown server error. Delete request failed.'
 						  )
-						: setRequestFailed(
+						: setFetchingError(
 								error?.response?.data ||
 									'Unknown server error. Delete request failed.'
 						  );
@@ -136,7 +134,7 @@ const Dashboard: NextPage<Props> = ({ validToken, data }) => {
 				if (error.status === 401) {
 					router.reload();
 				} else {
-					setRequestFailed(
+					setFetchingError(
 						(error as Error).message ||
 							'Unknown server error. Delete request failed.'
 					);
@@ -154,7 +152,7 @@ const Dashboard: NextPage<Props> = ({ validToken, data }) => {
 			return;
 		}
 		if (!series || !docId) {
-			setRequestFailed('Document Type and Id is required.');
+			setFetchingError('Document Type and Id is required.');
 			return;
 		}
 		try {
@@ -168,11 +166,11 @@ const Dashboard: NextPage<Props> = ({ validToken, data }) => {
 					router.reload();
 				} else {
 					Array.isArray(error?.response?.data)
-						? setRequestFailed(
+						? setFetchingError(
 								error?.response?.data.join(' ') ||
 									'Unknown server error. Delete request failed.'
 						  )
-						: setRequestFailed(
+						: setFetchingError(
 								error?.response?.data ||
 									'Unknown server error. Delete request failed.'
 						  );
@@ -181,7 +179,7 @@ const Dashboard: NextPage<Props> = ({ validToken, data }) => {
 				if (error.status === 401) {
 					router.reload();
 				} else {
-					setRequestFailed(
+					setFetchingError(
 						(error as Error).message ||
 							'Unknown server error. Delete request failed.'
 					);
@@ -190,19 +188,19 @@ const Dashboard: NextPage<Props> = ({ validToken, data }) => {
 		}
 	};
 
-	const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+	const handleDocSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
 		const { value } = e.target as {
 			value:
 				| 'contact-message'
 				| 'missing-info'
 				| 'penalties__missing-file'
-				| 'penalties__formula1__manual-upload'
-				| 'penalties__formula1__manual-upload'
-				| 'penalties__formula2__manual-upload'
-				| 'penalties__formula3__manual-upload'
-				| 'penalties__formula1'
-				| 'penalties__formula2'
-				| 'penalties__formula3';
+				| 'penalties__f1__manual-upload'
+				| 'penalties__f1__manual-upload'
+				| 'penalties__f2__manual-upload'
+				| 'penalties__f3__manual-upload'
+				| 'penalties__f1'
+				| 'penalties__f2'
+				| 'penalties__f3';
 		};
 		setChosenDocs(value);
 		setDocsData(null);
@@ -225,8 +223,47 @@ const Dashboard: NextPage<Props> = ({ validToken, data }) => {
 		setSearchInput(value);
 	};
 
+	const handleYearSelectChange = async (
+		e: React.ChangeEvent<HTMLSelectElement>
+	) => {
+		const { value } = e.target;
+		setSelectInput(value);
+	};
+
+	const upd1 = async () => {
+		await axios.get('/api/update-all/decisions-offences/f1/2020', {
+			headers: {
+				authorization: `Bearer IoGMwf7Wf4alc6mIIFDzdhJRQmpO5eGKSxLrdrDWzUv27XOAiopdv68wjsqbwvfT`,
+			},
+			timeout: 5000,
+		});
+	};
+
+	const upd2 = async () => {
+		await axios.get('/api/update-all/decisions-offences/f2', {
+			headers: {
+				authorization: `Bearer IoGMwf7Wf4alc6mIIFDzdhJRQmpO5eGKSxLrdrDWzUv27XOAiopdv68wjsqbwvfT`,
+			},
+			timeout: 5000,
+		});
+	};
+
+	const upd3 = async () => {
+		await axios.get('/api/update-all/decisions-offences/f3', {
+			headers: {
+				authorization: `Bearer IoGMwf7Wf4alc6mIIFDzdhJRQmpO5eGKSxLrdrDWzUv27XOAiopdv68wjsqbwvfT`,
+			},
+			timeout: 5000,
+		});
+	};
+
 	return signedIn ? (
 		<div className='mt-5 m-2'>
+			<div>
+				<button onClick={upd1}>updatef1</button>
+				<button onClick={upd2}>updatef2</button>
+				<button onClick={upd3}>updatef3</button>
+			</div>
 			<div className='d-flex my-2'>
 				<Form className='rounded-2 p-2 my-2 bg-light'>
 					<Form.Group>
@@ -247,7 +284,7 @@ const Dashboard: NextPage<Props> = ({ validToken, data }) => {
 						<Form.Select
 							name='documents'
 							id='documents'
-							onChange={handleSelectChange}
+							onChange={handleDocSelectChange}
 							value={chosenDocs}
 							disabled={fetching}
 							required
@@ -257,33 +294,33 @@ const Dashboard: NextPage<Props> = ({ validToken, data }) => {
 							<option value='penalties__missing-file'>Missing - Files</option>
 							{supportedSeries.map((s, i) => (
 								<option key={i} value={'penalties__' + s + '__manual-upload'}>
-									{s.replace('formula', 'F') + ' Penalties - Uploads'}
+									{s.replace('f', 'F') + ' Penalties - Uploads'}
 								</option>
 							))}
 							{supportedSeries.map((s, i) => (
 								<option key={i} value={'penalties__' + s}>
-									{s.replace('formula', 'Formula ') + ' Penalties'}
+									{s.replace('f', 'Formula ') + ' Penalties'}
 								</option>
 							))}
 						</Form.Select>
 					</Form.Group>
 				</Form>
-				{requestFailed !== false && (
+				{fetchingError && (
 					<div className='flex-grow-1 my-2 ms-4 alert alert-danger alert-dismissible'>
-						<strong>{requestFailed}</strong>
+						<strong>{fetchingError}</strong>
 						<button
 							type='button'
 							className='btn btn-close'
-							onClick={() => setRequestFailed(false)}
+							onClick={() => setFetchingError(null)}
 						></button>
 					</div>
 				)}
 			</div>
 			{chosenDocs !== 'contact-message' && chosenDocs !== 'missing-info' ? (
-				<Form className='rounded-2 p-2 my-2 bg-light'>
-					<Form.Group className='d-flex'>
+				<Form className='rounded-2 p-2 my-2 bg-light d-flex'>
+					<Form.Group className='d-flex flex-grow-1 me-5'>
 						<Form.Control
-							className='py-0 px-2 mx-1'
+							className='py-0 px-2 me-2 '
 							type='search'
 							name='searchInput'
 							id='searchInput'
@@ -297,9 +334,37 @@ const Dashboard: NextPage<Props> = ({ validToken, data }) => {
 							<i className='bi bi-x fs-6'></i>
 						</Button>
 					</Form.Group>
+					<Form.Group>
+						<Form.Select
+							className='py-0 px-1 fs-5 custom-select'
+							name='selectInput'
+							id='selectInput'
+							onChange={handleYearSelectChange}
+							value={selectInput}
+							disabled={fetching}
+						>
+							{(() => {
+								const seriesDbList = [];
+								for (const key of Object.keys(dbNameList)) {
+									if (key.includes(chosenDocs.split('__')[1])) {
+										seriesDbList.push(key);
+									}
+								}
+								const yearsList = seriesDbList.map((s) => s.split('_')[1]);
+								return yearsList.map((y, i) => (
+									<option key={i} value={y}>
+										{y}
+									</option>
+								));
+							})()}
+						</Form.Select>
+					</Form.Group>
 				</Form>
 			) : null}
 			{chosenDocs !== null && docsData !== null && !fetching ? (
+				//
+				//	Use .reduce to group by Series.
+				//
 				docsData.length !== 0 ? (
 					chosenDocs.includes('penalties__') ? (
 						renderDocsGroupedByGP(docsData as GroupedByGP, searchInput, {
