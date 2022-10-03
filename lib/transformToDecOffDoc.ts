@@ -18,7 +18,7 @@ export const transformToDecOffDoc = (
 
 	// Checking if string value comes from file name or from anchors href.
 	if (string.lastIndexOf('/') === -1) {
-		// Removing just file extension.
+		// Removing file extension.
 		fileName = string.slice(0, -4).replaceAll('_', ' ').toLowerCase();
 	} else {
 		// Extracting file name from href, removing extension.
@@ -30,16 +30,19 @@ export const transformToDecOffDoc = (
 	}
 	// Extracting end part of filename, matching against common duplicate file suffixes.
 	// Removing suffix if present.
-	const regexMatch = fileName.replace(/(_|-| ){1,}?\(?\d{1,}\)?$/gm, '');
-	if (regexMatch) {
-		fileName = fileName.slice(0, -regexMatch[0].length);
-	}
-	fileName.trim();
+	const unsuffixedFilename = fileName
+		.replace(/(_|-| ){1,}?\(?\d{1,}\)?$/gm, '')
+		.trim();
 	// Extracting grand prix name.
-	const gpName = fileName.slice(0, fileName.indexOf('-')).trim();
+	const grandPrixName = unsuffixedFilename
+		.slice(0, unsuffixedFilename.indexOf('-'))
+		.trim();
 	// Checking if document file name is title offence or decision.
 	const docType = (() => {
-		const str = fileName.replace(gpName, '').trim().slice(0, 10).toLowerCase();
+		const str = unsuffixedFilename
+			.replace(grandPrixName, '')
+			.trim()
+			.slice(0, 10);
 		return str.includes('offence')
 			? 'offence'
 			: str.includes('decision')
@@ -47,18 +50,18 @@ export const transformToDecOffDoc = (
 			: 'wrong doc type';
 	})();
 
-	const incidentTitle = [fileName].map((string) => {
+	const incidentTitle = [unsuffixedFilename].map((string) => {
 		// Removing grand prix name from filename string.
-		let str = string.replace(gpName, '').trim();
+		let str = string.replace(grandPrixName, '').trim();
 		// Checking for a dash, removing it and trimming whitespaces.
 		if (str.charAt(0) === '-') {
 			str = str.slice(1).trim();
 		}
 		// Checking for "offence" word, removing it and trimming whitespaces.
-		if (str.slice(0, 7).toLowerCase().trim() === 'offence') {
+		if (str.slice(0, 7).trim() === 'offence') {
 			str = str.slice(7).trim();
 		}
-		if (str.slice(0, 8).toLowerCase().trim() === 'decision') {
+		if (str.slice(0, 8).trim() === 'decision') {
 			// Checking for "decision" word, removing it and trimming whitespaces.
 			str = str.slice(8).trim();
 		}
@@ -333,9 +336,9 @@ export const transformToDecOffDoc = (
 	const data: TransformedPDFData = {
 		series: series,
 		doc_type: docType,
-		doc_name: fileName,
+		doc_name: unsuffixedFilename,
 		doc_date: docDate,
-		grand_prix: gpName,
+		grand_prix: grandPrixName,
 		penalty_type: penaltyType,
 		weekend: weekend,
 		incident_title: incidentTitle,
