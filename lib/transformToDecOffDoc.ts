@@ -309,6 +309,7 @@ export const transformToDecOffDoc = (
 		'pit lane',
 		'pit-lane',
 		'grid',
+		'drop of one position',
 		'time',
 		'fine',
 		'warning',
@@ -320,8 +321,13 @@ export const transformToDecOffDoc = (
 	// If not found it is assumed no penalty was applied.
 	for (let i = 0; i < penaltiesArray.length; i++) {
 		if (incidentInfo.Decision[0].toLowerCase().includes(penaltiesArray[i])) {
-			penaltyType = penaltiesArray[i];
-			break;
+			if (penaltiesArray[i] === 'drop of one position') {
+				penaltyType = 'grid';
+				break;
+			} else {
+				penaltyType = penaltiesArray[i];
+				break;
+			}
 		}
 	}
 
