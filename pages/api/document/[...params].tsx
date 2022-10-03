@@ -36,7 +36,11 @@ const handler = async (
 			}, Object.create(null));
 			return res.status(200).json(groupedByGP);
 		} catch (error: any) {
-			return res.status(500).json('Unknown server error.');
+			return res
+				.status(500)
+				.json(
+					'Failed to get documents. If this issue persists, please use the Contact form to report this issue.'
+				);
 		}
 	} else {
 		return res.status(405).end();
