@@ -4,7 +4,7 @@ import type { NextPage } from 'next';
 import { GroupedByGP } from '../../types/myTypes';
 import { Button, Form } from 'react-bootstrap';
 import { renderDocsGroupedByGP } from '../../lib/utils';
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
 import LoadingBar from '../../components/LoadingBar';
 import { dbNameList } from '../../lib/myData';
 
@@ -15,7 +15,7 @@ const FormulaSeries: NextPage = () => {
 	const [selectInput, setSelectInput] = useState(
 		new Date().getFullYear().toString()
 	);
-	const [fetching, setFetching] = useState(false);
+	const [fetching, setFetching] = useState(true);
 	const [fetchingError, setFetchingError] = useState<string | null>(null);
 
 	const router = useRouter();
@@ -137,7 +137,10 @@ const FormulaSeries: NextPage = () => {
 			<h2
 				className='text-center text-capitalize fw-bolder fst-italic'
 				style={{ lineHeight: '2.15rem' }}
-			>{`Formula ${router.query.series?.slice(-1)} Penalties`}</h2>
+			>
+				{router.query.series &&
+					`Formula ${router.query.series?.slice(-1)} Penalties`}
+			</h2>
 			<div className='my-lg-3'>
 				{fetching ? (
 					<LoadingBar margin='5rem 10rem' />
