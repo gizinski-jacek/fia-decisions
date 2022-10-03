@@ -148,11 +148,11 @@ const handler = async (
 				doc_id: string;
 			};
 			let seriesDB = '';
-			if (series === 'formula1') {
+			if (series === 'f1') {
 				seriesDB = dbNameList.f1_2022_db;
-			} else if (series === 'formula2') {
+			} else if (series === 'f2') {
 				seriesDB = dbNameList.f2_2022_db;
-			} else if (series === 'formula3') {
+			} else if (series === 'f3') {
 				seriesDB = dbNameList.f3_2022_db;
 			} else {
 				return res.status(422).json('Series is not supported.');
