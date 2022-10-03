@@ -16,7 +16,7 @@ const FormulaSeries: NextPage = () => {
 		new Date().getFullYear().toString()
 	);
 	const [fetching, setFetching] = useState(false);
-	const [fetchingError, setFetchingError] = useState<string | null>('null');
+	const [fetchingError, setFetchingError] = useState<string | null>(null);
 
 	const router = useRouter();
 
@@ -72,6 +72,7 @@ const FormulaSeries: NextPage = () => {
 	}, [selectInput, getDocuments]);
 
 	useEffect(() => {
+		setSearchInput('');
 		setSelectInput(new Date().getFullYear().toString());
 	}, [router.query.series]);
 
