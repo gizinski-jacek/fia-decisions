@@ -43,6 +43,7 @@ const FormulaSeries: NextPage = () => {
 
 	const getDocuments = useCallback(async () => {
 		try {
+			setFetchingError(null);
 			setFetching(true);
 			const res = await axios.get(
 				`/api/document/${router.query.series}/${selectInput}`
@@ -50,17 +51,9 @@ const FormulaSeries: NextPage = () => {
 			setFetching(false);
 			setDocsData(res.data);
 		} catch (error: any) {
-			if (error instanceof AxiosError) {
-				setFetchingError(
-					error?.response?.data ||
-						'Failed to get documents. If this issue persists, please use the Contact form to report this issue.'
-				);
-			} else {
-				setFetchingError(
-					(error as Error).message ||
-						'Failed to get documents. If this issue persists, please use the Contact form to report this issue.'
-				);
-			}
+			setFetchingError(
+				'Failed to get documents. Try refreshing the page. If this issue persists, please use the Contact form to report this issue.'
+			);
 			setDocsData(null);
 		}
 	}, [selectInput, router]);
@@ -152,12 +145,14 @@ const FormulaSeries: NextPage = () => {
 					renderDocsGroupedByGP(docsData, searchInput)
 				) : fetchingError ? (
 					<div className='m-0 mt-4 alert alert-danger alert-dismissible'>
-						<h3>{fetchingError}</h3>
-						<button
-							type='button'
-							className='btn btn-close'
-							onClick={() => setFetchingError(null)}
-						></button>
+						<strong>{fetchingError}</strong>
+						<Button
+							variant='primary'
+							className='position-absolute top-0 end-0 m-2'
+							onClick={getDocuments}
+						>
+							Refresh
+						</Button>
 					</div>
 				) : (
 					<div className='m-5 text-center'>
