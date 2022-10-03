@@ -14,8 +14,8 @@ interface Props {
 
 const penaltyTypeColors: PenaltyColors = {
 	disqualified: { color: '#ffffff', backgroundColor: '#323232' },
-	'drive through': { color: '#ffffff', backgroundColor: '#af4b4b' },
-	'drive-through': { color: '#ffffff', backgroundColor: '#af4b4b' },
+	'drive through': { color: '#ffffff', backgroundColor: '#964b4b' },
+	'drive-through': { color: '#ffffff', backgroundColor: '#964b4b' },
 	'pit lane': { color: '#000000', backgroundColor: '#c832ff' },
 	'pit-lane': { color: '#000000', backgroundColor: '#c832ff' },
 	grid: { color: '#000000', backgroundColor: '#f50000' },
