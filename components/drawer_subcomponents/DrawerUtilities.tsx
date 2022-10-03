@@ -45,7 +45,7 @@ const DrawerUtilities = ({ screenIsSmall }: Props) => {
 					timeToday.getTime() - oneDay
 			);
 			const dayAfterTheNextRace =
-				new Date(futureRaces[0].date + ' ' + futureRaces[0].time).setHours(4) +
+				new Date(futureRaces[0].date + ' ' + futureRaces[0].time).setHours(0) +
 				oneDay;
 			let upcomingRace: WeekendData;
 			if (dayAfterTheNextRace > timeToday.getTime()) {

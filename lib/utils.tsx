@@ -58,8 +58,8 @@ export const renderDocsGroupedByGP = (
 					<Accordion.Item eventKey='0'>
 						<Accordion.Header>
 							<div className='d-flex flex-column me-2 flex-sm-row w-100 align-items-center'>
-								<h4 className='me-sm-3 fw-bold'>{key}</h4>
-								<h4 className='me-sm-3 fw-bold'>
+								<h4 className='me-sm-3 fw-bold text-capitalize'>{key}</h4>
+								<h4 className='me-sm-3 fw-bold text-capitalize'>
 									{array.find((doc) => doc.weekend)?.weekend}
 								</h4>
 								<h4 className='me-sm-3 fw-bold text-sm-end'>
@@ -83,8 +83,8 @@ export const renderDocsGroupedByGP = (
 					<Accordion.Item eventKey='1'>
 						<Accordion.Header>
 							<div className='d-flex flex-column flex-sm-row w-100 align-items-center'>
-								<h4 className='me-sm-3 fw-bold'>{key}</h4>
-								<h4 className='me-sm-3 fw-bold'>
+								<h4 className='me-sm-3 fw-bold text-capitalize'>{key}</h4>
+								<h4 className='me-sm-3 fw-bold text-capitalize'>
 									{array.find((doc) => doc.weekend)?.weekend}
 								</h4>
 								<h4 className='me-sm-3 fw-bold text-sm-end'>

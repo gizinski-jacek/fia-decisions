@@ -30,7 +30,7 @@ export const fiaPageList: FiaPageList = {
 		'https://www.fia.com/documents/championships/fia-formula-3-championship-1012/season/season-2021-1108',
 };
 
-export const supportedSeries: string[] = ['formula1', 'formula2', 'formula3'];
+export const supportedSeries: string[] = ['f1', 'f2', 'f3'];
 
 // Database names for each supported racing series.
 export const dbNameList: DatabaseNameList = {

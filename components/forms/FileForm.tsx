@@ -136,7 +136,7 @@ const FileForm = () => {
 						<option value=''>Choose Formula series</option>
 						{supportedSeries.map((s, i) => (
 							<option key={i} value={s}>
-								{s.replace('formula', 'Formula ')}
+								{s.replace('f', 'Formula ')}
 							</option>
 						))}
 					</Form.Select>
