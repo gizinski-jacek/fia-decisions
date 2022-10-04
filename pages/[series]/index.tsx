@@ -12,7 +12,7 @@ const FormulaSeries: NextPage = () => {
 	const [docsData, setDocsData] = useState<GroupedByGP | null>(null);
 	const [showSearchInput, setShowSearchInput] = useState(false);
 	const [searchInput, setSearchInput] = useState('');
-	const [selectInput, setSelectInput] = useState(
+	const [yearSelect, setYearSelect] = useState(
 		new Date().getFullYear().toString()
 	);
 	const [fetching, setFetching] = useState(true);
@@ -38,15 +38,18 @@ const FormulaSeries: NextPage = () => {
 		e: React.ChangeEvent<HTMLSelectElement>
 	) => {
 		const { value } = e.target;
-		setSelectInput(value);
+		setYearSelect(value);
 	};
 
 	const getDocuments = useCallback(async () => {
+		if (!yearSelect || !router.query.series) {
+			return;
+		}
 		try {
 			setFetchingError(null);
 			setFetching(true);
 			const res = await axios.get(
-				`/api/document/${router.query.series}/${selectInput}`
+				`/api/document/${router.query.series}/${yearSelect}`
 			);
 			setFetching(false);
 			setDocsData(res.data);
@@ -56,17 +59,17 @@ const FormulaSeries: NextPage = () => {
 			);
 			setDocsData(null);
 		}
-	}, [selectInput, router]);
+	}, [yearSelect, router.query.series]);
 
 	useEffect(() => {
-		if (selectInput) {
+		if (yearSelect) {
 			getDocuments();
 		}
-	}, [selectInput, getDocuments]);
+	}, [yearSelect, getDocuments]);
 
 	useEffect(() => {
 		setSearchInput('');
-		setSelectInput(new Date().getFullYear().toString());
+		setYearSelect(new Date().getFullYear().toString());
 	}, [router.query.series]);
 
 	return (
@@ -87,8 +90,8 @@ const FormulaSeries: NextPage = () => {
 							<Form.Control
 								className='py-0 px-2 mx-1'
 								type='search'
-								name='searchInput'
-								id='searchInput'
+								name='search_input'
+								id='search_input'
 								maxLength={32}
 								onChange={handleInputChange}
 								value={searchInput}
@@ -110,10 +113,10 @@ const FormulaSeries: NextPage = () => {
 					<Form.Group>
 						<Form.Select
 							className='py-0 px-1 fs-5'
-							name='selectInput'
-							id='selectInput'
+							name='year_select'
+							id='year_select'
 							onChange={handleSelectChange}
-							value={selectInput}
+							value={yearSelect}
 							disabled={fetching}
 						>
 							{(() => {
