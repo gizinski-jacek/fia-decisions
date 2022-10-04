@@ -16,7 +16,7 @@ An app built for Formula series fans who do not feel like going through news art
 
 Github repo can be found [here](https://github.com/gizinski-jacek/fia-decisions).
 
-Live demo can be found on [Vercel](https://fia-penalties.vercel.app).
+Live demo can be found on [Vercel](https://tracklimits.cfd).
 
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
