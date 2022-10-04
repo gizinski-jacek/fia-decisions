@@ -1,7 +1,7 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next';
 import connectMongo from '../../../lib/mongo';
-import { dbNameList } from '../../../lib/myData';
+import { dbNameList, supportedSeries } from '../../../lib/myData';
 import { DecisionOffenceModel, GroupedByGP } from '../../../types/myTypes';
 
 const handler = async (
@@ -10,31 +10,12 @@ const handler = async (
 ) => {
 	if (req.method === 'GET') {
 		const { params } = req.query as { params: string[] };
-		let seriesYearDB = '';
-		if (params[0] === 'f1') {
-			if (params[1]) {
-				seriesYearDB = dbNameList[`f1_${params[1]}_db`];
-			} else {
-				seriesYearDB =
-					dbNameList[`f1_${new Date().getFullYear().toString()}_db`];
-			}
-		} else if (params[0] === 'f2') {
-			if (params[1]) {
-				seriesYearDB = dbNameList[`f2_${params[1]}_db`];
-			} else {
-				seriesYearDB =
-					dbNameList[`f2_${new Date().getFullYear().toString()}_db`];
-			}
-		} else if (params[0] === 'f3') {
-			if (params[1]) {
-				seriesYearDB = dbNameList[`f3_${params[1]}_db`];
-			} else {
-				seriesYearDB =
-					dbNameList[`f3_${new Date().getFullYear().toString()}_db`];
-			}
-		} else {
+		const series = supportedSeries.find((s) => s === params[0].toLowerCase());
+		const year = params[1] || new Date().getFullYear().toString();
+		if (!series) {
 			return res.status(422).json('Unsupported series.');
 		}
+		const seriesYearDB = dbNameList[`${series}_${year}_db`];
 		if (!seriesYearDB) {
 			return res.status(422).json('Unsupported year.');
 		}
