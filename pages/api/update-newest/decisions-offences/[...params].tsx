@@ -36,7 +36,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 			}
 			try {
 				const conn = await connectMongo(seriesYearDB);
-				const docList = await conn.models.Decision_Offence.find({})
+				const docList = await conn.models.Decision_Offence.find()
 					.sort({ doc_date: -1 })
 					.limit(1)
 					.exec();
