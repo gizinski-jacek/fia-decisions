@@ -38,12 +38,6 @@ const handler = async (
 		const { form } = req.query;
 		if (form === 'file') {
 			try {
-				//
-				//	Refactor to save to "Uploaded_Files" collection for verifying.
-				//	Add dashboard functionality to confirm files and save them
-				//	to correct Formula docs database.
-				//	Add cron job to automatically push them to said db?
-				//
 				const { series } = req.query as { series: string };
 				if (!series) {
 					return res.status(422).json(['Series is required.']);
