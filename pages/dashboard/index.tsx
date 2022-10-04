@@ -159,7 +159,7 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 		}
 		try {
 			setFetching(true);
-			await axios.put(`/api/dashboard/accept-document/${series}/${docId}`);
+			await axios.put(`/api/dashboard/accept-document/${docId}`);
 			getDocuments();
 		} catch (error: any) {
 			setFetching(false);
