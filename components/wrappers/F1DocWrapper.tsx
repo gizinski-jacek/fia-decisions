@@ -25,7 +25,7 @@ const penaltyTypeColors: PenaltyColors = {
 	fine: { color: '#000000', backgroundColor: '#00f000' },
 	warning: { color: '#000000', backgroundColor: '#ff64c8' },
 	reprimand: { color: '#000000', backgroundColor: '#32c8fa' },
-	none: { color: '#000000', backgroundColor: '#f0f0f0' },
+	'no penalty': { color: '#000000', backgroundColor: '#f0f0f0' },
 };
 
 const F1DocWrapper = ({ data, cmsProps }: Props) => {
