@@ -319,9 +319,6 @@ export const transformToDecOffDoc = (
 		'warning',
 		'reprimand',
 	];
-	//
-	//	Include stop & go penalties
-	//
 	let penaltyType = 'no penalty';
 	// Checking for penalty type in first string of Decision array.
 	// Exiting on first penalty found to prevent overwriting with lesser penalty.
