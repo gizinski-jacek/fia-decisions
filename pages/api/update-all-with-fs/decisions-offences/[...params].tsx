@@ -169,7 +169,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 				return res
 					.status(200)
 					.json(
-						'Request to update all files using file system accepted. This might take up to several minutes depending on amount of documents.'
+						'Request to update all files using host file system accepted. This may take up to several minutes.'
 					);
 			} catch (error: any) {
 				if (error instanceof AxiosError) {
