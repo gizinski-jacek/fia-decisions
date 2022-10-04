@@ -15,10 +15,7 @@ import { transformToDecOffDoc } from '../../../../lib/transformToDecOffDoc';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 	// Alternative route for requesting update of all documents.
-	// Unlike other routes, this one uses host machines file
-	// system to perform the update. Might be more reliable, but slower.
-	// Recommend using other routes over this one.
-	// Created as an alternative.
+	// Uses host machines file system to perform the update instead.
 	if (req.method === 'GET') {
 		if (!process.env.CRON_JOB_UPDATE_ALL_DOCS_SECRET) {
 			throw new Error(
