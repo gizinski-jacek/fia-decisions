@@ -19,6 +19,8 @@ const penaltyTypeColors: PenaltyColors = {
 	'pit lane': { color: '#000000', backgroundColor: '#c832ff' },
 	'pit-lane': { color: '#000000', backgroundColor: '#c832ff' },
 	grid: { color: '#000000', backgroundColor: '#f50000' },
+	'stop and go': { color: '#000000', backgroundColor: '#ff7d00' },
+	'stop & go': { color: '#000000', backgroundColor: '#ff7d00' },
 	time: { color: '#000000', backgroundColor: '#fae100' },
 	fine: { color: '#000000', backgroundColor: '#00f000' },
 	warning: { color: '#000000', backgroundColor: '#ff64c8' },
