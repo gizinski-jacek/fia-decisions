@@ -112,8 +112,9 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 		const [docType, series, manualUpload] = query.split('__');
 		try {
 			setFetching(true);
-			await axios.delete(
-				`/api/dashboard/${docType}/${series}/${yearSelect}/${docId}`
+			const res = await axios.delete(
+				`/api/dashboard/${docType}/${series}/${docId}/${yearSelect || ''}`,
+				{ timeout: 15000 }
 			);
 			getDocuments();
 		} catch (error: any) {
@@ -159,7 +160,9 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 		}
 		try {
 			setFetching(true);
-			await axios.put(`/api/dashboard/accept-document/${docId}`);
+			await axios.put(`/api/dashboard/accept-document/${docId}`, {
+				timeout: 15000,
+			});
 			getDocuments();
 		} catch (error: any) {
 			setFetching(false);
@@ -290,9 +293,9 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 			</div>
 			{chosenDocs !== 'contact-message' && chosenDocs !== 'missing-info' ? (
 				<Form className='rounded-2 p-2 my-2 bg-light d-flex'>
-					<Form.Group className='d-flex flex-grow-1 me-5'>
+					<Form.Group className='d-flex flex-grow-1'>
 						<Form.Control
-							className='py-0 px-2 me-2 '
+							className='py-0 px-2 me-2'
 							type='search'
 							name='search_input'
 							id='search_input'
@@ -306,43 +309,43 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 							<i className='bi bi-x fs-6'></i>
 						</Button>
 					</Form.Group>
-					<Form.Group>
-						<Form.Select
-							className='py-0 px-1 fs-5 custom-select'
-							name='year_select'
-							id='year_select'
-							onChange={handleYearSelectChange}
-							value={yearSelect}
-							disabled={fetching}
-						>
-							{(() => {
-								const series = chosenDocs.split('__')[1];
-								if (!series) return;
-								const supported = supportedSeries.find(
-									(s) => s === series.toLowerCase()
-								);
-								if (!supported) return;
-								const seriesDbList = [];
-								for (const key of Object.keys(dbNameList)) {
-									if (key.includes(supported)) {
-										seriesDbList.push(key);
+					{chosenDocs !== 'penalties__missing-file' && (
+						<Form.Group className='ms-5'>
+							<Form.Select
+								className='py-0 px-1 fs-5 custom-select'
+								name='year_select'
+								id='year_select'
+								onChange={handleYearSelectChange}
+								value={yearSelect}
+								disabled={fetching}
+							>
+								{(() => {
+									const series = chosenDocs.split('__')[1];
+									if (!series) return;
+									const supported = supportedSeries.find(
+										(s) => s === series.toLowerCase()
+									);
+									if (!supported) return;
+									const seriesDbList = [];
+									for (const key of Object.keys(dbNameList)) {
+										if (key.includes(supported)) {
+											seriesDbList.push(key);
+										}
 									}
-								}
-								const yearsList = seriesDbList.map((s) => s.split('_')[1]);
-								return yearsList.map((y) => (
-									<option key={y} value={y}>
-										{y}
-									</option>
-								));
-							})()}
-						</Form.Select>
-					</Form.Group>
+									const yearsList = seriesDbList.map((s) => s.split('_')[1]);
+									return yearsList.map((y) => (
+										<option key={y} value={y}>
+											{y}
+										</option>
+									));
+								})()}
+							</Form.Select>
+						</Form.Group>
+					)}
 				</Form>
 			) : null}
 			{chosenDocs !== null && docsData !== null && !fetching ? (
-				//
 				//	Use .reduce to group by Series.
-				//
 				docsData.length !== 0 ? (
 					chosenDocs.includes('penalties__') ? (
 						renderDocsGroupedByGP(docsData as GroupedByGP, searchInput, {
