@@ -64,7 +64,7 @@ const handler = async (
 				try {
 					const conn = await connectMongo(dbNameList.other_documents_db);
 					const document_list: MissingDocModel[] =
-						await conn.models.Missing_Doc.find({}).exec();
+						await conn.models.Missing_Doc.find().exec();
 					return res.status(200).json(document_list);
 				} catch (error: any) {
 					return res
@@ -76,7 +76,7 @@ const handler = async (
 				try {
 					const conn = await connectMongo(dbNameList.other_documents_db);
 					const document_list: ContactDocModel[] =
-						await conn.models.Contact_Doc.find({}).exec();
+						await conn.models.Contact_Doc.find().exec();
 					return res.status(200).json(document_list);
 				} catch (error: any) {
 					return res
@@ -91,17 +91,19 @@ const handler = async (
 		} else if (req.method === 'DELETE') {
 			const { params } = req.query as { params: string[] };
 			const docType = params[0];
-			const series = supportedSeries.find((s) => s === params[1].toLowerCase());
-			const year = params[2];
-			const docId = params[3];
-			if (docId) {
+			const series = params[1];
+			const docId = params[2];
+			const year = params[3];
+			if (!docId) {
 				return res.status(403).json('Document Id is required.');
 			}
 			if (docType === 'penalties') {
-				if (!series) {
-					return res.status(422).json('Unsupported series.');
+				let seriesYearDB: string;
+				if (series === 'missing-file') {
+					seriesYearDB = dbNameList.other_documents_db;
+				} else {
+					seriesYearDB = dbNameList[`${series}_${year}_db`];
 				}
-				const seriesYearDB = dbNameList[`${series}_${year}_db`];
 				if (!seriesYearDB) {
 					return res.status(422).json('Unsupported year.');
 				}
