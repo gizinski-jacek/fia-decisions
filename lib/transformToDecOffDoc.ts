@@ -311,6 +311,8 @@ export const transformToDecOffDoc = (
 		'pit-lane',
 		'grid',
 		'drop of one position',
+		'stop and go',
+		'stop & go',
 		'time',
 		'seconds',
 		'fine',
@@ -320,7 +322,7 @@ export const transformToDecOffDoc = (
 	//
 	//	Include stop & go penalties
 	//
-	let penaltyType = 'none';
+	let penaltyType = 'no penalty';
 	// Checking for penalty type in first string of Decision array.
 	// Exiting on first penalty found to prevent overwriting with lesser penalty.
 	// If not found it is assumed no penalty was applied.
@@ -330,13 +332,16 @@ export const transformToDecOffDoc = (
 				penaltyType = 'grid';
 				break;
 			}
+			if (penaltiesArray[i] === 'stop & go') {
+				penaltyType = 'stop and go';
+				break;
+			}
 			if (penaltiesArray[i] === 'seconds') {
 				penaltyType = 'time';
 				break;
-			} else {
-				penaltyType = penaltiesArray[i];
-				break;
 			}
+			penaltyType = penaltiesArray[i];
+			break;
 		}
 	}
 
@@ -362,6 +367,5 @@ export const transformToDecOffDoc = (
 		incident_info: { ...incidentInfo, Reason: reasonContents },
 		stewards: stewards,
 	};
-
 	return data;
 };
