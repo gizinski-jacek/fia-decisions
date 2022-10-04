@@ -30,7 +30,9 @@ const DrawerUtilities = ({ screenIsSmall }: Props) => {
 	const [nextRace, setNextRace] = useState<WeekendData | null>(null);
 
 	const getCalendarData = async (): Promise<WeekendData[]> => {
-		const res = await axios.get('https://ergast.com/api/f1/current.json');
+		const res = await axios.get('https://ergast.com/api/f1/current.json', {
+			timeout: 15000,
+		});
 		return res.data.MRData.RaceTable.Races;
 	};
 

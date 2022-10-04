@@ -49,7 +49,8 @@ const FormulaSeries: NextPage = () => {
 			setFetchingError(null);
 			setFetching(true);
 			const res = await axios.get(
-				`/api/document/${router.query.series}/${yearSelect}`
+				`/api/document/${router.query.series}/${yearSelect}`,
+				{ timeout: 15000 }
 			);
 			setFetching(false);
 			setDocsData(res.data);
