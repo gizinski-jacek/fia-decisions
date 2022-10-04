@@ -6,6 +6,7 @@ const Schema = mongoose.Schema;
 const Missing_Doc = new Schema<MissingDocModel>(
 	{
 		series: { type: String, trim: true, required: true },
+		year: { type: String, trim: true, required: true },
 		description: {
 			type: String,
 			trim: true,
