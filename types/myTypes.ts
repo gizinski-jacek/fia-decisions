@@ -53,11 +53,13 @@ export interface FiaPageList {
 
 export interface FileFormValues {
 	series: string;
+	year: string;
 	file: File | null;
 }
 
 export interface DataFormValues {
 	series: string;
+	year: string;
 	description: string;
 }
 
