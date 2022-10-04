@@ -150,14 +150,14 @@ export const formatPenalty = (type: string, string: string): string => {
 		);
 		if (matchGridNumber) {
 			const matchExtraText = matchGridNumber[0].match(
-				/(?<=\d\b)(.*)(?=grid)/im
+				/(?<=\d\b).{1,16}(?=grid)/im
 			);
 			if (matchExtraText) {
 				return `+ ${matchGridNumber[0]
 					.replace(matchExtraText[0], ' ')
-					.replace('position', 'grid')} Places`;
+					.replace(/position/im, '')} Places`;
 			} else {
-				return `+ ${matchGridNumber[0].replace('position', 'grid')} Places`;
+				return `+ ${matchGridNumber[0].replace(/position/im, '')} Places`;
 			}
 		}
 		const matchBackOfTheGrid = replacedWordWithNumber.match(/back.*grid?/im);
@@ -206,7 +206,7 @@ export const formatPenalty = (type: string, string: string): string => {
 				.toLowerCase()
 				.replace(/\(\d{1,2}\)/im, '')
 				.replace('  ', ' ')
-				.replace('second', 'seconds')}`;
+				.replace(/second/im, 'seconds')}`;
 		}
 		const matchLapDeletion = replacedWordWithNumber.match(/delet.*lap/im);
 		if (matchLapDeletion) {
@@ -258,7 +258,7 @@ export const formatPenalty = (type: string, string: string): string => {
 				.toLowerCase()
 				.replace(/\(\d{1,2}\)/im, '')
 				.replace('  ', ' ')
-				.replace(' second', 's')} ${type}`;
+				.replace(/ second/im, 's')} ${type}`;
 		}
 	}
 	if (type === 'fine') {
