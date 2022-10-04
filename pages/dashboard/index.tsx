@@ -39,59 +39,61 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 	const [fetching, setFetching] = useState(false);
 	const [fetchingError, setFetchingError] = useState<string | null>(null);
 	const [searchInput, setSearchInput] = useState('');
-	const [selectInput, setSelectInput] = useState(
+	const [yearSelect, setYearSelect] = useState(
 		new Date().getFullYear().toString()
 	);
 
 	const router = useRouter();
 
-	const handleSignIn = async () => {
-		await getDocuments(chosenDocs);
+	const handleSignIn = () => {
+		getDocuments();
 		setSignedIn(true);
 	};
 
-	const getDocuments = useCallback(
-		async (docType: string) => {
-			if (!docType) {
-				return null;
-			}
-			try {
-				setFetching(true);
-				const res = await axios.get(`/api/dashboard/${docType}`, {
-					timeout: 15000,
-				});
-				setFetching(false);
-				setFetchingError(null);
-				setDocsData(res.data);
-			} catch (error: any) {
-				setFetching(false);
-				if (error instanceof AxiosError) {
-					if (error.response?.status === 401) {
-						router.reload();
-					} else {
-						setFetchingError(
-							error?.response?.data ||
-								'Unknown server error. Fetching documents failed.'
-						);
-						setDocsData(null);
-					}
+	const getDocuments = useCallback(async () => {
+		if (!chosenDocs) {
+			setFetchingError('Must choose valid documents from the list.');
+			return;
+		}
+		const [docType, series, manualUpload] = chosenDocs.split('__');
+		try {
+			setFetching(true);
+			const res = await axios.get(
+				`/api/dashboard/${docType}/${series}/${yearSelect}/${
+					manualUpload || ''
+				}`,
+				{ timeout: 15000 }
+			);
+			setFetching(false);
+			setFetchingError(null);
+			setDocsData(res.data);
+		} catch (error: any) {
+			setFetching(false);
+			if (error instanceof AxiosError) {
+				if (error.response?.status === 401) {
+					router.reload();
 				} else {
-					if (error.status === 401) {
-						router.reload();
-					} else {
-						setFetchingError(
-							(error as Error).message ||
-								'Unknown server error. Fetching documents failed.'
-						);
-						setDocsData(null);
-					}
+					setFetchingError(
+						error?.response?.data ||
+							'Unknown server error. Fetching documents failed.'
+					);
+					setDocsData(null);
+				}
+			} else {
+				if (error.status === 401) {
+					router.reload();
+				} else {
+					setFetchingError(
+						(error as Error).message ||
+							'Unknown server error. Fetching documents failed.'
+					);
+					setDocsData(null);
 				}
 			}
-		},
-		[router]
-	);
+		}
+	}, [chosenDocs, yearSelect, router]);
 
-	const handleDeleteDocument = async (docType: string, docId: string) => {
+	const handleDeleteDocument = async (query: string, docId: string) => {
 		// Error when deleting:
 		// XML Parsing Error: no element found
 		// Location: http://localhost:3000/api/dashboard/missing?doc_id=6334be6da875c7c312b0f82e
@@ -103,14 +105,17 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 		) {
 			return;
 		}
-		if (!docType || !docId) {
-			setFetchingError('Document Type and Id is required.');
+		if (!query || !docId || !yearSelect) {
+			setFetchingError('Must choose documents and year from the list.');
 			return;
 		}
+		const [docType, series, manualUpload] = query.split('__');
 		try {
 			setFetching(true);
-			await axios.delete(`/api/dashboard/${docType}/${docId}`);
-			await getDocuments(chosenDocs);
+			await axios.delete(
+				`/api/dashboard/${docType}/${series}/${yearSelect}/${docId}`
+			);
+			getDocuments();
 		} catch (error: any) {
 			setFetching(false);
 			if (error instanceof AxiosError) {
@@ -149,13 +154,13 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 			return;
 		}
 		if (!series || !docId) {
-			setFetchingError('Document Type and Id is required.');
+			setFetchingError('Series and document Id is required.');
 			return;
 		}
 		try {
 			setFetching(true);
-			await axios.put(`/api/dashboard/${series}/${docId}`);
-			await getDocuments(chosenDocs);
+			await axios.put(`/api/dashboard/accept-document/${series}/${docId}`);
+			getDocuments();
 		} catch (error: any) {
 			setFetching(false);
 			if (error instanceof AxiosError) {
@@ -165,11 +170,11 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 					Array.isArray(error?.response?.data)
 						? setFetchingError(
 								error?.response?.data.join(' ') ||
-									'Unknown server error. Delete request failed.'
+									'Unknown server error. Accept request failed.'
 						  )
 						: setFetchingError(
 								error?.response?.data ||
-									'Unknown server error. Delete request failed.'
+									'Unknown server error. Accept request failed.'
 						  );
 				}
 			} else {
@@ -203,19 +208,19 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 		setDocsData(null);
 	};
 
-	const handleDocsRefresh = async () => {
-		await getDocuments(chosenDocs);
+	const handleDocsRefresh = () => {
+		getDocuments();
 	};
 
 	useEffect(() => {
 		if (signedIn) {
-			(async () => {
+			(() => {
 				setSearchInput('');
-				setSelectInput(new Date().getFullYear().toString());
-				await getDocuments(chosenDocs);
+				setYearSelect(new Date().getFullYear().toString());
+				getDocuments();
 			})();
 		}
-	}, [signedIn, chosenDocs, getDocuments]);
+	}, [signedIn, getDocuments]);
 
 	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const { value } = e.target;
@@ -226,43 +231,11 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 		e: React.ChangeEvent<HTMLSelectElement>
 	) => {
 		const { value } = e.target;
-		setSelectInput(value);
-	};
-
-	const upd1 = async () => {
-		await axios.get('/api/update-all/decisions-offences/f1/2022', {
-			headers: {
-				authorization: `Bearer IoGMwf7Wf4alc6mIIFDzdhJRQmpO5eGKSxLrdrDWzUv27XOAiopdv68wjsqbwvfT`,
-			},
-			timeout: 5000,
-		});
-	};
-
-	const upd2 = async () => {
-		await axios.get('/api/update-all/decisions-offences/f2/2022', {
-			headers: {
-				authorization: `Bearer IoGMwf7Wf4alc6mIIFDzdhJRQmpO5eGKSxLrdrDWzUv27XOAiopdv68wjsqbwvfT`,
-			},
-			timeout: 5000,
-		});
-	};
-
-	const upd3 = async () => {
-		await axios.get('/api/update-all/decisions-offences/f3/2022', {
-			headers: {
-				authorization: `Bearer IoGMwf7Wf4alc6mIIFDzdhJRQmpO5eGKSxLrdrDWzUv27XOAiopdv68wjsqbwvfT`,
-			},
-			timeout: 5000,
-		});
+		setYearSelect(value);
 	};
 
 	return signedIn ? (
 		<div className='mt-5 m-2'>
-			<div>
-				<button onClick={upd1}>updatef1</button>
-				<button onClick={upd2}>updatef2</button>
-				<button onClick={upd3}>updatef3</button>
-			</div>
 			<div className='d-flex my-2'>
 				<Form className='rounded-2 p-2 my-2 bg-light'>
 					<Form.Group>
@@ -281,8 +254,8 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 							</h6>
 						</Form.Label>
 						<Form.Select
-							name='documents'
-							id='documents'
+							name='documents_select'
+							id='documents_select'
 							onChange={handleDocSelectChange}
 							value={chosenDocs}
 							disabled={fetching}
@@ -321,8 +294,8 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 						<Form.Control
 							className='py-0 px-2 me-2 '
 							type='search'
-							name='searchInput'
-							id='searchInput'
+							name='search_input'
+							id='search_input'
 							maxLength={32}
 							onChange={handleInputChange}
 							value={searchInput}
@@ -336,22 +309,28 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 					<Form.Group>
 						<Form.Select
 							className='py-0 px-1 fs-5 custom-select'
-							name='selectInput'
-							id='selectInput'
+							name='year_select'
+							id='year_select'
 							onChange={handleYearSelectChange}
-							value={selectInput}
+							value={yearSelect}
 							disabled={fetching}
 						>
 							{(() => {
+								const series = chosenDocs.split('__')[1];
+								if (!series) return;
+								const supported = supportedSeries.find(
+									(s) => s === series.toLowerCase()
+								);
+								if (!supported) return;
 								const seriesDbList = [];
 								for (const key of Object.keys(dbNameList)) {
-									if (key.includes(chosenDocs.split('__')[1])) {
+									if (key.includes(supported)) {
 										seriesDbList.push(key);
 									}
 								}
 								const yearsList = seriesDbList.map((s) => s.split('_')[1]);
-								return yearsList.map((y, i) => (
-									<option key={i} value={y}>
+								return yearsList.map((y) => (
+									<option key={y} value={y}>
 										{y}
 									</option>
 								));
