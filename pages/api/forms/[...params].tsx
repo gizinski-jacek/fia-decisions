@@ -14,6 +14,7 @@ import {
 	ContactFormValues,
 	DashboardFormValues,
 	DataFormValues,
+	FileFormValues,
 	MissingDocModel,
 } from '../../../types/myTypes';
 import jwt from 'jsonwebtoken';
@@ -35,23 +36,16 @@ const handler = async (
 	>
 ) => {
 	if (req.method === 'POST') {
-		const { form } = req.query;
+		const { params } = req.query as { params: string[] };
+		const [form, series, year] = params;
 		if (form === 'file') {
 			try {
-				const { series } = req.query as { series: string };
-				if (!series) {
-					return res.status(422).json(['Series is required.']);
-				}
-				let seriesDB = '';
-				if (
-					supportedSeries.find(
-						(s) => s.toLocaleLowerCase() === series.toLowerCase()
-					)
-				) {
-					seriesDB = dbNameList.other_documents_db;
-				}
-				if (!seriesDB) {
-					return res.status(422).json(['Series is not supported.']);
+				const { errors } = await yupValidation(fileFormValidationSchema, {
+					series,
+					year,
+				});
+				if (errors) {
+					return res.status(422).json(errors);
 				}
 
 				const form = new multiparty.Form();
@@ -212,7 +206,7 @@ const handler = async (
 
 export default handler;
 
-const dataFormValidationSchema: Yup.SchemaOf<DataFormValues> =
+const fileFormValidationSchema: Yup.SchemaOf<{ series: string; year: string }> =
 	Yup.object().shape({
 		series: Yup.string()
 			.required('Series is is required.')
@@ -224,6 +218,38 @@ const dataFormValidationSchema: Yup.SchemaOf<DataFormValues> =
 					? true
 					: false;
 			}),
+		year: Yup.string()
+			.required('Year is is required.')
+			.test('is-supported-year', 'Year is not supported.', (val, ctx) => {
+				if (!val) return false;
+				let supported = false;
+				for (const key of Object.keys(dbNameList)) {
+					if (key.includes(val)) {
+						supported = true;
+						break;
+					}
+				}
+				return supported;
+			}),
+	});
+
+const dataFormValidationSchema: Yup.SchemaOf<DataFormValues> =
+	Yup.object().shape({
+		series: Yup.string()
+			.required('Series is is required.')
+			.test('is-supported-series', 'Series is not supported.', (val, ctx) => {
+				if (!val) return false;
+
+				return supportedSeries.find(
+					(s) => s.toLowerCase() === val.toLowerCase()
+				)
+					? true
+					: false;
+			}),
+		year: Yup.string()
+			.required('Description is is required.')
+			.min(16, 'Description min 16 characters.')
+			.max(512, 'Description max 512 characters.'),
 		description: Yup.string()
 			.required('Description is is required.')
 			.min(16, 'Description min 16 characters.')
