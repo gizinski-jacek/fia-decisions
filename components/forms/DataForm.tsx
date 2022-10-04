@@ -2,7 +2,11 @@ import { useState, useRef } from 'react';
 import { Button, Form } from 'react-bootstrap';
 import axios, { AxiosError } from 'axios';
 import { DataFormValues } from '../../types/myTypes';
-import { defaultDataFormValues, supportedSeries } from '../../lib/myData';
+import {
+	dbNameList,
+	defaultDataFormValues,
+	supportedSeries,
+} from '../../lib/myData';
 import LoadingBar from '../LoadingBar';
 
 const DataForm = () => {
@@ -25,12 +29,13 @@ const DataForm = () => {
 		setSubmitSuccess(false);
 		setFormErrors([]);
 		try {
-			if (!formData.series || !formData.description) {
-				setFormErrors(['Must choose a Series and provide a Description.']);
+			if (!formData.series || !formData.year || !formData.description) {
+				setFormErrors([
+					'Must choose a Series, a Year and provide a Description.',
+				]);
 				return;
 			}
 			const uploadData = new FormData();
-
 			for (const [key, value] of Object.entries(formData)) {
 				uploadData.append(key, value);
 			}
@@ -95,6 +100,43 @@ const DataForm = () => {
 								{s.replace('f', 'Formula ')}
 							</option>
 						))}
+					</Form.Select>
+				</Form.Group>
+				<Form.Group className='mb-3'>
+					<Form.Label htmlFor='year' className='fw-bolder'>
+						Select year
+					</Form.Label>
+					<Form.Select
+						className={
+							formErrors.length > 0 && !formData.year
+								? 'outline-error'
+								: !formData.year
+								? 'outline-warning'
+								: 'outline-success'
+						}
+						name='year'
+						id='year'
+						onChange={handleInputChange}
+						value={formData.year}
+						disabled={sending}
+						required
+					>
+						<option value=''>Choose Year</option>
+						{(() => {
+							if (!formData.series) return null;
+							const seriesDbList = [];
+							for (const key of Object.keys(dbNameList)) {
+								if (key.includes(formData.series)) {
+									seriesDbList.push(key);
+								}
+							}
+							const yearsList = seriesDbList.map((s) => s.split('_')[1]);
+							return yearsList.map((y, i) => (
+								<option key={i} value={y}>
+									{y}
+								</option>
+							));
+						})()}
 					</Form.Select>
 				</Form.Group>
 				<Form.Group className='mb-3'>

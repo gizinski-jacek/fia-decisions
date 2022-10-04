@@ -2,7 +2,11 @@ import { useRef, useState } from 'react';
 import { Button, Form } from 'react-bootstrap';
 import axios, { AxiosError } from 'axios';
 import { FileFormValues } from '../../types/myTypes';
-import { defaultFileFormValues, supportedSeries } from '../../lib/myData';
+import {
+	dbNameList,
+	defaultFileFormValues,
+	supportedSeries,
+} from '../../lib/myData';
 import LoadingBar from '../LoadingBar';
 
 const FileForm = () => {
@@ -42,23 +46,15 @@ const FileForm = () => {
 		setSubmitSuccess(false);
 		setFormErrors([]);
 		try {
-			if (!formData.series && !formData.file) {
-				setFormErrors(['Must choose a Series and a PDF file.']);
-				return;
-			}
-			if (!formData.series) {
-				setFormErrors(['Must choose a Series.']);
-				return;
-			}
-			if (!formData.file) {
-				setFormErrors(['Must choose a PDF file.']);
+			if (!formData.series && !formData.year && !formData.file) {
+				setFormErrors(['Must choose a Series, a Year and a PDF file.']);
 				return;
 			}
 			const uploadData = new FormData();
 			uploadData.append('file', formData.file as File);
 			setSending(true);
 			await axios.post(
-				`/api/forms/file?series=${formData.series}`,
+				`/api/forms/file/${formData.series}/${formData.year}`,
 				uploadData,
 				{ timeout: 15000 }
 			);
@@ -139,6 +135,43 @@ const FileForm = () => {
 								{s.replace('f', 'Formula ')}
 							</option>
 						))}
+					</Form.Select>
+				</Form.Group>
+				<Form.Group className='mb-3'>
+					<Form.Label htmlFor='year' className='fw-bolder'>
+						Select year
+					</Form.Label>
+					<Form.Select
+						className={
+							formErrors.length > 0 && !formData.year
+								? 'outline-error'
+								: !formData.year
+								? 'outline-warning'
+								: 'outline-success'
+						}
+						name='year'
+						id='year'
+						onChange={handleSelectChange}
+						value={formData.year}
+						disabled={sending}
+						required
+					>
+						<option value=''>Choose Year</option>
+						{(() => {
+							if (!formData.series) return null;
+							const seriesDbList = [];
+							for (const key of Object.keys(dbNameList)) {
+								if (key.includes(formData.series)) {
+									seriesDbList.push(key);
+								}
+							}
+							const yearsList = seriesDbList.map((s) => s.split('_')[1]);
+							return yearsList.map((y, i) => (
+								<option key={i} value={y}>
+									{y}
+								</option>
+							));
+						})()}
 					</Form.Select>
 				</Form.Group>
 				<Form.Group className='mb-3'>
