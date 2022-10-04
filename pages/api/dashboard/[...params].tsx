@@ -139,13 +139,10 @@ const handler = async (
 			}
 		} else if (req.method === 'PUT') {
 			const { params } = req.query as { params: string[] };
-			const [updateType, series, docId] = params;
+			const [updateType, docId] = params;
 			if (updateType === 'accept-document') {
 				if (!docId) {
 					return res.status(403).json('Document Id is required.');
-				}
-				if (!supportedSeries.some((s) => s === series)) {
-					return res.status(422).json('Series is not supported.');
 				}
 				try {
 					const connOtherDB = await connectMongo(dbNameList.other_documents_db);
@@ -153,10 +150,10 @@ const handler = async (
 						docId
 					).exec();
 					const docYear = new Date(document.doc_date).getFullYear().toString();
-					const seriesDB = dbNameList[`${series}_${docYear}_db`];
+					const seriesDB = dbNameList[`${document.series}_${docYear}_db`];
 					const connSeriesDB = await connectMongo(seriesDB);
 					const docExists = await connSeriesDB.models.Decision_Offence.findOne({
-						series: series,
+						series: document.series,
 						doc_type: document.doc_type,
 						doc_name: document.doc_name,
 						doc_date: document.doc_date,
