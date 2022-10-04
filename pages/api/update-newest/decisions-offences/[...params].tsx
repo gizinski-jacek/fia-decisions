@@ -8,6 +8,7 @@ import {
 	disallowedWordsInDocName,
 	fiaDomain,
 	fiaPageList,
+	supportedSeries,
 } from '../../../../lib/myData';
 import { streamToBuffer } from '../../../../lib/streamToBuffer';
 import { readPDFPages } from '../../../../lib/pdfReader';
@@ -23,42 +24,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 		const { authorization } = req.headers;
 		if (authorization === `Bearer ${process.env.CRON_JOB_SECRET}`) {
 			const { params } = req.query as { params: string[] };
-			let seriesYearDB = '';
-			let seriesYearPageURL = '';
-			if (params[0] === 'f1') {
-				if (params[1]) {
-					seriesYearDB = dbNameList[`f1_${params[1]}_db`];
-					seriesYearPageURL = fiaPageList[`f1_${params[1]}_page`];
-				} else {
-					seriesYearDB =
-						dbNameList[`f1_${new Date().getFullYear().toString()}_db`];
-					seriesYearPageURL =
-						fiaPageList[`f1_${new Date().getFullYear().toString()}_page`];
-				}
-			} else if (params[0] === 'f2') {
-				if (params[1]) {
-					seriesYearDB = dbNameList[`f2_${params[1]}_db`];
-					seriesYearPageURL = fiaPageList[`f2_${params[1]}_page`];
-				} else {
-					seriesYearDB =
-						dbNameList[`f2_${new Date().getFullYear().toString()}_db`];
-					seriesYearPageURL =
-						fiaPageList[`f2_${new Date().getFullYear().toString()}_page`];
-				}
-			} else if (params[0] === 'f3') {
-				if (params[1]) {
-					seriesYearDB = dbNameList[`f3_${params[1]}_db`];
-					seriesYearPageURL = fiaPageList[`f3_${params[1]}_page`];
-				} else {
-					seriesYearDB =
-						dbNameList[`f3_${new Date().getFullYear().toString()}_db`];
-					seriesYearPageURL =
-						fiaPageList[`f3_${new Date().getFullYear().toString()}_page`];
-				}
-			} else {
+			const series = supportedSeries.find((s) => s === params[0].toLowerCase());
+			const year = params[1] || new Date().getFullYear().toString();
+			if (!series) {
 				return res.status(422).json('Unsupported series.');
 			}
-			if (!seriesYearDB) {
+			const seriesYearDB = dbNameList[`${series}_${year}_db`];
+			const seriesYearPageURL = fiaPageList[`${series}_${year}_page`];
+			if (!seriesYearDB || !seriesYearPageURL) {
 				return res.status(422).json('Unsupported year.');
 			}
 			try {
