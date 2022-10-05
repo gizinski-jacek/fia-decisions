@@ -53,7 +53,6 @@ export interface FiaPageList {
 
 export interface FileFormValues {
 	series: string;
-	year: string;
 	file: File | null;
 }
 
