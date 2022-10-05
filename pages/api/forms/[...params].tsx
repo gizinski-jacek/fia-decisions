@@ -14,11 +14,9 @@ import {
 	ContactFormValues,
 	DashboardFormValues,
 	DataFormValues,
-	FileFormValues,
 	MissingDocModel,
 } from '../../../types/myTypes';
 import jwt from 'jsonwebtoken';
-import fs from 'fs';
 
 export const config = {
 	api: {
@@ -41,6 +39,9 @@ const handler = async (
 		const [form, series] = params;
 		if (form === 'file') {
 			try {
+				if (!supportedSeries.find((s) => s === series)) {
+					return res.status(422).json('Unsupported series.');
+				}
 				const form = new multiparty.Form();
 				// Errors may be emitted
 				// Note that if you are listening to 'part' events, the same error may be
@@ -68,9 +69,14 @@ const handler = async (
 						// decide what to do
 						console.log('got error on part ' + error);
 					});
-
 					if (!part) {
 						return res.status(422).json(['Must choose a file.']);
+					}
+					if (part.headers['content-type'] !== 'application/pdf') {
+						return res.status(422).json(['Only PDF files are allowed.']);
+					}
+					if (part.byteCount > 1000000) {
+						return res.status(422).json(['File is too big, max size 1MB.']);
 					}
 
 					const fileBuffer = await streamToBuffer(part);
@@ -95,22 +101,6 @@ const handler = async (
 							]);
 					}
 				});
-				form.on('file', async function (upload, file) {
-					const { errors } = await yupValidation(fileFormValidationSchema, {
-						series,
-						file,
-					});
-					fs.unlink(file.path, (error) => {
-						if (error) {
-							throw error;
-						}
-					});
-					if (errors) {
-						return res.status(422).json(errors);
-					}
-				});
-
-				// Close emitted after form parsed
 				form.on('close', function () {
 					console.log('Upload completed!');
 				});
@@ -214,36 +204,12 @@ const handler = async (
 
 export default handler;
 
-const fileFormValidationSchema: Yup.SchemaOf<FileFormValues> =
-	Yup.object().shape({
-		series: Yup.string()
-			.required('Series is is required.')
-			.test('is-supported-series', 'Series is not supported.', (val) => {
-				if (!val) return false;
-				return supportedSeries.find(
-					(s) => s.toLowerCase() === val.toLowerCase()
-				)
-					? true
-					: false;
-			}),
-		file: Yup.mixed()
-			.required('File is required')
-			.test('is-file-valid', (val) => {
-				if (val.headers['content-type'] !== 'application/pdf')
-					return new Yup.ValidationError('Only PDF files are allowed.');
-				if (val.size > 1000000)
-					return new Yup.ValidationError('File is too big, max size 1MB.');
-				return true;
-			}),
-	});
-
 const dataFormValidationSchema: Yup.SchemaOf<DataFormValues> =
 	Yup.object().shape({
 		series: Yup.string()
 			.required('Series is is required.')
 			.test('is-supported-series', 'Series is not supported.', (val) => {
 				if (!val) return false;
-
 				return supportedSeries.find(
 					(s) => s.toLowerCase() === val.toLowerCase()
 				)
