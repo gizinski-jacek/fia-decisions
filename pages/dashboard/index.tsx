@@ -246,14 +246,14 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 							className='fw-bolder d-flex justify-content-between align-items-center'
 						>
 							Documents
-							<h6
-								className='m-0'
+							<span
+								className='d-flex align-items-center'
 								style={{ cursor: 'pointer' }}
 								onClick={handleDocsRefresh}
 							>
-								Refresh
+								<h6 className='m-0'>Refresh</h6>
 								<i className='bi bi-arrow-repeat fs-6 ms-1'></i>
-							</h6>
+							</span>
 						</Form.Label>
 						<Form.Select
 							name='documents_select'
