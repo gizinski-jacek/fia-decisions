@@ -51,7 +51,8 @@ export const transformToDecOffDoc = (
 	// Extracting end part of filename, matching against common duplicate file suffixes.
 	// Removing suffix if present.
 	const unsuffixedFilename = fileName
-		.replace(/(_|-| ){1,}?\(?\d{1,}\)?$/gm, '')
+		.replace(/(_|-){1}?\d{1,}$/im, '')
+		.replace(/(_|-){1}?\(\d{1,}\)$/im, '')
 		.trim();
 	// Extracting grand prix name.
 	const grandPrixName = unsuffixedFilename
