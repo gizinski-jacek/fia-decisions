@@ -18,6 +18,7 @@ import {
 	MissingDocModel,
 } from '../../../types/myTypes';
 import jwt from 'jsonwebtoken';
+import fs from 'fs';
 
 export const config = {
 	api: {
@@ -37,17 +38,9 @@ const handler = async (
 ) => {
 	if (req.method === 'POST') {
 		const { params } = req.query as { params: string[] };
-		const [form, series, year] = params;
+		const [form, series] = params;
 		if (form === 'file') {
 			try {
-				const { errors } = await yupValidation(fileFormValidationSchema, {
-					series,
-					year,
-				});
-				if (errors) {
-					return res.status(422).json(errors);
-				}
-
 				const form = new multiparty.Form();
 				// Errors may be emitted
 				// Note that if you are listening to 'part' events, the same error may be
@@ -77,7 +70,7 @@ const handler = async (
 					});
 
 					if (!part) {
-						return res.status(422).json(['Must choose a PDF file.']);
+						return res.status(422).json(['Must choose a file.']);
 					}
 
 					const fileBuffer = await streamToBuffer(part);
@@ -102,6 +95,21 @@ const handler = async (
 							]);
 					}
 				});
+				form.on('file', async function (upload, file) {
+					const { errors } = await yupValidation(fileFormValidationSchema, {
+						series,
+						file,
+					});
+					fs.unlink(file.path, (error) => {
+						if (error) {
+							throw error;
+						}
+					});
+					if (errors) {
+						return res.status(422).json(errors);
+					}
+				});
+
 				// Close emitted after form parsed
 				form.on('close', function () {
 					console.log('Upload completed!');
@@ -206,11 +214,11 @@ const handler = async (
 
 export default handler;
 
-const fileFormValidationSchema: Yup.SchemaOf<{ series: string; year: string }> =
+const fileFormValidationSchema: Yup.SchemaOf<FileFormValues> =
 	Yup.object().shape({
 		series: Yup.string()
 			.required('Series is is required.')
-			.test('is-supported-series', 'Series is not supported.', (val, ctx) => {
+			.test('is-supported-series', 'Series is not supported.', (val) => {
 				if (!val) return false;
 				return supportedSeries.find(
 					(s) => s.toLowerCase() === val.toLowerCase()
@@ -218,18 +226,14 @@ const fileFormValidationSchema: Yup.SchemaOf<{ series: string; year: string }> =
 					? true
 					: false;
 			}),
-		year: Yup.string()
-			.required('Year is is required.')
-			.test('is-supported-year', 'Year is not supported.', (val, ctx) => {
-				if (!val) return false;
-				let supported = false;
-				for (const key of Object.keys(dbNameList)) {
-					if (key.includes(val)) {
-						supported = true;
-						break;
-					}
-				}
-				return supported;
+		file: Yup.mixed()
+			.required('File is required')
+			.test('is-file-valid', (val) => {
+				if (val.headers['content-type'] !== 'application/pdf')
+					return new Yup.ValidationError('Only PDF files are allowed.');
+				if (val.size > 1000000)
+					return new Yup.ValidationError('File is too big, max size 1MB.');
+				return true;
 			}),
 	});
 
@@ -237,7 +241,7 @@ const dataFormValidationSchema: Yup.SchemaOf<DataFormValues> =
 	Yup.object().shape({
 		series: Yup.string()
 			.required('Series is is required.')
-			.test('is-supported-series', 'Series is not supported.', (val, ctx) => {
+			.test('is-supported-series', 'Series is not supported.', (val) => {
 				if (!val) return false;
 
 				return supportedSeries.find(
