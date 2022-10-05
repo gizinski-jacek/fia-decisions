@@ -11,7 +11,7 @@ import { Button, Form } from 'react-bootstrap';
 import axios, { AxiosError } from 'axios';
 import { dbNameList, supportedSeries } from '../../lib/myData';
 import LoadingBar from '../../components/LoadingBar';
-import { renderDocsGroupedByGP, verifyToken } from '../../lib/utils';
+import { renderBySeries, verifyToken } from '../../lib/utils';
 import MissingDocWrapper from '../../components/wrappers/MissingDocWrapper';
 import ContactDocWrapper from '../../components/wrappers/ContactDocWrapper';
 
@@ -344,10 +344,9 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 				</Form>
 			) : null}
 			{chosenDocs !== null && docsData !== null && !fetching ? (
-				//	Use .reduce to group by Series.
 				docsData.length !== 0 ? (
 					chosenDocs.includes('penalties__') ? (
-						renderDocsGroupedByGP(docsData as GroupedByGP, searchInput, {
+						renderBySeries(docsData as GroupedByGP, searchInput, {
 							deleteHandler: handleDeleteDocument,
 							docType: chosenDocs,
 							acceptHandler: handleAcceptDocument,
