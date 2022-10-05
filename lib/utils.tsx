@@ -146,7 +146,7 @@ export const formatPenalty = (type: string, string: string): string => {
 			replacedWordWithNumber = string;
 		}
 		const matchGridNumber = replacedWordWithNumber.match(
-			/\d{1,2}.{1,16}(grid|position)\)?/im
+			/\d{1,2}.{1,12}(grid|position)\)?/im
 		);
 		if (matchGridNumber) {
 			const matchExtraText = matchGridNumber[0].match(
