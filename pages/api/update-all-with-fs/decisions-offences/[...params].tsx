@@ -15,8 +15,17 @@ import { readPDFPagesWithFS } from '../../../../lib/pdfReader';
 import { transformToDecOffDoc } from '../../../../lib/transformToDecOffDoc';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
-	// Alternative route for requesting update of all documents.
-	// Uses host machines file system to perform the update instead.
+	//	Alternative route for requesting update of all documents.
+	//	Uses host machines file system to perform the update instead.
+	//
+	//	! IMPORTANT !
+	//
+	//	This endpoint updates all documents for requested series and year.
+	//	Since the number of documents may be high the function does not wait
+	//	for all the Promises to finish and sends acknowledgement  response after to the client.
+	//	It is supposed to be a Background Task, also known as Fire-and-Forget
+	//	Requires hosting service providing support for such functions.
+	//
 	if (req.method === 'GET') {
 		if (!process.env.CRON_JOB_UPDATE_ALL_DOCS_SECRET) {
 			throw new Error(
@@ -164,7 +173,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 								reject(error);
 							}
 						});
-					}, 2000 * i)
+					}, 1000 * i)
 				);
 				return res
 					.status(200)

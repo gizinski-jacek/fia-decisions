@@ -15,6 +15,15 @@ import { readPDFPages } from '../../../../lib/pdfReader';
 import { transformToDecOffDoc } from '../../../../lib/transformToDecOffDoc';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
+	//
+	//	! IMPORTANT !
+	//
+	//	This endpoint updates all documents for requested series and year.
+	//	Since the number of documents may be high the function does not wait
+	//	for all the Promises to finish and sends acknowledgement  response after to the client.
+	//	It is supposed to be a Background Task, also known as Fire-and-Forget
+	//	Requires hosting service providing support for such functions.
+	//
 	if (req.method === 'GET') {
 		if (!process.env.CRON_JOB_UPDATE_ALL_DOCS_SECRET) {
 			throw new Error(
@@ -115,7 +124,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 								reject(error);
 							}
 						});
-					}, 500 * i)
+					}, 1000 * i)
 				);
 
 				return res
