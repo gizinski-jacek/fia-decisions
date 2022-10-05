@@ -43,7 +43,7 @@ const handler = async (
 					const query = manualUpload ? { manual_upload: true } : {};
 					const document_list: DecisionOffenceModel[] =
 						await conn.models.Decision_Offence.find(query)
-							.sort({ createdAt: -1 })
+							.sort({ doc_date: -1 })
 							.exec();
 					const groupedByGP: GroupedByGP = document_list.reduce(
 						(prev, curr) => {
