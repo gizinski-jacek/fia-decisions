@@ -48,7 +48,6 @@ export const dbNameList: DatabaseNameList = {
 // Default form data state used in FileForm component.
 export const defaultFileFormValues: FileFormValues = {
 	series: '',
-	year: '',
 	file: null,
 };
 
