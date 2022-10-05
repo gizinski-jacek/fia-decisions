@@ -125,7 +125,7 @@ const handler = async (
 					return res.status(422).json(errors);
 				}
 				const conn = await connectMongo(dbNameList.other_documents_db);
-				const newReport = new conn.models.Missing_Doc(fields);
+				const newReport = new conn.models.Missing_Data_Doc(fields);
 				await newReport.save();
 				return res.status(200).end();
 			} catch (error: any) {

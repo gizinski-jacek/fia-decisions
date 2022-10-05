@@ -64,7 +64,7 @@ const handler = async (
 				try {
 					const conn = await connectMongo(dbNameList.other_documents_db);
 					const document_list: MissingDocModel[] =
-						await conn.models.Missing_Doc.find().exec();
+						await conn.models.Missing_Data_Doc.find().exec();
 					return res.status(200).json(document_list);
 				} catch (error: any) {
 					return res
@@ -120,7 +120,7 @@ const handler = async (
 			if (docType === 'missing-info') {
 				try {
 					const conn = await connectMongo(dbNameList.other_documents_db);
-					await conn.models.Missing_Doc.findByIdAndDelete(docId).exec();
+					await conn.models.Missing_Data_Doc.findByIdAndDelete(docId).exec();
 					return res.status(200).end();
 				} catch (error: any) {
 					return res
