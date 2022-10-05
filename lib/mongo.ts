@@ -34,8 +34,8 @@ const connectMongo = async (dbName: string) => {
 			opts
 		);
 		if (dbName === dbNameList.other_documents_db) {
-			if (!client.models.Missing_Doc) {
-				client.model('Missing_Doc', require('../models/missingDoc'));
+			if (!client.models.Missing_Data_Doc) {
+				client.model('Missing_Data_Doc', require('../models/missingDoc'));
 			}
 			if (!client.models.Contact_Doc) {
 				client.model('Contact_Doc', require('../models/contactDoc'));
@@ -60,8 +60,8 @@ const connectMongo = async (dbName: string) => {
 			opts
 		);
 		if (dbName === dbNameList.other_documents_db) {
-			if (!conn.models.Missing_Doc) {
-				conn.model('Missing_Doc', require('../models/missingDoc'));
+			if (!conn.models.Missing_Data_Doc) {
+				conn.model('Missing_Data_Doc', require('../models/missingDoc'));
 			}
 			if (!conn.models.Contact_Doc) {
 				conn.model('Contact_Doc', require('../models/contactDoc'));
