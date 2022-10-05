@@ -4,6 +4,7 @@ import { Accordion } from 'react-bootstrap';
 import { GroupedByGP } from '../types/myTypes';
 import F1DocWrapper from '../components/wrappers/F1DocWrapper';
 import { ReactElement } from 'react';
+import { supportedSeries } from './myData';
 
 export const verifyToken = (req: NextApiRequest): boolean => {
 	if (!process.env.JWT_STRATEGY_SECRET) {
@@ -24,7 +25,7 @@ export const verifyToken = (req: NextApiRequest): boolean => {
 
 export const renderDocsGroupedByGP = (
 	docsData: GroupedByGP,
-	searchQuery: string,
+	searchQuery?: string,
 	cmsProps?: {
 		deleteHandler: (docType: string, docId: string) => void;
 		docType: string;
@@ -38,7 +39,7 @@ export const renderDocsGroupedByGP = (
 			</div>
 		);
 	}
-	const gpDocsArray = [];
+	const dataRender = [];
 	if (searchQuery) {
 		let searchData = {} as GroupedByGP;
 		for (const [key, array] of Object.entries(docsData)) {
@@ -59,8 +60,8 @@ export const renderDocsGroupedByGP = (
 			}
 		}
 		for (const [key, array] of Object.entries(searchData)) {
-			gpDocsArray.push(
-				<Accordion key={key} id={key} className='p-0 my-2'>
+			dataRender.push(
+				<Accordion key={key} id={key} className='my-1'>
 					<Accordion.Item eventKey='0'>
 						<Accordion.Header>
 							<div className='d-flex flex-column me-2 flex-sm-row w-100 align-items-center'>
@@ -84,8 +85,8 @@ export const renderDocsGroupedByGP = (
 		}
 	} else {
 		for (const [key, array] of Object.entries(docsData)) {
-			gpDocsArray.push(
-				<Accordion key={key} id={key} className='p-0 my-2'>
+			dataRender.push(
+				<Accordion key={key} id={key} className='my-1'>
 					<Accordion.Item eventKey='1'>
 						<Accordion.Header>
 							<div className='d-flex flex-column flex-sm-row w-100 align-items-center'>
@@ -108,7 +109,49 @@ export const renderDocsGroupedByGP = (
 			);
 		}
 	}
-	return gpDocsArray;
+	return dataRender;
+};
+
+export const renderBySeries = (
+	docsData: GroupedByGP,
+	searchQuery?: string,
+	cmsProps?: {
+		deleteHandler: (docType: string, docId: string) => void;
+		docType: string;
+		acceptHandler: (series: string, docId: string) => void;
+	}
+): JSX.Element[] | ReactElement | any => {
+	const groupedBySeries = supportedSeries.map((series) => {
+		const seriesDocs: { [key: string]: GroupedByGP[] } = { [series]: [] };
+		for (const [key, value] of Object.entries(docsData)) {
+			if (value[0].series === series) {
+				seriesDocs[series].push({ [key]: value });
+			}
+		}
+		const seriesDocsWrapped = [];
+		for (const [key, value] of Object.entries(seriesDocs)) {
+			if (!value.length) continue;
+			seriesDocsWrapped.push(
+				<Accordion key={key} id={key} className='my-1'>
+					<Accordion.Item eventKey='2'>
+						<Accordion.Header>
+							<h4 className='me-sm-3 fw-bold text-capitalize'>
+								{key.replace('f', 'Formula ')} Penalties
+							</h4>
+						</Accordion.Header>
+						<Accordion.Body className='p-0 px-1'>
+							{value.map((docs: GroupedByGP) =>
+								renderDocsGroupedByGP(docs, searchQuery, cmsProps)
+							)}
+						</Accordion.Body>
+					</Accordion.Item>
+				</Accordion>
+			);
+		}
+
+		return seriesDocsWrapped;
+	});
+	return groupedBySeries;
 };
 
 export const formatPenalty = (type: string, string: string): string => {
