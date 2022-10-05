@@ -219,7 +219,6 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 		if (signedIn) {
 			(() => {
 				setSearchInput('');
-				setYearSelect(new Date().getFullYear().toString());
 				getDocuments();
 			})();
 		}
