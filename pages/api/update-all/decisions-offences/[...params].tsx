@@ -115,7 +115,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 								reject(error);
 							}
 						});
-					}, 2000 * i)
+					}, 500 * i)
 				);
 
 				return res
