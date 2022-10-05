@@ -120,6 +120,7 @@ const DataForm = () => {
 						value={formData.year}
 						disabled={sending}
 						required
+						aria-describedby='yearSelectHelpText'
 					>
 						<option value=''>Choose Year</option>
 						{(() => {
@@ -138,6 +139,9 @@ const DataForm = () => {
 							));
 						})()}
 					</Form.Select>
+					<Form.Text muted id='messageInputHelpText'>
+						Select series to see supported years
+					</Form.Text>
 				</Form.Group>
 				<Form.Group className='mb-3'>
 					<Form.Label htmlFor='title' className='fw-bolder'>
@@ -165,9 +169,9 @@ const DataForm = () => {
 						placeholder='Description, Title or Link'
 						disabled={sending}
 						required
-						aria-describedby='informationInputHelpText'
+						aria-describedby='descriptionInputHelpText'
 					/>
-					<Form.Text muted id='informationInputHelpText'>
+					<Form.Text muted id='descriptionInputHelpText'>
 						Description 16-512 characters long
 					</Form.Text>
 				</Form.Group>
