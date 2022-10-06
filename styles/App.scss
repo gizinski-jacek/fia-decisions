@@ -23,6 +23,7 @@ nav {
 
 	&.custom-sm-grid {
 		display: grid;
+		grid-template-columns: 1fr -webkit-max-content;
 		grid-template-columns: 1fr max-content;
 		grid-template-areas:
 			'utilities controls'
@@ -31,6 +32,7 @@ nav {
 
 	&.custom-md-grid {
 		display: grid;
+		grid-template-columns: 1fr -webkit-max-content;
 		grid-template-columns: 1fr max-content;
 		grid-template-areas:
 			'utilities controls'
@@ -57,7 +59,18 @@ nav {
 		.custom-btn-show {
 			position: relative;
 			top: 0;
+			-webkit-animation: slideBtnDown 0.3s ease forwards;
 			animation: slideBtnDown 0.3s ease forwards;
+		}
+
+		@-webkit-keyframes slideBtnDown {
+			75% {
+				transform: translateY(0) rotateX(180deg);
+			}
+
+			100% {
+				transform: translateY(var(--slide-down)) rotateX(180deg);
+			}
 		}
 
 		@keyframes slideBtnDown {
@@ -157,6 +170,8 @@ nav {
 }
 
 .custom-button {
+	height: -webkit-fit-content !important;
+	height: -moz-fit-content !important;
 	height: fit-content !important;
 }
 

@@ -26,7 +26,31 @@
 	left: 0;
 	background: rgb(0, 125, 255);
 	width: 0;
+	-webkit-animation: loadingBar 1.5s linear infinite;
 	animation: loadingBar 1.5s linear infinite;
+}
+
+@-webkit-keyframes loadingBar {
+	0% {
+		left: 0%;
+		right: 100%;
+		width: 0%;
+	}
+	10% {
+		left: 0%;
+		right: 75%;
+		width: 25%;
+	}
+	90% {
+		right: 0%;
+		left: 75%;
+		width: 25%;
+	}
+	100% {
+		left: 100%;
+		right: 0%;
+		width: 0%;
+	}
 }
 
 @keyframes loadingBar {
