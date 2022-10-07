@@ -148,7 +148,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 										readPDF as any,
 										series as 'f1' | 'f2' | 'f3'
 									);
-									console.log(href);
 									const docExists = await conn.models.Decision_Offence.findOne({
 										series: series,
 										doc_type: transformed.doc_type,
