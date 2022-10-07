@@ -97,6 +97,7 @@ export interface WeekendData {
 export interface PenaltyColors {
 	[key: string]: { color: string; backgroundColor: string };
 }
+
 export interface DashboardFormValues {
 	password: string;
 }
