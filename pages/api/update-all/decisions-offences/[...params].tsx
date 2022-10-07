@@ -59,7 +59,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 					'.decision-document-list'
 				);
 				if (!mainDoc) {
-					return res.status(500).json('Error getting list.');
+					return res.status(500).json('Error getting document list.');
 				}
 				const allDocAnchors: NodeList = mainDoc.querySelectorAll('a');
 				const allDocsHref: string[] = [];
@@ -99,10 +99,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 								const transformed = transformToDecOffDoc(
 									href,
 									readPDF as any,
-									params[0] as 'f1' | 'f2' | 'f3'
+									series as 'f1' | 'f2' | 'f3'
 								);
 								const docExists = await conn.models.Decision_Offence.findOne({
-									series: params[0],
+									series: series,
 									doc_type: transformed.doc_type,
 									doc_name: transformed.doc_name,
 									doc_date: transformed.doc_date,
