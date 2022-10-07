@@ -52,7 +52,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 							);
 						}
 						await axios.get(
-							`${appURI}/api/f1/update-all/decisions-offences/${params[0]}`,
+							`${appURI}/api/f1/update-all/decisions-offences/${series}`,
 							{
 								headers: {
 									authorization: `Bearer ${process.env.CRON_JOB_UPDATE_ALL_DOCS_SECRET}`,
@@ -146,10 +146,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 									const transformed = transformToDecOffDoc(
 										href,
 										readPDF as any,
-										params[0] as 'f1' | 'f2' | 'f3'
+										series as 'f1' | 'f2' | 'f3'
 									);
+									console.log(href);
 									const docExists = await conn.models.Decision_Offence.findOne({
-										series: params[0],
+										series: series,
 										doc_type: transformed.doc_type,
 										doc_name: transformed.doc_name,
 										doc_date: transformed.doc_date,
