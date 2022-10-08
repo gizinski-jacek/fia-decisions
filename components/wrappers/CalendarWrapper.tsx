@@ -3,13 +3,12 @@ import { WeekendData } from '../../types/myTypes';
 
 interface Props {
 	calendarData: WeekendData[];
-	// timezone: 'my' | 'track';
 	nextRace: WeekendData | null;
 }
 
 const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
 	return (
-		<Table size='sm' striped bordered hover responsive='sm'>
+		<Table size='sm' bordered hover responsive='sm' className='m-0'>
 			<thead>
 				<tr>
 					<th className='d-none d-lg-table-cell'>
