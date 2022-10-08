@@ -7,8 +7,9 @@ import FileForm from '../forms/FileForm';
 import DataForm from '../forms/DataForm';
 import ContactForm from '../forms/ContactForm';
 import style from '../../styles/Slider.module.scss';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import CalendarWrapper from '../wrappers/CalendarWrapper';
+import LoadingBar from '../LoadingBar';
 
 interface Props {
 	screenIsSmall: boolean;
@@ -23,40 +24,41 @@ const DrawerUtilities = ({ screenIsSmall }: Props) => {
 		'file' | 'data' | 'contact'
 	>('file');
 	const [showCalendarModal, setShowCalendarModal] = useState(false);
-	// const [calendarTimezone, setCalendarTimezone] = useState<'my' | 'track'>(
-	// 	'my'
-	// );
-	const [calendarData, setCalendarData] = useState<WeekendData[]>([]);
+	const [calendarData, setCalendarData] = useState<WeekendData[] | null>(null);
 	const [nextRace, setNextRace] = useState<WeekendData | null>(null);
 
-	const getCalendarData = async (): Promise<WeekendData[]> => {
-		const res = await axios.get('https://ergast.com/api/f1/current.json', {
-			timeout: 15000,
-		});
-		return res.data.MRData.RaceTable.Races;
-	};
-
-	useEffect(() => {
-		(async () => {
-			const data = await getCalendarData();
+	const getCalendarData = async () => {
+		try {
+			const res = await axios.get('https://ergast.com/api/f1/current.json', {
+				timeout: 15000,
+			});
 			const timeToday = new Date('2022/10/3 03:59:59');
 			const oneDay = 24 * 60 * 60 * 1000;
-			const futureRaces = data.filter(
-				(r) =>
+			const futureRaces = res.data.MRData.RaceTable.Races.filter(
+				(r: WeekendData) =>
 					new Date(r.date + ' ' + r.time).getTime() >
 					timeToday.getTime() - oneDay
 			);
 			const dayAfterTheNextRace =
 				new Date(futureRaces[0].date + ' ' + futureRaces[0].time).setHours(0) +
 				oneDay;
-			let upcomingRace: WeekendData;
+			let nextRace: WeekendData;
 			if (dayAfterTheNextRace > timeToday.getTime()) {
-				upcomingRace = futureRaces[0];
+				nextRace = futureRaces[0];
 			} else {
-				upcomingRace = futureRaces[1];
+				nextRace = futureRaces[1];
 			}
-			setNextRace(upcomingRace);
-			setCalendarData(data);
+			setCalendarData(res.data.MRData.RaceTable.Races);
+			setNextRace(nextRace);
+		} catch (error: any) {
+			setCalendarData(null);
+			setNextRace(null);
+		}
+	};
+
+	useEffect(() => {
+		(() => {
+			getCalendarData();
 		})();
 	}, []);
 
@@ -83,10 +85,6 @@ const DrawerUtilities = ({ screenIsSmall }: Props) => {
 	const handleCloseCalendarModal = () => {
 		setShowCalendarModal(false);
 	};
-
-	// const toggleCalendarTimezone = (value: 'my' | 'track') => {
-	// 	setCalendarTimezone(value);
-	// };
 
 	return (
 		<>
@@ -238,44 +236,18 @@ const DrawerUtilities = ({ screenIsSmall }: Props) => {
 					<Modal.Title className='w-100 me-5'>
 						<div className='d-flex align-items-center'>
 							<h3 className='m-0 text-nowrap'>
-								F1 {calendarData.find((w) => w.season !== undefined)?.season}{' '}
+								F1 {calendarData?.find((w) => w.season !== undefined)?.season}{' '}
 								Race Calendar
 							</h3>
-							{/* <div className='d-flex ms-5'>
-								<Button
-									size='sm'
-									className={`mx-2 fw-bold ${
-										calendarTimezone === 'my'
-											? 'btn-success'
-											: 'btn-secondary opacity-75'
-									}`}
-									onClick={() => toggleCalendarTimezone('my')}
-								>
-									My Time
-								</Button>
-								<Button
-									size='sm'
-									className={`mx-2 fw-bold ${
-										calendarTimezone === 'track'
-											? 'btn-success'
-											: 'btn-secondary opacity-75'
-									}`}
-									onClick={() => toggleCalendarTimezone('track')}
-								>
-									Track Time
-								</Button>
-							</div> */}
 						</div>
 					</Modal.Title>
 				</Modal.Header>
-				<Modal.Body className='bg-light'>
-					{
-						<CalendarWrapper
-							calendarData={calendarData}
-							// timezone={calendarTimezone}
-							nextRace={nextRace}
-						/>
-					}
+				<Modal.Body className='bg-light rounded'>
+					{calendarData ? (
+						<CalendarWrapper calendarData={calendarData} nextRace={nextRace} />
+					) : (
+						<LoadingBar margin='5rem' />
+					)}
 				</Modal.Body>
 			</Modal>
 		</>
