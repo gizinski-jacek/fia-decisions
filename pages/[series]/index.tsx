@@ -147,7 +147,7 @@ const FormulaSeries: NextPage = () => {
 			</h2>
 			<div className='my-lg-3'>
 				{fetching ? (
-					<LoadingBar margin='5rem 10rem' />
+					<LoadingBar margin='5rem' />
 				) : docsData ? (
 					renderDocsGroupedByGP(docsData, searchInput)
 				) : fetchingError ? (
