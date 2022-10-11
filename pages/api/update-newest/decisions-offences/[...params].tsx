@@ -44,11 +44,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 					try {
 						const appURI =
 							process.env.NODE_ENV === 'production'
-								? process.env.MY_APP_URI
-								: process.env.MY_APP_URI_DEV;
+								? process.env.API_WORKER_URI
+								: process.env.API_WORKER_URI_DEV;
 						if (!appURI) {
 							throw new Error(
-								'Please define MY_APP_URI / MY_APP_URI_DEV environment variables inside .env.local'
+								'Please define API_WORKER_URI / API_WORKER_URI_DEV environment variables inside .env.local'
 							);
 						}
 						await axios.get(
