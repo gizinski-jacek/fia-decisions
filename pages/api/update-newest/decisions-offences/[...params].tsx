@@ -134,46 +134,48 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<string>) => {
 				console.log(`Number of new scraped documents: ${allDocsHref.length}.`);
 				await Promise.all(
 					allDocsHref.map(
-						(href) =>
-							new Promise(async (resolve, reject) => {
-								try {
-									const responseFile = await axios.get(fiaDomain + href, {
-										responseType: 'stream',
-										timeout: 15000,
-									});
-									const fileBuffer = await streamToBuffer(responseFile.data);
-									const readPDF = await readPDFPages(fileBuffer);
-									const transformed = transformToDecOffDoc(
-										href,
-										readPDF as any,
-										series as 'f1' | 'f2' | 'f3'
-									);
-									const docExists = await conn.models.Decision_Offence.findOne({
-										series: series,
-										doc_type: transformed.doc_type,
-										doc_name: transformed.doc_name,
-										doc_date: transformed.doc_date,
-										penalty_type: transformed.penalty_type,
-										grand_prix: transformed.grand_prix,
-										weekend: transformed.weekend,
-									});
-									if (docExists) {
-										console.log('Document already exists. Skipping.');
+						(href, i) =>
+							new Promise((resolve, reject) =>
+								setTimeout(async () => {
+									try {
+										const responseFile = await axios.get(fiaDomain + href, {
+											responseType: 'stream',
+											timeout: 15000,
+										});
+										const fileBuffer = await streamToBuffer(responseFile.data);
+										const readPDF = await readPDFPages(fileBuffer);
+										const transformed = transformToDecOffDoc(
+											href,
+											readPDF as any,
+											series as 'f1' | 'f2' | 'f3'
+										);
+										const docExists =
+											await conn.models.Decision_Offence.findOne({
+												series: transformed.series,
+												doc_type: transformed.doc_type,
+												doc_name: transformed.doc_name,
+												doc_date: transformed.doc_date,
+												penalty_type: transformed.penalty_type,
+												grand_prix: transformed.grand_prix,
+												weekend: transformed.weekend,
+											});
+										if (docExists) {
+											console.log('Document already exists. Skipping.');
+											resolve(null);
+											return;
+										}
+										await conn.models.Decision_Offence.create({
+											...transformed,
+											manual_upload: false,
+										});
 										resolve(null);
-										return;
+									} catch (error: any) {
+										reject(error);
 									}
-									await conn.models.Decision_Offence.create({
-										...transformed,
-										manual_upload: false,
-									});
-									resolve(null);
-								} catch (error: any) {
-									reject(error);
-								}
-							})
+								}, 1000 * i)
+							)
 					)
 				);
-
 				console.log('Finished updating.');
 				return res.status(200).end();
 			} catch (error: any) {
