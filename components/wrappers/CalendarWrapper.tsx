@@ -124,7 +124,7 @@ const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
 											weekend.SecondPractice.date +
 												' ' +
 												weekend.SecondPractice.time
-										).toLocaleString(undefined, {
+										).toLocaleString([], {
 											year: '2-digit',
 											month: '2-digit',
 											day: '2-digit',
@@ -139,7 +139,7 @@ const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
 												weekend.FirstPractice.date +
 													' ' +
 													weekend.FirstPractice.time
-											).toLocaleString(undefined, {
+											).toLocaleString([], {
 												hour: '2-digit',
 												minute: '2-digit',
 											})}
@@ -152,7 +152,7 @@ const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
 										<span className='fw-bold'>
 											{new Date(
 												weekend.Qualifying.date + ' ' + weekend.Qualifying.time
-											).toLocaleString(undefined, {
+											).toLocaleString([], {
 												hour: '2-digit',
 												minute: '2-digit',
 											})}
@@ -167,7 +167,7 @@ const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
 												weekend.SecondPractice.date +
 													' ' +
 													weekend.SecondPractice.time
-											).toLocaleString(undefined, {
+											).toLocaleString([], {
 												hour: '2-digit',
 												minute: '2-digit',
 											})}
@@ -180,7 +180,7 @@ const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
 										<span className='fw-bold'>
 											{new Date(
 												weekend.Sprint.date + ' ' + weekend.Sprint.time
-											).toLocaleString(undefined, {
+											).toLocaleString([], {
 												hour: '2-digit',
 												minute: '2-digit',
 											})}
@@ -193,7 +193,7 @@ const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
 										<span className='fw-bold'>
 											{new Date(
 												weekend.date + ' ' + weekend.time
-											).toLocaleString(undefined, {
+											).toLocaleString([], {
 												hour: '2-digit',
 												minute: '2-digit',
 											})}
@@ -229,7 +229,7 @@ const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
 											weekend.SecondPractice.date +
 												' ' +
 												weekend.SecondPractice.time
-										).toLocaleString(undefined, {
+										).toLocaleString([], {
 											year: '2-digit',
 											month: '2-digit',
 											day: '2-digit',
@@ -244,7 +244,7 @@ const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
 												weekend.FirstPractice.date +
 													' ' +
 													weekend.FirstPractice.time
-											).toLocaleString(undefined, {
+											).toLocaleString([], {
 												hour: '2-digit',
 												minute: '2-digit',
 											})}
@@ -259,7 +259,7 @@ const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
 												weekend.SecondPractice.date +
 													' ' +
 													weekend.SecondPractice.time
-											).toLocaleString(undefined, {
+											).toLocaleString([], {
 												hour: '2-digit',
 												minute: '2-digit',
 											})}
@@ -274,7 +274,7 @@ const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
 												weekend.ThirdPractice.date +
 													' ' +
 													weekend.ThirdPractice.time
-											).toLocaleString(undefined, {
+											).toLocaleString([], {
 												hour: '2-digit',
 												minute: '2-digit',
 											})}
@@ -287,7 +287,7 @@ const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
 										<span className='fw-bold'>
 											{new Date(
 												weekend.Qualifying.date + ' ' + weekend.Qualifying.time
-											).toLocaleString(undefined, {
+											).toLocaleString([], {
 												hour: '2-digit',
 												minute: '2-digit',
 											})}
@@ -300,7 +300,7 @@ const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
 										<span className='fw-bold'>
 											{new Date(
 												weekend.date + ' ' + weekend.time
-											).toLocaleString(undefined, {
+											).toLocaleString([], {
 												hour: '2-digit',
 												minute: '2-digit',
 											})}
