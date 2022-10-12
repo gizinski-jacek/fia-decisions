@@ -32,7 +32,7 @@ const DrawerUtilities = ({ screenIsSmall }: Props) => {
 			const res = await axios.get('https://ergast.com/api/f1/current.json', {
 				timeout: 15000,
 			});
-			const timeToday = new Date('2022/10/3 03:59:59');
+			const timeToday = new Date();
 			const oneDay = 24 * 60 * 60 * 1000;
 			const futureRaces = res.data.MRData.RaceTable.Races.filter(
 				(r: WeekendData) =>
