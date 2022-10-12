@@ -370,7 +370,7 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 					</div>
 				)
 			) : (
-				<LoadingBar />
+				<LoadingBar margin='2rem 5rem' />
 			)}
 		</div>
 	) : (
