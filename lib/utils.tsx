@@ -189,21 +189,41 @@ export const formatPenalty = (type: string, string: string): string => {
 			replacedWordWithNumber = string;
 		}
 		const matchGridNumber = replacedWordWithNumber.match(
-			/\d{1,2}.{1,12}(grid|position)\)?/im
+			/\d{1,2}.{1,16}(grid|position)\)?/im
 		);
 		if (matchGridNumber) {
-			const matchExtraText = matchGridNumber[0].match(
-				/(?<=\d\b).{1,16}(?=grid)/im
-			);
-			if (matchExtraText) {
-				return `+ ${matchGridNumber[0]
-					.replace(matchExtraText[0], ' ')
-					.replace(/position/im, '')} Places`;
+			const matchExtraNumbers = matchGridNumber[0].match(/.*(\d\. )/im);
+			if (matchExtraNumbers) {
+				const str = matchGridNumber[0].replace(matchExtraNumbers[0], ' ');
+				const matchExtraText = str.match(/(?<=\d\b).{2,16}(?=grid)/im);
+				if (matchExtraText) {
+					return `+ ${str
+						.replace(matchExtraText[0], ' ')
+						.replace(/drop of/im, '')
+						.replace(/position/im, '')} Places`;
+				} else {
+					return `+ ${str
+						.replace(/drop of/im, '')
+						.replace(/position/im, '')} Places`;
+				}
 			} else {
-				return `+ ${matchGridNumber[0].replace(/position/im, '')} Places`;
+				const matchExtraText = matchGridNumber[0].match(
+					/(?<=\d\b).{2,16}(?=grid)/im
+				);
+				if (matchExtraText) {
+					return `+ ${matchGridNumber[0]
+						.replace(matchExtraText[0], ' ')
+						.replace(/drop of/im, '')
+						.replace(/position/im, '')} Places`;
+				} else {
+					return `+ ${matchGridNumber[0]
+						.replace(/drop of/im, '')
+						.replace(/position/im, '')} Places`;
+				}
 			}
 		}
-		const matchBackOfTheGrid = replacedWordWithNumber.match(/back.*grid?/im);
+		const matchBackOfTheGrid =
+			replacedWordWithNumber.match(/(back|rear).*grid?/im);
 		if (matchBackOfTheGrid) {
 			return 'Back of the Grid';
 		}
