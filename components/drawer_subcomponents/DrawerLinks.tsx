@@ -2,6 +2,7 @@ import { useContext } from 'react';
 import { useRouter } from 'next/router';
 import { DrawerContext } from '../../hooks/DrawerProvider';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface Props {
 	screenIsSmall: boolean;
@@ -21,31 +22,6 @@ const DrawerLinks = ({ screenIsSmall }: Props) => {
 								: 'flex-sm-row flex-sm-grow-1 gap-3 '
 						}`}
 		>
-			{/* <li className='nav-item'>
-							<Link href='/'>
-								<a
-									className={`w-100 btn btn-sm btn-success fw-bolder d-flex align-items-center justify-content-center text-nowrap 
-									${drawer.onLeft ? 'justify-content-sm-start' : 'justify-content-sm-center'} 
-									${router.query.series === '' ? 'active' : ''}`}
-								>
-									<i
-										className={`bi bi-house-door fs-6 
-										${
-											screenIsSmall
-												? 'me-2'
-												: drawer.onLeft && drawer.isSmall
-												? 'm-auto'
-												: 'me-2'
-										}`}
-									></i>
-									{screenIsSmall
-										? 'Home'
-										: drawer.onLeft && drawer.isSmall
-										? ''
-										: 'Home'}
-								</a>
-							</Link>
-						</li> */}
 			<li className='nav-item'>
 				<Link href={'/f1'}>
 					<a
@@ -53,16 +29,22 @@ const DrawerLinks = ({ screenIsSmall }: Props) => {
 									${drawer.onLeft ? 'justify-content-sm-start' : 'justify-content-sm-center'} 
 									${router.query.series === 'f1' ? 'active' : ''}`}
 					>
-						<i
-							className={`bi bi-1-square fs-6 
-										${
-											screenIsSmall
-												? 'me-2'
-												: drawer.onLeft && drawer.isSmall
-												? 'm-auto'
-												: 'me-2'
-										}`}
-						></i>
+						<div
+							className={`custom-icon ${
+								screenIsSmall
+									? 'me-2'
+									: drawer.onLeft && drawer.isSmall
+									? 'm-auto'
+									: 'me-2'
+							}`}
+						>
+							<Image
+								src='/f1.png'
+								alt='Formula 1 icon'
+								width={24}
+								height={24}
+							/>
+						</div>
 						{screenIsSmall
 							? 'Formula 1'
 							: drawer.onLeft && drawer.isSmall
@@ -78,16 +60,22 @@ const DrawerLinks = ({ screenIsSmall }: Props) => {
 									${drawer.onLeft ? 'justify-content-sm-start' : 'justify-content-sm-center'} 
 									${router.query.series === 'f2' ? 'active' : ''}`}
 					>
-						<i
-							className={`bi bi-2-square fs-6 
-										${
-											screenIsSmall
-												? 'me-2'
-												: drawer.onLeft && drawer.isSmall
-												? 'm-auto'
-												: 'me-2'
-										}`}
-						></i>
+						<div
+							className={`custom-icon ${
+								screenIsSmall
+									? 'me-2'
+									: drawer.onLeft && drawer.isSmall
+									? 'm-auto'
+									: 'me-2'
+							}`}
+						>
+							<Image
+								src='/f2.png'
+								alt='Formula 2 icon'
+								width={24}
+								height={24}
+							/>
+						</div>
 						{screenIsSmall
 							? 'Formula 2'
 							: drawer.onLeft && drawer.isSmall
@@ -103,16 +91,22 @@ const DrawerLinks = ({ screenIsSmall }: Props) => {
 									${drawer.onLeft ? 'justify-content-sm-start' : 'justify-content-sm-center'} 
 									${router.query.series === 'f3' ? 'active' : ''}`}
 					>
-						<i
-							className={`bi bi-3-square fs-6 
-										${
-											screenIsSmall
-												? 'me-2'
-												: drawer.onLeft && drawer.isSmall
-												? 'm-auto'
-												: 'me-2'
-										}`}
-						></i>
+						<div
+							className={`custom-icon ${
+								screenIsSmall
+									? 'me-2'
+									: drawer.onLeft && drawer.isSmall
+									? 'm-auto'
+									: 'me-2'
+							}`}
+						>
+							<Image
+								src='/f3.png'
+								alt='Formula 3 icon'
+								width={24}
+								height={24}
+							/>
+						</div>
 						{screenIsSmall
 							? 'Formula 3'
 							: drawer.onLeft && drawer.isSmall
