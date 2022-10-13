@@ -1,5 +1,4 @@
 import { useContext, useEffect, useState } from 'react';
-import { ThemeContext } from '../../hooks/ThemeProvider';
 import { DrawerContext } from '../../hooks/DrawerProvider';
 import { Button, Modal } from 'react-bootstrap';
 import { WeekendData } from '../../types/myTypes';
@@ -15,7 +14,6 @@ interface Props {
 }
 
 const DrawerUtilities = ({ screenIsSmall }: Props) => {
-	const { toggleTheme } = useContext(ThemeContext);
 	const { drawer } = useContext(DrawerContext);
 
 	const [showFormModal, setShowFormModal] = useState(false);
