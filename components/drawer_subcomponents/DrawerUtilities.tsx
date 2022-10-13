@@ -93,10 +93,7 @@ const DrawerUtilities = ({ screenIsSmall }: Props) => {
 						className='w-100 fw-bolder'
 						onClick={handleOpenCalendarModal}
 					>
-						<div
-							className={`d-flex align-items-center justify-content-center text-nowrap 
-									${drawer.onLeft ? 'justify-content-sm-start' : 'justify-content-sm-center'}`}
-						>
+						<div className='d-flex align-items-center justify-content-center text-nowrap'>
 							<i
 								className={`bi bi-calendar-week fs-6 
 										${
@@ -122,10 +119,7 @@ const DrawerUtilities = ({ screenIsSmall }: Props) => {
 						className='w-100 fw-bolder'
 						onClick={handleOpenFormModal}
 					>
-						<div
-							className={`d-flex align-items-center justify-content-center text-nowrap 
-									${drawer.onLeft ? 'justify-content-sm-start' : 'justify-content-sm-center'}`}
-						>
+						<div className='d-flex align-items-center justify-content-center text-nowrap'>
 							<i
 								className={`bi bi-envelope fs-6 
 										${
