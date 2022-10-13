@@ -29,9 +29,9 @@ const DrawerControls = ({
 			}`}
 		>
 			<li
-				className={`nav-item 
-						${drawerIsHidden ? 'custom-btn-show' : ''}
-						${drawer.onLeft ? 'flex-grow-1' : 'order-lg-last'}`}
+				className={`nav-item w-100 
+				${drawerIsHidden ? 'custom-btn-show' : ''} 
+				${drawer.onLeft ? 'flex-grow-1' : 'order-lg-last'}`}
 			>
 				<Button
 					variant='dark'
@@ -58,10 +58,7 @@ const DrawerControls = ({
 					)}
 				</Button>
 			</li>
-			<li
-				className={`nav-item d-none d-sm-block 
-						${drawer.onLeft ? 'flex-grow-1' : ''}`}
-			>
+			<li className='nav-item w-100 d-none flex-grow-1 d-sm-block'>
 				<Button
 					variant='dark'
 					size='sm'
