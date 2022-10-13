@@ -1,6 +1,6 @@
+import dynamic from 'next/dynamic';
 import Head from 'next/head';
 import { DrawerContextProvider } from '../hooks/DrawerProvider';
-import Drawer from './Drawer';
 import ScrollToTopBtn from './ScrollToTopBtn';
 
 interface Props {
@@ -8,6 +8,8 @@ interface Props {
 }
 
 const Layout = ({ children }: Props) => {
+	const DynamicDrawer = dynamic(() => import('./Drawer'), { ssr: false });
+
 	return (
 		<DrawerContextProvider>
 			<Head>
@@ -18,7 +20,7 @@ const Layout = ({ children }: Props) => {
 				/>
 				<link rel='icon' href='/favicon.ico' />
 			</Head>
-			<Drawer>{children}</Drawer>
+			<DynamicDrawer>{children}</DynamicDrawer>
 			<ScrollToTopBtn />
 		</DrawerContextProvider>
 	);
