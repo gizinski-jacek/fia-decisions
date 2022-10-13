@@ -62,7 +62,7 @@ const DrawerLinks = ({ screenIsSmall }: Props) => {
 									: 'me-2'
 							}`}
 						>
-							<img src='/f2.png' alt='F2' width={24} height={24} />
+							<Image src='/f2.png' alt='F2' width={24} height={24} />
 						</div>
 						{screenIsSmall
 							? 'Formula 2'
@@ -87,7 +87,7 @@ const DrawerLinks = ({ screenIsSmall }: Props) => {
 									: 'me-2'
 							}`}
 						>
-							<img src='/f3.png' alt='F3' width={24} height={24} />
+							<Image src='/f3.png' alt='F3' width={24} height={24} />
 						</div>
 						{screenIsSmall
 							? 'Formula 3'
