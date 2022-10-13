@@ -19,6 +19,11 @@ nav {
 
 	.nav-item {
 		flex-basis: 0 !important;
+
+		.custom-icon {
+			width: 24px;
+			height: 24px;
+		}
 	}
 
 	&.custom-sm-grid {
