@@ -2,11 +2,7 @@ import { useRef, useState } from 'react';
 import { Button, Form } from 'react-bootstrap';
 import axios, { AxiosError } from 'axios';
 import { FileFormValues } from '../../types/myTypes';
-import {
-	dbNameList,
-	defaultFileFormValues,
-	supportedSeries,
-} from '../../lib/myData';
+import { defaultFileFormValues, supportedSeries } from '../../lib/myData';
 import LoadingBar from '../LoadingBar';
 
 const FileForm = () => {

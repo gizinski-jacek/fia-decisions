@@ -2,7 +2,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import connectMongo from '../../../lib/mongo';
 import mongoose from 'mongoose';
-import { dbNameList, supportedSeries } from '../../../lib/myData';
+import { dbNameList } from '../../../lib/myData';
 import {
 	ContactDocModel,
 	DecisionOffenceModel,

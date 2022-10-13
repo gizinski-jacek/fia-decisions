@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { DrawerContext } from '../hooks/DrawerProvider';
 import DrawerLinks from './drawer_subcomponents/DrawerLinks';
 import DrawerUtilities from './drawer_subcomponents/DrawerUtilities';
