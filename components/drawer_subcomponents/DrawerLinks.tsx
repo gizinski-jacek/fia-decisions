@@ -26,8 +26,7 @@ const DrawerLinks = ({ screenIsSmall }: Props) => {
 				<Link href={'/f1'}>
 					<a
 						className={`w-100 btn btn-sm btn-danger fw-bolder d-flex align-items-center justify-content-center text-nowrap 
-									${drawer.onLeft ? 'justify-content-sm-start' : 'justify-content-sm-center'} 
-									${router.query.series === 'f1' ? 'active' : ''}`}
+						${router.query.series === 'f1' ? 'active' : ''}`}
 					>
 						<div
 							className={`custom-icon ${
@@ -38,12 +37,7 @@ const DrawerLinks = ({ screenIsSmall }: Props) => {
 									: 'me-2'
 							}`}
 						>
-							<Image
-								src='/f1.png'
-								alt='Formula 1 icon'
-								width={24}
-								height={24}
-							/>
+							<Image src='/f1.png' alt='F1' width={24} height={24} />
 						</div>
 						{screenIsSmall
 							? 'Formula 1'
@@ -57,8 +51,7 @@ const DrawerLinks = ({ screenIsSmall }: Props) => {
 				<Link href={'/f2'}>
 					<a
 						className={`w-100 btn btn-sm btn-primary fw-bolder d-flex align-items-center justify-content-center text-nowrap 
-									${drawer.onLeft ? 'justify-content-sm-start' : 'justify-content-sm-center'} 
-									${router.query.series === 'f2' ? 'active' : ''}`}
+						${router.query.series === 'f2' ? 'active' : ''}`}
 					>
 						<div
 							className={`custom-icon ${
@@ -69,12 +62,7 @@ const DrawerLinks = ({ screenIsSmall }: Props) => {
 									: 'me-2'
 							}`}
 						>
-							<Image
-								src='/f2.png'
-								alt='Formula 2 icon'
-								width={24}
-								height={24}
-							/>
+							<img src='/f2.png' alt='F2' width={24} height={24} />
 						</div>
 						{screenIsSmall
 							? 'Formula 2'
@@ -88,8 +76,7 @@ const DrawerLinks = ({ screenIsSmall }: Props) => {
 				<Link href={'/f3'}>
 					<a
 						className={`w-100 btn btn-sm btn-secondary fw-bolder d-flex align-items-center justify-content-center text-nowrap 
-									${drawer.onLeft ? 'justify-content-sm-start' : 'justify-content-sm-center'} 
-									${router.query.series === 'f3' ? 'active' : ''}`}
+						${router.query.series === 'f3' ? 'active' : ''}`}
 					>
 						<div
 							className={`custom-icon ${
@@ -100,12 +87,7 @@ const DrawerLinks = ({ screenIsSmall }: Props) => {
 									: 'me-2'
 							}`}
 						>
-							<Image
-								src='/f3.png'
-								alt='Formula 3 icon'
-								width={24}
-								height={24}
-							/>
+							<img src='/f3.png' alt='F3' width={24} height={24} />
 						</div>
 						{screenIsSmall
 							? 'Formula 3'
