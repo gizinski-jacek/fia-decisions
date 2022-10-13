@@ -6,7 +6,6 @@ import { WeekendData } from '../../types/myTypes';
 import FileForm from '../forms/FileForm';
 import DataForm from '../forms/DataForm';
 import ContactForm from '../forms/ContactForm';
-import style from '../../styles/Slider.module.scss';
 import axios from 'axios';
 import CalendarWrapper from '../wrappers/CalendarWrapper';
 import LoadingBar from '../LoadingBar';
@@ -61,10 +60,6 @@ const DrawerUtilities = ({ screenIsSmall }: Props) => {
 			getCalendarData();
 		})();
 	}, []);
-
-	const handleToggleTheme = () => {
-		toggleTheme();
-	};
 
 	const handleOpenFormModal = () => {
 		setShowFormModal(true);
@@ -122,41 +117,6 @@ const DrawerUtilities = ({ screenIsSmall }: Props) => {
 						</div>
 					</Button>
 				</li>
-				{/* <li className='nav-item'>
-					<Button
-						variant='dark'
-						size='sm'
-						className='w-100 fw-bolder'
-						onClick={handleToggleTheme}
-					>
-						<div
-							className={`d-flex align-items-center justify-content-center text-nowrap 
-									${drawer.onLeft ? 'justify-content-sm-start' : 'justify-content-sm-center'}
-									${style.mode} ${style[selectedTheme]}`}
-						>
-							{screenIsSmall ? (
-								<div className='d-flex align-items-center'>
-									<div className={`me-2 ${style.mode_slider}`}>
-										<div className={style.mode_slider_circle}></div>
-									</div>
-									Theme
-								</div>
-							) : drawer.onLeft && drawer.isSmall ? (
-								<span className={`${style.mode_icon} m-auto`}>
-									<i className={`bi bi-sun ${style.sun} fs-6`}></i>
-									<i className={`bi bi-moon-fill ${style.moon} fs-6`}></i>
-								</span>
-							) : (
-								<div className='d-flex align-items-center'>
-									<div className={`me-2 ${style.mode_slider}`}>
-										<div className={style.mode_slider_circle}></div>
-									</div>
-									Theme
-								</div>
-							)}
-						</div>
-					</Button>
-				</li> */}
 				<li className='nav-item'>
 					<Button
 						variant='info'
