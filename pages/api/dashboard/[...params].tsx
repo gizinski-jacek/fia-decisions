@@ -162,6 +162,7 @@ const handler = async (
 						penalty_type: document.penalty_type,
 						grand_prix: document.grand_prix,
 						weekend: document.weekend,
+						incident_title: document.incident_title,
 					});
 					if (docExists) {
 						return res.status(403).json('Document already exists.');
