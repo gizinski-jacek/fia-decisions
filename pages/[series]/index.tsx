@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import type { NextPage } from 'next';
 import { GroupedByGP } from '../../types/myTypes';
@@ -7,8 +7,10 @@ import { renderDocsGroupedByGP } from '../../lib/utils';
 import axios from 'axios';
 import LoadingBar from '../../components/LoadingBar';
 import { dbNameList } from '../../lib/myData';
+import { DrawerContext } from '../../hooks/DrawerProvider';
 
 const FormulaSeries: NextPage = () => {
+	const { drawer } = useContext(DrawerContext);
 	const [docsData, setDocsData] = useState<GroupedByGP | null>(null);
 	const [showSearchInput, setShowSearchInput] = useState(false);
 	const [searchInput, setSearchInput] = useState('');
@@ -74,11 +76,11 @@ const FormulaSeries: NextPage = () => {
 	}, [router.query.series]);
 
 	return (
-		<div className='m-2 my-lg-3'>
+		<div className='m-2'>
 			<div className='position-relative'>
 				<div
-					className={`custom-search mb-2 
-					${showSearchInput ? 'expanded mb-lg-0' : 'mb-sm-0'}`}
+					className={`custom-search  
+					${showSearchInput ? 'expanded mb-2' : ''}`}
 				>
 					<Button variant='dark' size='sm' onClick={handleShowSearchInput}>
 						<i className='bi bi-search fs-6'></i>
@@ -110,7 +112,10 @@ const FormulaSeries: NextPage = () => {
 						</Form.Group>
 					</Form>
 				</div>
-				<Form className='position-absolute top-0 end-0 mb-2 custom-select'>
+				<Form
+					className={`position-absolute top-0 end-0 mb-2 me-lg-0 custom-select 
+					${drawer.isHidden ? 'me-5' : ''} `}
+				>
 					<Form.Group>
 						<Form.Select
 							className='py-0 px-1 fs-5'
@@ -145,7 +150,7 @@ const FormulaSeries: NextPage = () => {
 				{router.query.series &&
 					`Formula ${router.query.series?.slice(-1)} Penalties`}
 			</h2>
-			<div className='my-lg-3'>
+			<div className='my-lg-2'>
 				{fetching ? (
 					<LoadingBar margin='5rem' />
 				) : docsData ? (
