@@ -59,6 +59,7 @@ nav {
 	&.custom-nav-hide {
 		position: absolute;
 		width: 100%;
+		min-width: 440px;
 		transform: translateY(-100%);
 
 		.custom-btn-show {
@@ -109,9 +110,11 @@ table {
 .custom-search {
 	height: 34px !important;
 	transition: 0.3s ease;
+	margin-bottom: 0.5rem;
 
-	@media only screen and (min-width: 576px) {
+	@media only screen and (min-width: 680px) {
 		height: 0 !important;
+		margin-bottom: 0 !important;
 	}
 
 	> button {
@@ -158,6 +161,7 @@ table {
 .custom-select {
 	max-height: 34px !important;
 	min-width: 90px !important;
+	transition: 0.25s ease;
 }
 
 .custom-container {
