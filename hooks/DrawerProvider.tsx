@@ -6,24 +6,28 @@ interface Props {
 }
 
 type DrawerProps = {
-	drawer: { onLeft: boolean; isSmall: boolean };
+	drawer: { onLeft: boolean; isSmall: boolean; isHidden: boolean };
 	toggleDrawerPosition: () => void;
 	toggleDrawerSize: () => void;
+	toggleDrawerVisibility: () => void;
 };
 
 const DrawerContext = createContext<DrawerProps>({
-	drawer: { onLeft: false, isSmall: false },
+	drawer: { onLeft: false, isSmall: false, isHidden: false },
 	toggleDrawerPosition: () => null,
 	toggleDrawerSize: () => null,
+	toggleDrawerVisibility: () => null,
 });
 
 const DrawerContextProvider = ({ children }: Props) => {
 	const [drawer, setDrawer] = useLocalStorage<{
 		onLeft: boolean;
 		isSmall: boolean;
+		isHidden: boolean;
 	}>('drawer', {
 		onLeft: false,
 		isSmall: false,
+		isHidden: false,
 	});
 
 	const toggleDrawerPosition = () => {
@@ -40,12 +44,20 @@ const DrawerContextProvider = ({ children }: Props) => {
 		});
 	};
 
+	const toggleDrawerVisibility = () => {
+		setDrawer({
+			...drawer,
+			isHidden: !drawer.isHidden,
+		});
+	};
+
 	return (
 		<DrawerContext.Provider
 			value={{
 				drawer,
 				toggleDrawerPosition,
 				toggleDrawerSize,
+				toggleDrawerVisibility,
 			}}
 		>
 			{children}
