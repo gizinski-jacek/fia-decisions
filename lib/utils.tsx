@@ -155,6 +155,7 @@ export const renderBySeries = (
 };
 
 export const formatPenalty = (type: string, string: string): string => {
+	type = type.replace('-', ' ');
 	if (type === 'grid') {
 		const numberWords = {
 			one: '1',
@@ -329,6 +330,9 @@ export const formatPenalty = (type: string, string: string): string => {
 		if (fineAmount) {
 			return `€${fineAmount[0]} Fine`;
 		}
+	}
+	if (type === 'pit lane') {
+		return `${type} start`;
 	}
 	return type;
 };
