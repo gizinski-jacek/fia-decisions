@@ -11,7 +11,6 @@ interface Props {
 const Drawer = ({ children }: Props) => {
 	const { drawer } = useContext(DrawerContext);
 	const [screenIsSmall, setSmallScreen] = useState(false);
-	const [drawerIsHidden, setDrawerHidden] = useState(false);
 
 	useEffect(() => {
 		if (typeof window !== 'undefined') {
@@ -31,10 +30,6 @@ const Drawer = ({ children }: Props) => {
 		}
 	}, []);
 
-	const toggleDrawerVisiblity = () => {
-		setDrawerHidden((prevState) => !prevState);
-	};
-
 	return (
 		<div
 			className={`d-flex flex-column custom-main-container 
@@ -49,15 +44,11 @@ const Drawer = ({ children }: Props) => {
 						? 'd-flex flex-column'
 						: 'custom-md-grid'
 				}
-				${drawerIsHidden ? 'custom-nav-hide' : ''}`}
+				${drawer.isHidden ? 'custom-nav-hide' : ''}`}
 			>
 				<DrawerLinks screenIsSmall={screenIsSmall} />
 				<DrawerUtilities screenIsSmall={screenIsSmall} />
-				<DrawerControls
-					drawerIsHidden={drawerIsHidden}
-					screenIsSmall={screenIsSmall}
-					toggleDrawerVisiblity={toggleDrawerVisiblity}
-				/>
+				<DrawerControls screenIsSmall={screenIsSmall} />
 			</nav>
 			<main className='w-100 mx-auto'>{children}</main>
 		</div>
