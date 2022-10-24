@@ -3,18 +3,16 @@ import { DrawerContext } from '../../hooks/DrawerProvider';
 import { Button } from 'react-bootstrap';
 
 interface Props {
-	drawerIsHidden: boolean;
 	screenIsSmall: boolean;
-	toggleDrawerVisiblity: () => void;
 }
 
-const DrawerControls = ({
-	drawerIsHidden,
-	screenIsSmall,
-	toggleDrawerVisiblity,
-}: Props) => {
-	const { drawer, toggleDrawerPosition, toggleDrawerSize } =
-		useContext(DrawerContext);
+const DrawerControls = ({ screenIsSmall }: Props) => {
+	const {
+		drawer,
+		toggleDrawerPosition,
+		toggleDrawerSize,
+		toggleDrawerVisibility,
+	} = useContext(DrawerContext);
 
 	return (
 		<ul
@@ -30,7 +28,7 @@ const DrawerControls = ({
 		>
 			<li
 				className={`nav-item w-100 
-				${drawerIsHidden ? 'custom-btn-show' : ''} 
+				${drawer.isHidden ? 'custom-btn-show' : ''} 
 				${drawer.onLeft ? 'flex-grow-1' : 'order-lg-last'}`}
 			>
 				<Button
@@ -39,10 +37,10 @@ const DrawerControls = ({
 					className='w-100 fw-bolder'
 					onClick={() =>
 						screenIsSmall
-							? toggleDrawerVisiblity()
+							? toggleDrawerVisibility()
 							: drawer.onLeft
 							? toggleDrawerSize()
-							: toggleDrawerVisiblity()
+							: toggleDrawerVisibility()
 					}
 				>
 					{screenIsSmall ? (
@@ -58,7 +56,10 @@ const DrawerControls = ({
 					)}
 				</Button>
 			</li>
-			<li className='nav-item w-100 d-none flex-grow-1 d-sm-block'>
+			<li
+				className={`nav-item d-none d-sm-block w-100 
+				${drawer.onLeft ? 'flex-grow-1' : ''}`}
+			>
 				<Button
 					variant='dark'
 					size='sm'
