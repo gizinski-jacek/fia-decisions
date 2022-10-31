@@ -13,7 +13,7 @@ const ScrollToTopBtn = () => {
 
 	useEffect(() => {
 		const toggleShowBtn = () => {
-			setShowBtn(document.documentElement.scrollTop > 300);
+			setShowBtn(document.documentElement.scrollTop > 200);
 		};
 
 		window.addEventListener('scroll', toggleShowBtn);
