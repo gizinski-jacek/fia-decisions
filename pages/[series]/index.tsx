@@ -80,7 +80,7 @@ const FormulaSeries: NextPage = () => {
 			<div className='position-relative'>
 				<div
 					className={`custom-search  
-					${showSearchInput ? 'expanded mb-2' : ''}`}
+					${showSearchInput ? 'expanded mb-2 mb-lg-0' : ''}`}
 				>
 					<Button variant='dark' size='sm' onClick={handleShowSearchInput}>
 						<i className='bi bi-search fs-6'></i>
@@ -113,7 +113,7 @@ const FormulaSeries: NextPage = () => {
 					</Form>
 				</div>
 				<Form
-					className={`position-absolute top-0 end-0 mb-2 me-lg-0 custom-select 
+					className={`position-absolute top-0 end-0 mb-2 me-xl-0 custom-select 
 					${drawer.isHidden ? 'me-5' : ''} `}
 				>
 					<Form.Group>
