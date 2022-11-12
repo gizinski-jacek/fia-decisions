@@ -1,3 +1,5 @@
+import { AxiosResponse } from 'axios';
+
 export interface TransformedPDFData {
 	series: string;
 	doc_type: string;
@@ -77,6 +79,24 @@ export interface ContactDocModel extends ContactFormValues {
 	_id: string;
 	createdAt: string;
 	updatedAt: string;
+}
+
+export interface FormulaSeriesResponseData extends AxiosResponse {
+	data: GroupedByGP;
+}
+
+export interface DocumentsResponseData extends AxiosResponse {
+	data: GroupedByGP | MissingDocModel[] | ContactDocModel[];
+}
+
+export interface ErgastSeasonData extends AxiosResponse {
+	data: {
+		MRData: {
+			RaceTable: {
+				Races: WeekendData[];
+			};
+		};
+	};
 }
 
 export interface WeekendData {
