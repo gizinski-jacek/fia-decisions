@@ -1,7 +1,7 @@
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import type { NextPage } from 'next';
-import { GroupedByGP } from '../../types/myTypes';
+import { FormulaSeriesResponseData, GroupedByGP } from '../../types/myTypes';
 import { Button, Form } from 'react-bootstrap';
 import { renderDocsGroupedByGP } from '../../lib/utils';
 import axios from 'axios';
@@ -50,7 +50,7 @@ const FormulaSeries: NextPage = () => {
 		try {
 			setFetchingError(null);
 			setFetching(true);
-			const res = await axios.get(
+			const res: FormulaSeriesResponseData = await axios.get(
 				`/api/document/${router.query.series}/${yearSelect}`,
 				{ timeout: 15000 }
 			);
@@ -132,10 +132,12 @@ const FormulaSeries: NextPage = () => {
 										seriesDbList.push(key);
 									}
 								}
-								const yearsList = seriesDbList.map((s) => s.split('_')[1]);
-								return yearsList.map((y, i) => (
-									<option key={i} value={y}>
-										{y}
+								const yearsList = seriesDbList.map(
+									(series) => series.split('_')[1]
+								);
+								return yearsList.map((year) => (
+									<option key={year} value={year}>
+										{year}
 									</option>
 								));
 							})()}
