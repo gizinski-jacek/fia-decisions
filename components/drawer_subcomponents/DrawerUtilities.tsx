@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 import { DrawerContext } from '../../hooks/DrawerProvider';
 import { Button, Modal } from 'react-bootstrap';
-import { WeekendData } from '../../types/myTypes';
+import { ErgastSeasonData, WeekendData } from '../../types/myTypes';
 import FileForm from '../forms/FileForm';
 import DataForm from '../forms/DataForm';
 import ContactForm from '../forms/ContactForm';
@@ -23,17 +23,19 @@ const DrawerUtilities = ({ screenIsSmall }: Props) => {
 	const [showCalendarModal, setShowCalendarModal] = useState(false);
 	const [calendarData, setCalendarData] = useState<WeekendData[] | null>(null);
 	const [nextRace, setNextRace] = useState<WeekendData | null>(null);
+	const [calendarError, setCalendarError] = useState<string | null>(null);
 
 	const getCalendarData = async () => {
 		try {
-			const res = await axios.get('https://ergast.com/api/f1/current.json', {
-				timeout: 15000,
-			});
+			const res: ErgastSeasonData = await axios.get(
+				'https://ergast.com/api/f1/current.json',
+				{ timeout: 15000 }
+			);
 			const timeToday = new Date();
 			const oneDay = 24 * 60 * 60 * 1000;
 			const futureRaces = res.data.MRData.RaceTable.Races.filter(
-				(r: WeekendData) =>
-					new Date(r.date + ' ' + r.time).getTime() >
+				(weekend) =>
+					new Date(weekend.date + ' ' + weekend.time).getTime() >
 					timeToday.getTime() - oneDay
 			);
 			const dayAfterTheNextRace =
@@ -50,6 +52,7 @@ const DrawerUtilities = ({ screenIsSmall }: Props) => {
 		} catch (error: any) {
 			setCalendarData(null);
 			setNextRace(null);
+			setCalendarError('Error fetching calendar data.');
 		}
 	};
 
@@ -195,7 +198,11 @@ const DrawerUtilities = ({ screenIsSmall }: Props) => {
 					</Modal.Title>
 				</Modal.Header>
 				<Modal.Body className='bg-light rounded'>
-					{calendarData ? (
+					{calendarError ? (
+						<div className='m-2 alert alert-danger text-capitalize'>
+							<h3>{calendarError}</h3>
+						</div>
+					) : calendarData ? (
 						<CalendarWrapper calendarData={calendarData} nextRace={nextRace} />
 					) : (
 						<LoadingBar margin='5rem' />
