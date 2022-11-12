@@ -18,31 +18,34 @@ const ContactDocWrapper = ({ data, docType, handleDelete }: Props) => {
 					</h4>
 				</Accordion.Header>
 				<Accordion.Body>
-					{(data as ContactDocModel[]).map((c) => (
-						<div key={c._id} className='p-2 mb-2 bg-light rounded text-break'>
+					{(data as ContactDocModel[]).map((contact) => (
+						<div
+							key={contact._id}
+							className='p-2 mb-2 bg-light rounded text-break'
+						>
 							<div className='d-flex justify-content-between'>
 								<div>
 									<strong>Email</strong>
-									<a href={`mailto:${c.email}`} className='d-block'>
-										{c.email}
+									<a href={`mailto:${contact.email}`} className='d-block'>
+										{contact.email}
 									</a>
 								</div>
 								<div>
 									<strong>Timestamp</strong>
-									<p>{new Date(c.createdAt).toLocaleString()}</p>
+									<p>{new Date(contact.createdAt).toLocaleString()}</p>
 								</div>
 								<Button
 									variant='danger'
 									size='sm'
 									className='fw-bolder mt-2 mt-sm-0 custom-button'
-									onClick={() => handleDelete(docType, c._id)}
+									onClick={() => handleDelete(docType, contact._id)}
 								>
 									Delete
 								</Button>
 							</div>
 							<div>
 								<strong>Message</strong>
-								<p className='text-capitalize'>{c.message}</p>
+								<p className='text-capitalize'>{contact.message}</p>
 							</div>
 						</div>
 					))}

@@ -68,17 +68,17 @@ const F1DocWrapper = ({ data, cmsProps }: Props) => {
 				content.push(
 					<div key={`incident_info-${key}`} className='my-2'>
 						<p className='fw-bold m-0 d-inline'>{key}: </p>
-						{(value as string[]).map((s, i) => {
+						{(value as string[]).map((str, i) => {
 							if (i === 0) {
 								return (
 									<p key={i} className='m-0 d-inline'>
-										{s + '\n'}
+										{str + '\n'}
 									</p>
 								);
 							} else {
 								return (
 									<p key={i} className='m-0'>
-										{s + '\n'}
+										{str + '\n'}
 									</p>
 								);
 							}
@@ -144,16 +144,16 @@ const F1DocWrapper = ({ data, cmsProps }: Props) => {
 								<p className='d-inline'>{data.incident_info.Session}</p>
 							</div>
 							<div className='mx-md-3'>
-								{data.incident_info.Decision.map((s, i) => {
+								{data.incident_info.Decision.map((str, i) => {
 									if (i === 0) {
 										return (
 											<div key={i}>
 												<p className='fw-bold m-0 d-inline'>Penalty: </p>
-												<p className='d-inline'>{s}</p>
+												<p className='d-inline'>{str}</p>
 											</div>
 										);
 									} else {
-										return <p key={i}>{s}</p>;
+										return <p key={i}>{str}</p>;
 									}
 								})}
 							</div>

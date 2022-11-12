@@ -69,30 +69,30 @@ export const transformToDecOffDoc = (
 			: 'wrong doc type';
 	})();
 
-	const incidentTitle = [unsuffixedFilename].map((string) => {
+	const incidentTitle = [unsuffixedFilename].map((str) => {
 		// Removing grand prix name from filename string.
-		let str = string.replace(grandPrixName, '').trim();
+		let string = str.replace(grandPrixName, '').trim();
 		// Checking for a dash, removing it and trimming whitespaces.
-		if (str.charAt(0) === '-') {
-			str = str.slice(1).trim();
+		if (string.charAt(0) === '-') {
+			string = string.slice(1).trim();
 		}
 		// Checking for "offence" word, removing it and trimming whitespaces.
-		if (str.slice(0, 7).trim() === 'offence') {
-			str = str.slice(7).trim();
+		if (string.slice(0, 7).trim() === 'offence') {
+			string = string.slice(7).trim();
 		}
-		if (str.slice(0, 8).trim() === 'decision') {
+		if (string.slice(0, 8).trim() === 'decision') {
 			// Checking for "decision" word, removing it and trimming whitespaces.
-			str = str.slice(8).trim();
+			string = string.slice(8).trim();
 		}
 		// Checking for a dash, removing it and trimming whitespaces.
-		if (str.charAt(0) === '-') {
-			str = str.slice(1).trim();
+		if (string.charAt(0) === '-') {
+			string = string.slice(1).trim();
 		}
 		// Checking for extra dot after removing suffixes.
-		if (str.charAt(str.length - 1) === '.') {
-			str = str.slice(0, str.length - 1).trim();
+		if (string.charAt(string.length - 1) === '.') {
+			string = string.slice(0, string.length - 1).trim();
 		}
-		return str;
+		return string;
 	})[0];
 
 	// Trimming all document strings just in case.

@@ -18,25 +18,28 @@ const MissingDocWrapper = ({ data, docType, handleDelete }: Props) => {
 					</h4>
 				</Accordion.Header>
 				<Accordion.Body>
-					{data.map((m) => (
-						<div key={m._id} className='p-2 mb-2 bg-light rounded text-break'>
+					{data.map((missing) => (
+						<div
+							key={missing._id}
+							className='p-2 mb-2 bg-light rounded text-break'
+						>
 							<div className='d-flex justify-content-between'>
 								<div>
 									<strong>Series</strong>
-									<p className='text-capitalize'>{m.series}</p>
+									<p className='text-capitalize'>{missing.series}</p>
 								</div>
 								<Button
 									variant='danger'
 									size='sm'
 									className='fw-bolder mt-2 mt-sm-0 custom-button'
-									onClick={() => handleDelete(docType, m._id)}
+									onClick={() => handleDelete(docType, missing._id)}
 								>
 									Delete
 								</Button>
 							</div>
 							<div>
 								<strong>Description</strong>
-								<p className='text-capitalize'>{m.description}</p>
+								<p className='text-capitalize'>{missing.description}</p>
 							</div>
 						</div>
 					))}

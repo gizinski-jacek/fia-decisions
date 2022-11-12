@@ -95,9 +95,9 @@ const DataForm = () => {
 						required
 					>
 						<option value=''>Choose Formula series</option>
-						{supportedSeries.map((s, i) => (
-							<option key={i} value={s}>
-								{s.replace('f', 'Formula ')}
+						{supportedSeries.map((series) => (
+							<option key={series} value={series}>
+								{series.replace('f', 'Formula ')}
 							</option>
 						))}
 					</Form.Select>
@@ -131,10 +131,12 @@ const DataForm = () => {
 									seriesDbList.push(key);
 								}
 							}
-							const yearsList = seriesDbList.map((s) => s.split('_')[1]);
-							return yearsList.map((y, i) => (
-								<option key={i} value={y}>
-									{y}
+							const yearsList = seriesDbList.map(
+								(series) => series.split('_')[1]
+							);
+							return yearsList.map((year) => (
+								<option key={year} value={year}>
+									{year}
 								</option>
 							));
 						})()}
