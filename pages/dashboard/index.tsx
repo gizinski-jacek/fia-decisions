@@ -3,6 +3,7 @@ import { GetServerSidePropsContext, NextApiRequest, NextPage } from 'next';
 import { useRouter } from 'next/router';
 import {
 	ContactDocModel,
+	DocumentsResponseData,
 	GroupedByGP,
 	MissingDocModel,
 } from '../../types/myTypes';
@@ -58,7 +59,7 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 		const [docType, series, manualUpload] = chosenDocs.split('__');
 		try {
 			setFetching(true);
-			const res = await axios.get(
+			const res: DocumentsResponseData = await axios.get(
 				`/api/dashboard/${docType}/${series}/${yearSelect}/${
 					manualUpload || ''
 				}`,
@@ -112,7 +113,7 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 		const [docType, series, manualUpload] = query.split('__');
 		try {
 			setFetching(true);
-			const res = await axios.delete(
+			await axios.delete(
 				`/api/dashboard/${docType}/${series}/${docId}/${yearSelect || ''}`,
 				{ timeout: 15000 }
 			);
@@ -266,14 +267,17 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 							<option value='contact-message'>Contact Messages</option>
 							<option value='missing-info'>Missing - Info</option>
 							<option value='penalties__missing-file'>Missing - Files</option>
-							{supportedSeries.map((s, i) => (
-								<option key={i} value={'penalties__' + s + '__manual-upload'}>
-									{s.replace('f', 'F') + ' Penalties - Uploads'}
+							{supportedSeries.map((series, i) => (
+								<option
+									key={series + i}
+									value={'penalties__' + series + '__manual-upload'}
+								>
+									{series.replace('f', 'F') + ' Penalties - Uploads'}
 								</option>
 							))}
-							{supportedSeries.map((s, i) => (
-								<option key={i} value={'penalties__' + s}>
-									{s.replace('f', 'Formula ') + ' Penalties'}
+							{supportedSeries.map((series, i) => (
+								<option key={series + i} value={'penalties__' + series}>
+									{series.replace('f', 'Formula ') + ' Penalties'}
 								</option>
 							))}
 						</Form.Select>
@@ -331,10 +335,12 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 											seriesDbList.push(key);
 										}
 									}
-									const yearsList = seriesDbList.map((s) => s.split('_')[1]);
-									return yearsList.map((y) => (
-										<option key={y} value={y}>
-											{y}
+									const yearsList = seriesDbList.map(
+										(series) => series.split('_')[1]
+									);
+									return yearsList.map((year) => (
+										<option key={year} value={year}>
+											{year}
 										</option>
 									));
 								})()}
