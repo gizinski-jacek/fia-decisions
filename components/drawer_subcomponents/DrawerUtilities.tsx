@@ -38,14 +38,17 @@ const DrawerUtilities = ({ screenIsSmall }: Props) => {
 					new Date(weekend.date + ' ' + weekend.time).getTime() >
 					timeToday.getTime() - oneDay
 			);
-			const dayAfterTheNextRace =
-				new Date(futureRaces[0].date + ' ' + futureRaces[0].time).setHours(0) +
-				oneDay;
-			let nextRace: WeekendData;
-			if (dayAfterTheNextRace > timeToday.getTime()) {
-				nextRace = futureRaces[0];
-			} else {
-				nextRace = futureRaces[1];
+			let nextRace: WeekendData | null = null;
+			if (futureRaces.length) {
+				const dayAfterTheNextRace =
+					new Date(futureRaces[0].date + ' ' + futureRaces[0].time).setHours(
+						0
+					) + oneDay;
+				if (dayAfterTheNextRace > timeToday.getTime()) {
+					nextRace = futureRaces[0];
+				} else {
+					nextRace = futureRaces[1];
+				}
 			}
 			setCalendarData(res.data.MRData.RaceTable.Races);
 			setNextRace(nextRace);
