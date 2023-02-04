@@ -6,7 +6,7 @@ import { Button, Form } from 'react-bootstrap';
 import { renderDocsGroupedByGP } from '../../lib/utils';
 import axios from 'axios';
 import LoadingBar from '../../components/LoadingBar';
-import { dbNameList } from '../../lib/myData';
+import { dbNameList, supportedYears } from '../../lib/myData';
 import { DrawerContext } from '../../hooks/DrawerProvider';
 
 const FormulaSeries: NextPage = () => {
@@ -14,9 +14,7 @@ const FormulaSeries: NextPage = () => {
 	const [docsData, setDocsData] = useState<GroupedByGP | null>(null);
 	const [showSearchInput, setShowSearchInput] = useState(false);
 	const [searchInput, setSearchInput] = useState('');
-	const [yearSelect, setYearSelect] = useState(
-		new Date().getFullYear().toString()
-	);
+	const [yearSelect, setYearSelect] = useState<string>('');
 	const [fetching, setFetching] = useState(true);
 	const [fetchingError, setFetchingError] = useState<string | null>(null);
 
@@ -68,11 +66,27 @@ const FormulaSeries: NextPage = () => {
 		if (yearSelect) {
 			getDocuments();
 		}
-	}, [yearSelect, getDocuments]);
+	}, [yearSelect, getDocuments, router]);
+
+	useEffect(() => {
+		if (router.query.series) {
+			setYearSelect(
+				supportedYears[router.query.series as string]
+					.sort((a, b) => b - a)[0]
+					.toString()
+			);
+		}
+	}, [router, setYearSelect]);
 
 	useEffect(() => {
 		setSearchInput('');
-		setYearSelect(new Date().getFullYear().toString());
+		if (router.query.series) {
+			setYearSelect(
+				supportedYears[router.query.series as string]
+					.sort((a, b) => b - a)[0]
+					.toString()
+			);
+		}
 	}, [router.query.series]);
 
 	return (
