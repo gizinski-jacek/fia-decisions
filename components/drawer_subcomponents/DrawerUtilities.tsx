@@ -27,10 +27,16 @@ const DrawerUtilities = ({ screenIsSmall }: Props) => {
 
 	const getCalendarData = async () => {
 		try {
-			const res: ErgastSeasonData = await axios.get(
-				'https://ergast.com/api/f1/current.json',
+			const currentSeason = new Date().getFullYear();
+			let res: ErgastSeasonData = await axios.get(
+				`https://ergast.com/api/f1/${currentSeason}.json`,
 				{ timeout: 15000 }
 			);
+			if (!res.data.MRData.RaceTable.Races.length) {
+				res = await axios.get('https://ergast.com/api/f1/current.json', {
+					timeout: 15000,
+				});
+			}
 			const timeToday = new Date();
 			const oneDay = 24 * 60 * 60 * 1000;
 			const futureRaces = res.data.MRData.RaceTable.Races.filter(
