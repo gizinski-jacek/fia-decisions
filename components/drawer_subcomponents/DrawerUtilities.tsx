@@ -198,12 +198,11 @@ const DrawerUtilities = ({ screenIsSmall }: Props) => {
 			>
 				<Modal.Header closeButton>
 					<Modal.Title className='w-100 me-5'>
-						<div className='d-flex align-items-center'>
-							<h3 className='m-0 fw-bolder text-nowrap'>
-								F1 {calendarData?.find((w) => w.season !== undefined)?.season}{' '}
-								Race Calendar
-							</h3>
-						</div>
+						<h3 className='fw-bold'>
+							Formula 1{' '}
+							{calendarData?.find((w) => w.season !== undefined)?.season} Race
+							Calendar
+						</h3>
 					</Modal.Title>
 				</Modal.Header>
 				<Modal.Body className='bg-light rounded'>
