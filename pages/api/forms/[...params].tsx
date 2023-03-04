@@ -183,7 +183,7 @@ const handler = async (
 				);
 				res.setHeader(
 					'Set-Cookie',
-					`token=${token}; Path=/; httpOnly=true; SameSite=strict; Secure=true; Max-Age=900` // 15 minutes
+					`token=${token}; Path=/; httpOnly=true; SameSite=strict; Secure=true; Max-Age=7200` // 2 hours
 				);
 				return res.status(200).end();
 			} catch (error: any) {
