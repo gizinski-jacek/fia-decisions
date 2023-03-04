@@ -49,16 +49,12 @@ const F1DocWrapper = ({ data, cmsProps }: Props) => {
 
 		for (const [key, value] of Object.entries(obj.document_info)) {
 			content.push(
-				<div key={`document_info-${key}`} className='my-1'>
+				<div key={`document_info-${key}`}>
 					<p className='fw-bold m-0 d-inline'>{key}:</p> {value}
 				</div>
 			);
 		}
-		content.push(
-			<div key={'headline'} className='my-2 mt-3'>
-				{obj.incident_info.Headline}
-			</div>
-		);
+		content.push(<div key={'headline'}>{obj.incident_info.Headline}</div>);
 
 		for (const [key, value] of Object.entries(obj.incident_info)) {
 			if (key === 'Headline') {
@@ -66,21 +62,17 @@ const F1DocWrapper = ({ data, cmsProps }: Props) => {
 			}
 			if (key === 'Fact' || key === 'Decision') {
 				content.push(
-					<div key={`incident_info-${key}`} className='my-2'>
-						<p className='fw-bold m-0 d-inline'>{key}: </p>
+					<div key={`incident_info-${key}`}>
+						<p className='fw-bold d-inline'>{key}: </p>
 						{(value as string[]).map((str, i) => {
 							if (i === 0) {
 								return (
-									<p key={i} className='m-0 d-inline'>
+									<p key={i} className='d-inline'>
 										{str + '\n'}
 									</p>
 								);
 							} else {
-								return (
-									<p key={i} className='m-0'>
-										{str + '\n'}
-									</p>
-								);
+								return <p key={i}>{str + '\n'}</p>;
 							}
 						})}
 					</div>
@@ -88,8 +80,8 @@ const F1DocWrapper = ({ data, cmsProps }: Props) => {
 				continue;
 			}
 			content.push(
-				<div key={key} className='my-2'>
-					<p className='fw-bold m-0 d-inline'>{key}:</p> {value}
+				<div key={key}>
+					<p className='fw-bold  d-inline'>{key}:</p> {value}
 				</div>
 			);
 		}
@@ -206,11 +198,13 @@ const F1DocWrapper = ({ data, cmsProps }: Props) => {
 					<Modal.Title className='fw-bolder'>Document Details</Modal.Title>
 				</Modal.Header>
 				<Modal.Body>
-					<div className='text-break'>{modalDataRender(data)}</div>
+					<div className='d-flex flex-column gap-1'>
+						{modalDataRender(data)}
+					</div>
 				</Modal.Body>
-				<Modal.Footer className='d-flex flex-row'>
-					<div className='me-auto'>
-						<p className='fw-bold m-0 d-inline'>Stewards: </p>
+				<Modal.Footer className='justify-content-start'>
+					<div>
+						<p className='fw-bold d-inline'>Stewards: </p>
 						{data.stewards.join(', ')}
 					</div>
 				</Modal.Footer>
