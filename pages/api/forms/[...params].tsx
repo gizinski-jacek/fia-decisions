@@ -6,7 +6,7 @@ import multiparty from 'multiparty';
 import { parseFields } from '../../../lib/multiparty';
 import { streamToBuffer } from '../../../lib/streamToBuffer';
 import { readPDFPages } from '../../../lib/pdfReader';
-import { transformToDecOffDoc } from '../../../lib/transformToDecOffDoc';
+import { createDecOffDocument } from '../../../lib/transformToDecOffDoc';
 import yupValidation, {
 	contactFormValidationSchema,
 	dashboardFormValidationSchema,
@@ -78,7 +78,7 @@ const handler = async (
 
 					const fileBuffer = await streamToBuffer(part);
 					const pdfData = await readPDFPages(fileBuffer);
-					const transformed = transformToDecOffDoc(
+					const transformed = createDecOffDocument(
 						part.filename,
 						pdfData as any,
 						series as 'f1' | 'f2' | 'f3'
