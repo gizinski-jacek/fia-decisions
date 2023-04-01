@@ -78,7 +78,7 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/deploym
 
 ## Status
 
-Project status: **_MOSTLY FINISHED_**
+Project status: **_FINISHED_**
 
 ## Contact
 
