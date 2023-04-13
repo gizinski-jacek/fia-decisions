@@ -41,6 +41,15 @@ nav {
 			width: 24px;
 			height: 24px;
 		}
+
+		a,
+		> button {
+			font-size: 1rem;
+		}
+
+		&:hover > div {
+			display: flex !important;
+		}
 	}
 
 	&.custom-sm-grid {
@@ -231,6 +240,7 @@ table {
 
 	h4:last-child {
 		flex: 1 1 0;
+		white-space: nowrap;
 	}
 }
 
