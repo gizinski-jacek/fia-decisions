@@ -37,8 +37,23 @@ const FormulaSeries: NextPage = () => {
 	const handleSelectChange = async (
 		e: React.ChangeEvent<HTMLSelectElement>
 	) => {
+		const { series } = router.query as { series: string };
 		const { value } = e.target;
-		setYearSelect(value);
+		const seriesMostRecentSeason = supportedYears[series]
+			.sort((a, b) => b - a)[0]
+			.toString();
+		if (series) {
+			setYearSelect(value);
+			if (value !== seriesMostRecentSeason) {
+				router.push(`/${series}?year=${value}`, undefined, {
+					shallow: true,
+				});
+			} else {
+				router.push(`/${series}`, undefined, {
+					shallow: true,
+				});
+			}
+		}
 	};
 
 	const getDocuments = useCallback(async () => {
@@ -63,31 +78,25 @@ const FormulaSeries: NextPage = () => {
 	}, [yearSelect, router.query.series]);
 
 	useEffect(() => {
+		const { series, year } = router.query as { series: string; year: string };
+		setSearchInput('');
+		if (series) {
+			if (year) {
+				setYearSelect(year);
+			} else {
+				const seriesMostRecentSeason = supportedYears[series]
+					.sort((a, b) => b - a)[0]
+					.toString();
+				setYearSelect(seriesMostRecentSeason);
+			}
+		}
+	}, [router]);
+
+	useEffect(() => {
 		if (yearSelect) {
 			getDocuments();
 		}
 	}, [yearSelect, getDocuments, router]);
-
-	useEffect(() => {
-		if (router.query.series) {
-			setYearSelect(
-				supportedYears[router.query.series as string]
-					.sort((a, b) => b - a)[0]
-					.toString()
-			);
-		}
-	}, [router, setYearSelect]);
-
-	useEffect(() => {
-		setSearchInput('');
-		if (router.query.series) {
-			setYearSelect(
-				supportedYears[router.query.series as string]
-					.sort((a, b) => b - a)[0]
-					.toString()
-			);
-		}
-	}, [router.query.series]);
 
 	return (
 		<div className='m-2'>
