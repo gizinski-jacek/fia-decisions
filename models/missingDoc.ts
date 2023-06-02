@@ -3,7 +3,7 @@ import { MissingDocModel } from '../types/myTypes';
 
 const Schema = mongoose.Schema;
 
-const Missing_Data_Doc = new Schema<MissingDocModel>(
+const Missing_Doc = new Schema<MissingDocModel>(
 	{
 		series: { type: String, trim: true, required: true },
 		year: { type: String, trim: true, required: true },
@@ -18,4 +18,4 @@ const Missing_Data_Doc = new Schema<MissingDocModel>(
 	{ timestamps: true }
 );
 
-module.exports = Missing_Data_Doc;
+module.exports = Missing_Doc;
