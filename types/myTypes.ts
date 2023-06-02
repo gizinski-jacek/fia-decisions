@@ -29,12 +29,12 @@ export interface IncidentDetails {
 	Time: string;
 	Session: string;
 	Fact: string;
-	Infringment: string[];
+	Infringement: string[];
 	Decision: string[];
 	Reason: string;
 }
 
-export interface DecisionOffenceModel extends TransformedPDFData {
+export interface PenaltyModel extends TransformedPDFData {
 	_id: string;
 	manual_upload: boolean;
 	createdAt: string;
@@ -42,7 +42,7 @@ export interface DecisionOffenceModel extends TransformedPDFData {
 }
 
 export interface GroupedByGP {
-	[key: string]: DecisionOffenceModel[];
+	[key: string]: PenaltyModel[];
 }
 
 export interface DatabaseNameList {
