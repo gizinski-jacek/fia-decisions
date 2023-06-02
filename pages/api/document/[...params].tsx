@@ -2,7 +2,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import connectMongo from '../../../lib/mongo';
 import { dbNameList, supportedSeries } from '../../../lib/myData';
-import { DecisionOffenceModel, GroupedByGP } from '../../../types/myTypes';
+import { PenaltyModel, GroupedByGP } from '../../../types/myTypes';
 
 const handler = async (
 	req: NextApiRequest,
@@ -21,8 +21,9 @@ const handler = async (
 		}
 		try {
 			const conn = await connectMongo(seriesYearDB);
-			const document_list: DecisionOffenceModel[] =
-				await conn.models.Decision_Offence.find().sort({ doc_date: -1 }).exec();
+			const document_list: PenaltyModel[] = await conn.models.Penalty_Doc.find()
+				.sort({ doc_date: -1 })
+				.exec();
 			const groupedByGP: GroupedByGP = document_list.reduce((prev, curr) => {
 				prev[curr.grand_prix] = prev[curr.grand_prix] || [];
 				prev[curr.grand_prix].push(curr);

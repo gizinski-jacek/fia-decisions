@@ -6,7 +6,7 @@ import multiparty from 'multiparty';
 import { parseFields } from '../../../lib/multiparty';
 import { streamToBuffer } from '../../../lib/streamToBuffer';
 import { readPDFPages } from '../../../lib/pdfReader';
-import { createDecOffDocument } from '../../../lib/transformToDecOffDoc';
+import { createPenaltyDocument } from '../../../lib/transformToPenaltyDoc';
 import yupValidation, {
 	contactFormValidationSchema,
 	dashboardFormValidationSchema,
@@ -79,13 +79,13 @@ const handler = async (
 					try {
 						const fileBuffer = await streamToBuffer(part);
 						const pdfData = await readPDFPages(fileBuffer);
-						const transformed = createDecOffDocument(
+						const transformed = createPenaltyDocument(
 							part.filename,
 							pdfData as any,
 							series as 'f1' | 'f2' | 'f3'
 						);
 						const conn = await connectMongo(dbNameList.other_documents_db);
-						await conn.models.Decision_Offence.create({
+						await conn.models.Penalty_Doc.create({
 							...transformed,
 							manual_upload: true,
 						});
@@ -94,8 +94,7 @@ const handler = async (
 						return res
 							.status(500)
 							.json([
-								error.message ||
-									'Unknown server error. If it is a reoccuring error, please use the Contact form to report this issue.',
+								'Unknown server error. If it is a reoccuring error, please use the Contact form to report this issue.',
 							]);
 					}
 				});
@@ -123,7 +122,7 @@ const handler = async (
 					return res.status(422).json(errors);
 				}
 				const conn = await connectMongo(dbNameList.other_documents_db);
-				const newReport = new conn.models.Missing_Data_Doc(fields);
+				const newReport = new conn.models.Missing_Doc(fields);
 				await newReport.save();
 				return res.status(200).end();
 			} catch (error: any) {

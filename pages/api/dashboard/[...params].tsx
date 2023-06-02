@@ -5,7 +5,7 @@ import mongoose from 'mongoose';
 import { dbNameList } from '../../../lib/myData';
 import {
 	ContactDocModel,
-	DecisionOffenceModel,
+	PenaltyModel,
 	GroupedByGP,
 	MissingDocModel,
 } from '../../../types/myTypes';
@@ -41,8 +41,8 @@ const handler = async (
 				try {
 					const conn = await connectMongo(seriesYearDB);
 					const query = manualUpload ? { manual_upload: true } : {};
-					const document_list: DecisionOffenceModel[] =
-						await conn.models.Decision_Offence.find(query)
+					const document_list: PenaltyModel[] =
+						await conn.models.Penalty_Doc.find(query)
 							.sort({ doc_date: -1 })
 							.exec();
 					const groupedByGP: GroupedByGP = document_list.reduce(
@@ -64,7 +64,7 @@ const handler = async (
 				try {
 					const conn = await connectMongo(dbNameList.other_documents_db);
 					const document_list: MissingDocModel[] =
-						await conn.models.Missing_Data_Doc.find().exec();
+						await conn.models.Missing_Doc.find().exec();
 					return res.status(200).json(document_list);
 				} catch (error: any) {
 					return res
@@ -109,7 +109,7 @@ const handler = async (
 				}
 				try {
 					const conn = await connectMongo(seriesYearDB);
-					await conn.models.Decision_Offence.findByIdAndDelete(docId).exec();
+					await conn.models.Penalty_Doc.findByIdAndDelete(docId).exec();
 					return res.status(200).end();
 				} catch (error: any) {
 					return res
@@ -120,7 +120,7 @@ const handler = async (
 			if (docType === 'missing-info') {
 				try {
 					const conn = await connectMongo(dbNameList.other_documents_db);
-					await conn.models.Missing_Data_Doc.findByIdAndDelete(docId).exec();
+					await conn.models.Missing_Doc.findByIdAndDelete(docId).exec();
 					return res.status(200).end();
 				} catch (error: any) {
 					return res
@@ -148,13 +148,13 @@ const handler = async (
 				}
 				try {
 					const connOtherDB = await connectMongo(dbNameList.other_documents_db);
-					const document = await connOtherDB.models.Decision_Offence.findById(
+					const document = await connOtherDB.models.Penalty_Doc.findById(
 						docId
 					).exec();
 					const docYear = new Date(document.doc_date).getFullYear().toString();
 					const seriesDB = dbNameList[`${document.series}_${docYear}_db`];
 					const connSeriesDB = await connectMongo(seriesDB);
-					const docExists = await connSeriesDB.models.Decision_Offence.findOne({
+					const docExists = await connSeriesDB.models.Penalty_Doc.findOne({
 						series: document.series,
 						doc_type: document.doc_type,
 						doc_name: document.doc_name,
@@ -167,12 +167,10 @@ const handler = async (
 					if (docExists) {
 						return res.status(403).json('Document already exists.');
 					}
-					await connOtherDB.models.Decision_Offence.findByIdAndDelete(
-						docId
-					).exec();
+					await connOtherDB.models.Penalty_Doc.findByIdAndDelete(docId).exec();
 					document._id = new mongoose.Types.ObjectId();
 					document.isNew = true;
-					await connSeriesDB.models.Decision_Offence.insertMany(document);
+					await connSeriesDB.models.Penalty_Doc.insertMany(document);
 					return res.status(200).end();
 				} catch (error: any) {
 					return res
