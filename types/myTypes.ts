@@ -29,7 +29,7 @@ export interface IncidentDetails {
 	Time: string;
 	Session: string;
 	Fact: string;
-	Offence: string[];
+	Infringment: string[];
 	Decision: string[];
 	Reason: string;
 }
