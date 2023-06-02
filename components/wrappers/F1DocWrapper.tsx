@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { Accordion, Button, Modal } from 'react-bootstrap';
 import { formatPenalty } from '../../lib/utils';
-import { DecisionOffenceModel, PenaltyColors } from '../../types/myTypes';
+import { PenaltyModel, PenaltyColors } from '../../types/myTypes';
 
 interface Props {
-	data: DecisionOffenceModel;
+	data: PenaltyModel;
 	cmsProps?: {
 		deleteHandler: (docType: string, docId: string) => void;
 		docType: string;
@@ -39,7 +39,7 @@ const F1DocWrapper = ({ data, cmsProps }: Props) => {
 		setShowDocModal(false);
 	};
 
-	const modalDataRender = (obj: DecisionOffenceModel) => {
+	const modalDataRender = (obj: PenaltyModel) => {
 		const content = [];
 		content.push(
 			<h4 key={'title'} className='text-capitalize fw-bold'>
