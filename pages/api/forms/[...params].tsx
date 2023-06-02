@@ -76,14 +76,14 @@ const handler = async (
 						return res.status(422).json(['File is too big, max size 1MB.']);
 					}
 
-					const fileBuffer = await streamToBuffer(part);
-					const pdfData = await readPDFPages(fileBuffer);
-					const transformed = createDecOffDocument(
-						part.filename,
-						pdfData as any,
-						series as 'f1' | 'f2' | 'f3'
-					);
 					try {
+						const fileBuffer = await streamToBuffer(part);
+						const pdfData = await readPDFPages(fileBuffer);
+						const transformed = createDecOffDocument(
+							part.filename,
+							pdfData as any,
+							series as 'f1' | 'f2' | 'f3'
+						);
 						const conn = await connectMongo(dbNameList.other_documents_db);
 						await conn.models.Decision_Offence.create({
 							...transformed,
@@ -94,7 +94,8 @@ const handler = async (
 						return res
 							.status(500)
 							.json([
-								'Unknown server error. If it is a reoccuring error, please use the Contact form to report this issue.',
+								error.message ||
+									'Unknown server error. If it is a reoccuring error, please use the Contact form to report this issue.',
 							]);
 					}
 				});
