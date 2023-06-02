@@ -95,8 +95,9 @@ const FileForm = () => {
 				>
 					FIA site
 				</a>{' '}
-				marked as <b className='text-danger'>Decision</b> or{' '}
-				<b className='text-danger'>Offence</b> are supported.
+				marked as <b className='text-danger'>Offence</b>,{' '}
+				<b className='text-danger'>Decision</b> or{' '}
+				<b className='text-danger'>Infringement</b> are supported.
 			</h5>
 			<h5>
 				<a className='fw-bold' href='/pdf_example.png' target='_blank'>
