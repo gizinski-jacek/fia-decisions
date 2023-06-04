@@ -10,7 +10,7 @@ import {
 import DashboardForm from '../../components/forms/DashboardForm';
 import { Button, Form } from 'react-bootstrap';
 import axios, { AxiosError } from 'axios';
-import { dbNameList, supportedSeries } from '../../lib/myData';
+import { dbNameList, supportedSeries, supportedYears } from '../../lib/myData';
 import LoadingBar from '../../components/LoadingBar';
 import { renderBySeries, verifyToken } from '../../lib/utils';
 import MissingDocWrapper from '../../components/wrappers/MissingDocWrapper';
@@ -208,6 +208,13 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 				| 'penalties__f2'
 				| 'penalties__f3';
 		};
+		const [docType, series, manualUpload] = value.split('__');
+		if (
+			docType === 'penalties' &&
+			!supportedYears[series].includes(parseInt(yearSelect))
+		) {
+			setYearSelect(new Date().getFullYear().toString());
+		}
 		setChosenDocs(value);
 		setDocsData(null);
 	};
