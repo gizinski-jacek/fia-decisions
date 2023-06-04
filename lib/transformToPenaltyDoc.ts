@@ -424,7 +424,7 @@ export const createPenaltyDocument = (
 		.map((string) => string.replaceAll('Infringment', 'Infringement'));
 
 	// Check if file has correct format.
-	checkForRequiredFields(pdfDataArray);
+	checkForRequiredFields(fixedPDfDataArray);
 
 	const filename = getCleanFilename(href);
 
@@ -441,7 +441,7 @@ export const createPenaltyDocument = (
 		headlineStrings,
 		reasonAndStewardsStrings,
 		weekendDate,
-	} = splitPDFData(pdfDataArray);
+	} = splitPDFData(fixedPDfDataArray);
 
 	const documentDetails = formatDocumentDetails(documentStrings);
 
