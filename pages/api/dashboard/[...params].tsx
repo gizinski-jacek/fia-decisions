@@ -29,12 +29,7 @@ const handler = async (
 				if (!series) {
 					return res.status(422).json('Unsupported series.');
 				}
-				let seriesYearDB: string;
-				if (series === 'missing-file') {
-					seriesYearDB = dbNameList.other_documents_db;
-				} else {
-					seriesYearDB = dbNameList[`${series}_${year}_db`];
-				}
+				const seriesYearDB = dbNameList[`${series}_${year}_db`];
 				if (!seriesYearDB) {
 					return res.status(422).json('Unsupported year.');
 				}
@@ -66,6 +61,29 @@ const handler = async (
 					const document_list: MissingDocModel[] =
 						await conn.models.Missing_Doc.find().exec();
 					return res.status(200).json(document_list);
+				} catch (error: any) {
+					return res
+						.status(404)
+						.json('Unknown server error. Failed to get documents.');
+				}
+			}
+			if (docType === 'missing-file') {
+				try {
+					const conn = await connectMongo(dbNameList.other_documents_db);
+					const query = manualUpload ? { manual_upload: true } : {};
+					const document_list: PenaltyModel[] =
+						await conn.models.Penalty_Doc.find(query)
+							.sort({ doc_date: -1 })
+							.exec();
+					const groupedByGP: GroupedByGP = document_list.reduce(
+						(prev, curr) => {
+							prev[curr.grand_prix] = prev[curr.grand_prix] || [];
+							prev[curr.grand_prix].push(curr);
+							return prev;
+						},
+						Object.create(null)
+					);
+					return res.status(200).json(groupedByGP);
 				} catch (error: any) {
 					return res
 						.status(404)
