@@ -48,7 +48,7 @@ const DrawerLinks = ({ screenIsSmall }: Props) => {
 					</a>
 				</Link>
 				<div
-					className={`d-none ${
+					className={`d-none flex-wrap ${
 						drawer.onLeft
 							? 'flex-column top-0 start-100 ps-1'
 							: 'flex-row top-100 start-0 pt-1'
