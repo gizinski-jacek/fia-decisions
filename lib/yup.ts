@@ -22,7 +22,7 @@ export default async function yupValidation<T = Record<string, any>>(
 export const dataFormValidationSchema: Yup.SchemaOf<DataFormValues> =
 	Yup.object().shape({
 		series: Yup.string()
-			.required('Series is is required.')
+			.required('Series is required.')
 			.test('is-supported-series', 'Series is not supported.', (val) => {
 				if (!val) return false;
 				return supportedSeries.find(
@@ -31,12 +31,9 @@ export const dataFormValidationSchema: Yup.SchemaOf<DataFormValues> =
 					? true
 					: false;
 			}),
-		year: Yup.string()
-			.required('Description is is required.')
-			.min(16, 'Description min 16 characters.')
-			.max(512, 'Description max 512 characters.'),
+		year: Yup.string().required('Year is required.'),
 		description: Yup.string()
-			.required('Description is is required.')
+			.required('Description is required.')
 			.min(16, 'Description min 16 characters.')
 			.max(512, 'Description max 512 characters.'),
 	});
