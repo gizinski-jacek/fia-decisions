@@ -25,7 +25,7 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 	const [chosenDocs, setChosenDocs] = useState<
 		| 'contact-message'
 		| 'missing-info'
-		| 'penalties__missing-file'
+		| 'missing-file'
 		| 'penalties__f1__manual-upload'
 		| 'penalties__f1__manual-upload'
 		| 'penalties__f2__manual-upload'
@@ -199,7 +199,7 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 			value:
 				| 'contact-message'
 				| 'missing-info'
-				| 'penalties__missing-file'
+				| 'missing-file'
 				| 'penalties__f1__manual-upload'
 				| 'penalties__f1__manual-upload'
 				| 'penalties__f2__manual-upload'
@@ -273,7 +273,7 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 						>
 							<option value='contact-message'>Contact Messages</option>
 							<option value='missing-info'>Missing - Info</option>
-							<option value='penalties__missing-file'>Missing - Files</option>
+							<option value='missing-file'>Missing - Files</option>
 							{supportedSeries.map((series, i) => (
 								<option
 									key={series + i}
@@ -319,7 +319,7 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 							<i className='bi bi-x fs-6'></i>
 						</Button>
 					</Form.Group>
-					{chosenDocs !== 'penalties__missing-file' && (
+					{chosenDocs !== 'missing-file' && (
 						<Form.Group className='ms-5'>
 							<Form.Select
 								className='py-0 px-1 fs-5 custom-select'
@@ -358,7 +358,7 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 			) : null}
 			{chosenDocs !== null && docsData !== null && !fetching ? (
 				docsData.length !== 0 ? (
-					chosenDocs.includes('penalties__') ? (
+					chosenDocs.match(/(penalties__|missing-file)/im) ? (
 						renderBySeries(docsData as GroupedByGP, searchInput, {
 							deleteHandler: handleDeleteDocument,
 							docType: chosenDocs,
