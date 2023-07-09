@@ -135,7 +135,7 @@ table {
 
 .custom-search {
 	height: 34px !important;
-	transition: 0.3s ease;
+	transition: 0.15s ease;
 	margin-bottom: 0.5rem;
 
 	@media only screen and (min-width: 680px) {
@@ -167,7 +167,7 @@ table {
 
 	&.expanded {
 		height: 34px !important;
-		transition: 0.3s ease;
+		transition: 0.15s ease;
 
 		@media only screen and (min-width: 992px) {
 			height: 0 !important;
@@ -179,7 +179,7 @@ table {
 
 		form {
 			transform: scaleX(1);
-			transition: 0.45s ease;
+			transition: 0.15s ease;
 		}
 	}
 }
@@ -187,7 +187,7 @@ table {
 .custom-select {
 	max-height: 34px !important;
 	min-width: 90px !important;
-	transition: 0.25s ease;
+	transition: 0.15s ease;
 }
 
 .custom-container {
