@@ -120,15 +120,15 @@ const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
 								</td>
 								<td className='text-center fw-semibold'>
 									<span>
-										{new Date(
-											weekend.SecondPractice.date +
-												' ' +
-												weekend.SecondPractice.time
-										).toLocaleString(undefined, {
-											year: '2-digit',
-											month: '2-digit',
-											day: '2-digit',
-										})}
+										{weekend.FirstPractice.date.slice(-2) +
+											'-' +
+											new Date(
+												weekend.date + ' ' + weekend.time
+											).toLocaleString(undefined, {
+												day: '2-digit',
+												month: '2-digit',
+												year: 'numeric',
+											})}
 									</span>
 								</td>
 								<td>
@@ -211,15 +211,15 @@ const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
 								</td>
 								<td className='text-center fw-semibold'>
 									<span>
-										{new Date(
-											weekend.SecondPractice.date +
-												' ' +
-												weekend.SecondPractice.time
-										).toLocaleString(undefined, {
-											year: '2-digit',
-											month: '2-digit',
-											day: '2-digit',
-										})}
+										{weekend.FirstPractice.date.slice(-2) +
+											'-' +
+											new Date(
+												weekend.date + ' ' + weekend.time
+											).toLocaleString(undefined, {
+												day: '2-digit',
+												month: '2-digit',
+												year: 'numeric',
+											})}
 									</span>
 								</td>
 								<td>
