@@ -102,7 +102,7 @@ const FormulaSeries: NextPage = () => {
 		<div className='m-2'>
 			<div className='position-relative'>
 				<div
-					className={`custom-search  
+					className={`custom-search 
 					${showSearchInput ? 'expanded mb-2 mb-lg-0' : ''}`}
 				>
 					<Button variant='dark' size='sm' onClick={handleShowSearchInput}>
