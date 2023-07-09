@@ -203,6 +203,7 @@ const DrawerUtilities = ({ screenIsSmall }: Props) => {
 							{calendarData?.find((w) => w.season !== undefined)?.season} Race
 							Calendar
 						</h3>
+						<h6>All times shown are in your local time zone.</h6>
 					</Modal.Title>
 				</Modal.Header>
 				<Modal.Body className='bg-light rounded'>
