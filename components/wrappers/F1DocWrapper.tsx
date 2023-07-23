@@ -171,7 +171,7 @@ const F1DocWrapper = ({ data, cmsProps }: Props) => {
 									>
 										Delete
 									</Button>
-									{cmsProps.docType === 'penalties__missing-file' && (
+									{cmsProps.docType === 'missing-file' && (
 										<Button
 											size='sm'
 											variant='success'
