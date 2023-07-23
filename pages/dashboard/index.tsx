@@ -514,8 +514,8 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 					)}
 				</Form>
 			) : null}
-			{chosenDocs !== null && docsData !== null && !fetching ? (
-				docsData.length !== 0 ? (
+			{!fetching ? (
+				chosenDocs && docsData && docsData.length !== 0 ? (
 					chosenDocs.match(/(penalties__|missing-file)/im) ? (
 						renderBySeries(docsData as GroupedByGP, searchInput, {
 							deleteHandler: handleDeleteDocument,
