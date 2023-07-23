@@ -156,10 +156,15 @@ const handler = async (
 			}
 		}
 		if (form === 'dashboard-sign-in') {
+			const {
+				DASHBOARD_ACCESS_PASSWORD,
+				JWT_PAYLOAD_STRING,
+				JWT_STRATEGY_SECRET,
+			} = process.env;
 			if (
-				!process.env.DASHBOARD_ACCESS_PASSWORD ||
-				!process.env.JWT_PAYLOAD_STRING ||
-				!process.env.JWT_STRATEGY_SECRET
+				!DASHBOARD_ACCESS_PASSWORD ||
+				!JWT_PAYLOAD_STRING ||
+				!JWT_STRATEGY_SECRET
 			) {
 				throw new Error(
 					'Please define DASHBOARD_ACCESS_PASSWORD, JWT_PAYLOAD_STRING and JWT_STRATEGY_SECRET environment variables inside .env.local'
@@ -174,13 +179,10 @@ const handler = async (
 				if (errors) {
 					return res.status(422).json(errors);
 				}
-				if (fields.password !== process.env.DASHBOARD_ACCESS_PASSWORD) {
+				if (fields.password !== DASHBOARD_ACCESS_PASSWORD) {
 					return res.status(403).json(['Password is incorrect.']);
 				}
-				const token = jwt.sign(
-					process.env.JWT_PAYLOAD_STRING,
-					process.env.JWT_STRATEGY_SECRET
-				);
+				const token = jwt.sign(JWT_PAYLOAD_STRING, JWT_STRATEGY_SECRET);
 				res.setHeader(
 					'Set-Cookie',
 					`token=${token}; Path=/; httpOnly=true; SameSite=strict; Secure=true; Max-Age=7200` // 2 hours
@@ -194,6 +196,7 @@ const handler = async (
 					]);
 			}
 		}
+		return res.status(405).end();
 	} else {
 		return res.status(405).end();
 	}
