@@ -122,12 +122,12 @@ const FormulaSeries: NextPage = () => {
 								onChange={handleInputChange}
 								value={searchInput}
 								placeholder='Penalty / Name / Car #'
-								disabled={!showSearchInput || !docsData}
+								disabled={!showSearchInput || !docsData || fetching}
 							/>
 							<Button
 								variant='dark'
 								size='sm'
-								disabled={!showSearchInput || !docsData}
+								disabled={!showSearchInput || !docsData || fetching}
 								onClick={() => setSearchInput('')}
 							>
 								<i className='bi bi-x fs-6'></i>
