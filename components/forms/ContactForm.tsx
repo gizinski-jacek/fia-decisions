@@ -160,7 +160,12 @@ const ContactForm = () => {
 					variant='primary'
 					type='submit'
 					className='fw-bolder'
-					disabled={sending}
+					disabled={
+						sending ||
+						!formData.email ||
+						!formData.message ||
+						!!formErrors.length
+					}
 					onClick={handleSubmit}
 				>
 					Submit

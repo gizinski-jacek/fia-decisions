@@ -206,7 +206,13 @@ const DataForm = () => {
 					variant='primary'
 					type='submit'
 					className='fw-bolder'
-					disabled={sending}
+					disabled={
+						sending ||
+						!formData.series ||
+						!formData.year ||
+						!formData.description ||
+						!!formErrors.length
+					}
 					onClick={handleSubmit}
 				>
 					Submit

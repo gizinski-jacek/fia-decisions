@@ -102,7 +102,7 @@ const DashboardForm = ({ handleSignIn }: Props) => {
 			<Button
 				variant='dark'
 				className='fw-bolder my-2'
-				disabled={sending}
+				disabled={sending || !formData.password || !!formErrors.length}
 				onClick={handleSubmit}
 			>
 				Submit
