@@ -7,7 +7,8 @@ import { ReactElement } from 'react';
 import { supportedSeries } from './myData';
 
 export const verifyToken = (req: NextApiRequest): boolean => {
-	if (!process.env.JWT_STRATEGY_SECRET) {
+	const { JWT_STRATEGY_SECRET, JWT_PAYLOAD_STRING } = process.env;
+	if (!JWT_STRATEGY_SECRET) {
 		throw new Error(
 			'Please define JWT_STRATEGY_SECRET environment variable inside .env.local'
 		);
@@ -16,8 +17,8 @@ export const verifyToken = (req: NextApiRequest): boolean => {
 	if (!token) {
 		return false;
 	}
-	const decodedToken = jwt.verify(token, process.env.JWT_STRATEGY_SECRET);
-	if (decodedToken !== process.env.JWT_PAYLOAD_STRING) {
+	const decodedToken = jwt.verify(token, JWT_STRATEGY_SECRET);
+	if (decodedToken !== JWT_PAYLOAD_STRING) {
 		return false;
 	}
 	return true;
