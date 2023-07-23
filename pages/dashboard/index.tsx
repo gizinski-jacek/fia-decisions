@@ -8,7 +8,7 @@ import {
 	MissingDocModel,
 } from '../../types/myTypes';
 import DashboardForm from '../../components/forms/DashboardForm';
-import { Button, Form } from 'react-bootstrap';
+import { Button, Form, Modal } from 'react-bootstrap';
 import axios, { AxiosError } from 'axios';
 import { dbNameList, supportedSeries, supportedYears } from '../../lib/myData';
 import LoadingBar from '../../components/LoadingBar';
@@ -42,6 +42,13 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 	const [searchInput, setSearchInput] = useState('');
 	const [yearSelect, setYearSelect] = useState(
 		new Date().getFullYear().toString()
+	);
+	const [showModal, setShowModal] = useState<boolean>(false);
+	const [requestUpdateSeries, setRequestUpdateSeries] = useState<string | null>(
+		null
+	);
+	const [requestUpdateYear, setRequestUpdateYear] = useState<string | null>(
+		null
 	);
 
 	const router = useRouter();
@@ -95,13 +102,13 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 	}, [chosenDocs, yearSelect, router]);
 
 	const handleDeleteDocument = async (query: string, docId: string) => {
-		// Error when deleting:
+		// Error when deleting: !!!
 		// XML Parsing Error: no element found
 		// Location: http://localhost:3000/api/dashboard/missing?doc_id=6334be6da875c7c312b0f82e
 		// Line Number 1, Column 1:
 		if (
 			confirm(
-				'Are you sure You want to Delete this document? This action is irreversible.'
+				'This action is irreversible. Are you sure You want to Delete this document?'
 			) === false
 		) {
 			return;
@@ -148,7 +155,7 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 	};
 
 	const handleAcceptDocument = async (series: string, docId: string) => {
-		// Error when deleting:
+		// Error when accepting: !!!
 		// XML Parsing Error: no element found
 		// Location: http://localhost:3000/api/dashboard/missing?doc_id=6334be6da875c7c312b0f82e
 		// Line Number 1, Column 1:
@@ -244,9 +251,81 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 		setYearSelect(value);
 	};
 
+	const handleRequestUpdateSeriesSelectChange = (
+		e: React.ChangeEvent<HTMLSelectElement>
+	) => {
+		const { value } = e.target;
+		setRequestUpdateSeries(value);
+		setRequestUpdateYear(null);
+	};
+
+	const handleRequestUpdateYearSelectChange = (
+		e: React.ChangeEvent<HTMLSelectElement>
+	) => {
+		const { value } = e.target;
+		setRequestUpdateYear(value);
+	};
+
+	const requestUpdateNewest = async () => {
+		try {
+			if (!requestUpdateSeries) return;
+			setFetching(true);
+			await axios.get(
+				`/api/dashboard/req-update-newest/${requestUpdateSeries}/${
+					requestUpdateYear || ''
+				}`,
+				{ timeout: 25000 }
+			);
+			setFetching(false);
+			handleCloseModal();
+		} catch (error: any) {
+			setFetchingError(
+				error?.response?.data ||
+					'Unknown server error. Fetching documents failed.'
+			);
+			setFetching(false);
+			handleCloseModal();
+		}
+	};
+
+	const requestUpdateAll = async () => {
+		try {
+			if (!requestUpdateSeries || !requestUpdateYear) return;
+			setFetching(true);
+			const confirm = window.confirm(
+				'This update process will take a long time. Are You sure you want to update all documents from this year?'
+			);
+			if (confirm) {
+				await axios.get(
+					`/api/dashboard/req-update-all/${requestUpdateSeries}/${requestUpdateYear}`,
+					{ timeout: 25000 }
+				);
+			}
+			setFetching(false);
+			handleCloseModal();
+		} catch (error: any) {
+			setFetchingError(
+				error?.response?.data ||
+					'Unknown server error. Fetching documents failed.'
+			);
+			setFetching(false);
+			handleCloseModal();
+		}
+	};
+
+	const handleOpenModal = () => {
+		setShowModal(true);
+	};
+
+	const handleCloseModal = () => {
+		setShowModal(false);
+		setRequestUpdateSeries(null);
+		setRequestUpdateYear(null);
+	};
+
 	return signedIn ? (
 		<div className='mt-5 m-2'>
-			<div className='d-flex my-2'>
+			<div className='d-flex justify-content-between align-items-start my-2'>
 				<Form className='rounded-2 p-2 my-2 bg-light'>
 					<Form.Group>
 						<Form.Label
@@ -291,7 +370,7 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 					</Form.Group>
 				</Form>
 				{fetchingError && (
-					<div className='flex-grow-1 my-2 ms-4 alert alert-danger alert-dismissible'>
+					<div className='mx-4 alert alert-danger alert-dismissible'>
 						<strong>{fetchingError}</strong>
 						<button
 							type='button'
@@ -300,6 +379,80 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 						></button>
 					</div>
 				)}
+				<Button
+					className='text-nowrap'
+					variant='primary'
+					size='sm'
+					onClick={handleOpenModal}
+				>
+					Request Update
+				</Button>
+				<Modal
+					show={showModal}
+					onHide={handleCloseModal}
+					dialogClassName='modal-md'
+				>
+					<Modal.Header closeButton>
+						<Modal.Title className='d-flex gap-5 me-2'>
+							<h3>Request Update Documents</h3>
+						</Modal.Title>
+					</Modal.Header>
+					<Modal.Body>
+						<Form className='d-flex flex-column gap-4 w-50 my-4 mx-auto'>
+							<Form.Group>
+								<Form.Select
+									className='py-0'
+									name='request_update_series_select'
+									id='request_update_series_select'
+									onChange={handleRequestUpdateSeriesSelectChange}
+									value={requestUpdateSeries || ''}
+									disabled={fetching}
+								>
+									<option value=''>Select Series</option>
+									{supportedSeries.map((series) => (
+										<option key={series} value={series}>
+											{series.replace('f', 'Formula ')}
+										</option>
+									))}
+								</Form.Select>
+							</Form.Group>
+							<Form.Group>
+								<Form.Select
+									className='py-0'
+									name='request_update_year_select'
+									id='request_update_year_select'
+									onChange={handleRequestUpdateYearSelectChange}
+									value={requestUpdateYear || ''}
+									disabled={fetching || !requestUpdateSeries}
+								>
+									<option value=''>Select Year</option>
+									{requestUpdateSeries &&
+										supportedYears[requestUpdateSeries].map((year) => (
+											<option key={year} value={year}>
+												{year}
+											</option>
+										))}
+								</Form.Select>
+							</Form.Group>
+							<Button
+								variant='warning'
+								disabled={!requestUpdateSeries || fetching}
+								onClick={requestUpdateNewest}
+							>
+								Update Newest
+							</Button>
+							<Button
+								variant='danger'
+								disabled={
+									!requestUpdateSeries || !requestUpdateYear || fetching
+								}
+								onClick={requestUpdateAll}
+							>
+								Update All
+							</Button>
+						</Form>
+					</Modal.Body>
+				</Modal>
 			</div>
 			{chosenDocs !== 'contact-message' && chosenDocs !== 'missing-info' ? (
 				<Form className='rounded-2 p-2 my-2 bg-light d-flex'>
@@ -313,9 +466,14 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 							onChange={handleInputChange}
 							value={searchInput}
 							placeholder='Penalty / Name / Car #'
-							disabled={fetching}
+							disabled={!docsData || fetching}
 						/>
-						<Button variant='dark' size='sm' onClick={() => setSearchInput('')}>
+						<Button
+							variant='dark'
+							size='sm'
+							disabled={!docsData || fetching}
+							onClick={() => setSearchInput('')}
+						>
 							<i className='bi bi-x fs-6'></i>
 						</Button>
 					</Form.Group>
@@ -327,7 +485,7 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 								id='year_select'
 								onChange={handleYearSelectChange}
 								value={yearSelect}
-								disabled={fetching}
+								disabled={!docsData || fetching}
 							>
 								{(() => {
 									const series = chosenDocs.split('__')[1];
