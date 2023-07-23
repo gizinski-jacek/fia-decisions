@@ -2,7 +2,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import connectMongo from '../../../lib/mongo';
 import mongoose from 'mongoose';
-import { dbNameList } from '../../../lib/myData';
+import { dbNameList, supportedSeries } from '../../../lib/myData';
 import {
 	ContactDocModel,
 	PenaltyModel,
@@ -10,6 +10,7 @@ import {
 	MissingDocModel,
 } from '../../../types/myTypes';
 import { verifyToken } from '../../../lib/utils';
+import axios from 'axios';
 
 const handler = async (
 	req: NextApiRequest,
@@ -21,11 +22,69 @@ const handler = async (
 	if (tokenValid) {
 		if (req.method === 'GET') {
 			const { params } = req.query as { params: string[] };
-			const docType = params[0];
-			const series = params[1];
+			const type = params[0];
+			const series = supportedSeries.find((s) => s === params[1].toLowerCase());
 			const year = params[2] || new Date().getFullYear().toString();
 			const manualUpload = params[3];
-			if (docType === 'penalties') {
+
+			const {
+				NODE_ENV,
+				CRON_JOB_UPDATE_NEWEST_SECRET,
+				CRON_JOB_UPDATE_ALL_SECRET,
+			} = process.env;
+			const apiURI =
+				NODE_ENV === 'production'
+					? process.env.API_WORKER_URI
+					: process.env.API_WORKER_URI_DEV;
+
+			if (type === 'req-update-newest') {
+				if (!series) {
+					return res.status(422).json('Unsupported series.');
+				}
+				try {
+					if (!CRON_JOB_UPDATE_NEWEST_SECRET || !apiURI) {
+						throw new Error(
+							'Please define CRON_JOB_UPDATE_NEWEST_SECRET and API_WORKER_URI environment variable inside .env.local'
+						);
+					}
+					await axios.get(
+						`${apiURI}/api/update-newest/penalties/${series}/${year}`,
+						{
+							headers: {
+								Authorization: `Bearer ${CRON_JOB_UPDATE_NEWEST_SECRET}`,
+							},
+						}
+					);
+					return res.status(202).json('Update request accepted.');
+				} catch (error: any) {
+					console.log(error);
+					return res.status(404).json('Unknown server error.');
+				}
+			}
+			if (type === 'req-update-all') {
+				if (!series) {
+					return res.status(422).json('Unsupported series.');
+				}
+				try {
+					if (!CRON_JOB_UPDATE_ALL_SECRET || !apiURI) {
+						throw new Error(
+							'Please define CRON_JOB_UPDATE_ALL_SECRET and API_WORKER_URI environment variable inside .env.local'
+						);
+					}
+					await axios.get(
+						`${apiURI}/api/update-all/penalties/${series}/${year}`,
+						{
+							headers: {
+								Authorization: `Bearer ${CRON_JOB_UPDATE_ALL_SECRET}`,
+							},
+						}
+					);
+					return res.status(202).json('Update request accepted.');
+				} catch (error: any) {
+					return res.status(404).json('Unknown server error.');
+				}
+			}
+			if (type === 'penalties') {
 				if (!series) {
 					return res.status(422).json('Unsupported series.');
 				}
@@ -55,7 +114,7 @@ const handler = async (
 						.json('Unknown server error. Failed to get documents.');
 				}
 			}
-			if (docType === 'missing-info') {
+			if (type === 'missing-info') {
 				try {
 					const conn = await connectMongo(dbNameList.other_documents_db);
 					const document_list: MissingDocModel[] =
@@ -67,7 +126,7 @@ const handler = async (
 						.json('Unknown server error. Failed to get documents.');
 				}
 			}
-			if (docType === 'missing-file') {
+			if (type === 'missing-file') {
 				try {
 					const conn = await connectMongo(dbNameList.other_documents_db);
 					const query = manualUpload ? { manual_upload: true } : {};
@@ -90,7 +149,7 @@ const handler = async (
 						.json('Unknown server error. Failed to get documents.');
 				}
 			}
-			if (docType === 'contact-message') {
+			if (type === 'contact-message') {
 				try {
 					const conn = await connectMongo(dbNameList.other_documents_db);
 					const document_list: ContactDocModel[] =
@@ -102,6 +161,7 @@ const handler = async (
 						.json('Unknown server error. Failed to get documents.');
 				}
 			}
+			return res.status(405).end();
 		} else if (req.method === 'POST') {
 			//
 			//	Create new doc from manually inserted data.
@@ -109,7 +169,7 @@ const handler = async (
 		} else if (req.method === 'DELETE') {
 			const { params } = req.query as { params: string[] };
 			const docType = params[0];
-			const series = params[1];
+			const series = supportedSeries.find((s) => s === params[1].toLowerCase());
 			const docId = params[2];
 			const year = params[3];
 			if (!docId) {
