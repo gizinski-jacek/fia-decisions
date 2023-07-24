@@ -1,7 +1,7 @@
 import * as Yup from 'yup';
 import {
 	ContactFormValues,
-	DashboardFormValues,
+	LoginFormValues,
 	DataFormValues,
 } from '../types/myTypes';
 import { supportedSeries } from './myData';
@@ -51,7 +51,7 @@ export const contactFormValidationSchema: Yup.SchemaOf<ContactFormValues> =
 			.max(512, 'Message max 512 characters.'),
 	});
 
-export const dashboardFormValidationSchema: Yup.SchemaOf<DashboardFormValues> =
+export const loginFormValidationSchema: Yup.SchemaOf<LoginFormValues> =
 	Yup.object().shape({
 		password: Yup.string()
 			.required('Password is required.')
