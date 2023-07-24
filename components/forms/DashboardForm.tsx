@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { Button, Form } from 'react-bootstrap';
 import { defaultDashboardFormValues } from '../../lib/myData';
 import { DashboardFormValues } from '../../types/myTypes';
@@ -16,8 +16,6 @@ const DashboardForm = ({ handleSignIn }: Props) => {
 	const [formErrors, setFormErrors] = useState<string[]>([]);
 	const [sending, setSending] = useState(false);
 
-	const formRef = useRef<HTMLFormElement>(null);
-
 	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setFormErrors([]);
 		const { name, value } = e.target;
@@ -25,9 +23,9 @@ const DashboardForm = ({ handleSignIn }: Props) => {
 	};
 
 	const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
-		e.preventDefault();
-		setFormErrors([]);
 		try {
+			e.preventDefault();
+			setFormErrors([]);
 			if (!formData.password) {
 				setFormErrors(['Must provide a password.']);
 				return;
@@ -55,10 +53,7 @@ const DashboardForm = ({ handleSignIn }: Props) => {
 	};
 
 	return (
-		<Form
-			ref={formRef}
-			className='w-50 mx-auto my-5 px-5 bg-light rounded text-center d-flex flex-column justify-content-center align-items-center'
-		>
+		<Form className='w-50 mx-auto my-5 px-5 bg-light rounded text-center d-flex flex-column justify-content-center align-items-center'>
 			<h2 className='my-5'>Dashboard Access</h2>
 			<Form.Group>
 				<Form.Label htmlFor=''>Dashboard Password</Form.Label>
