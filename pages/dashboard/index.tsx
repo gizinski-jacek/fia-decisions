@@ -383,6 +383,7 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 					className='text-nowrap'
 					variant='primary'
 					size='sm'
+					disabled={fetching}
 					onClick={handleOpenModal}
 				>
 					Request Update
@@ -398,59 +399,63 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 						</Modal.Title>
 					</Modal.Header>
 					<Modal.Body>
-						<Form className='d-flex flex-column gap-4 w-50 my-4 mx-auto'>
-							<Form.Group>
-								<Form.Select
-									className='py-0'
-									name='request_update_series_select'
-									id='request_update_series_select'
-									onChange={handleRequestUpdateSeriesSelectChange}
-									value={requestUpdateSeries || ''}
-									disabled={fetching}
-								>
-									<option value=''>Select Series</option>
-									{supportedSeries.map((series) => (
-										<option key={series} value={series}>
-											{series.replace('f', 'Formula ')}
-										</option>
-									))}
-								</Form.Select>
-							</Form.Group>
-							<Form.Group>
-								<Form.Select
-									className='py-0'
-									name='request_update_year_select'
-									id='request_update_year_select'
-									onChange={handleRequestUpdateYearSelectChange}
-									value={requestUpdateYear || ''}
-									disabled={fetching || !requestUpdateSeries}
-								>
-									<option value=''>Select Year</option>
-									{requestUpdateSeries &&
-										supportedYears[requestUpdateSeries].map((year) => (
-											<option key={year} value={year}>
-												{year}
+						{!fetching && showModal ? (
+							<Form className='d-flex flex-column gap-4 w-50 my-4 mx-auto'>
+								<Form.Group>
+									<Form.Select
+										className='py-0'
+										name='request_update_series_select'
+										id='request_update_series_select'
+										onChange={handleRequestUpdateSeriesSelectChange}
+										value={requestUpdateSeries || ''}
+										disabled={fetching}
+									>
+										<option value=''>Select Series</option>
+										{supportedSeries.map((series) => (
+											<option key={series} value={series}>
+												{series.replace('f', 'Formula ')}
 											</option>
 										))}
-								</Form.Select>
-							</Form.Group>
-							<Button
-								variant='warning'
-								disabled={!requestUpdateSeries || fetching}
-								onClick={requestUpdateNewest}
-							>
-								Update Newest
-							</Button>
-							<Button
-								variant='danger'
-								disabled={
-									!requestUpdateSeries || !requestUpdateYear || fetching
-								}
-								onClick={requestUpdateAll}
-							>
-								Update All
-							</Button>
-						</Form>
+									</Form.Select>
+								</Form.Group>
+								<Form.Group>
+									<Form.Select
+										className='py-0'
+										name='request_update_year_select'
+										id='request_update_year_select'
+										onChange={handleRequestUpdateYearSelectChange}
+										value={requestUpdateYear || ''}
+										disabled={fetching || !requestUpdateSeries}
+									>
+										<option value=''>Select Year</option>
+										{requestUpdateSeries &&
+											supportedYears[requestUpdateSeries].map((year) => (
+												<option key={year} value={year}>
+													{year}
+												</option>
+											))}
+									</Form.Select>
+								</Form.Group>
+								<Button
+									variant='warning'
+									disabled={!requestUpdateSeries || fetching}
+									onClick={requestUpdateNewest}
+								>
+									Update Newest
+								</Button>
+								<Button
+									variant='danger'
+									disabled={
+										!requestUpdateSeries || !requestUpdateYear || fetching
+									}
+									onClick={requestUpdateAll}
+								>
+									Update All
+								</Button>
+							</Form>
+						) : (
+							<LoadingBar margin='2rem 5rem' />
+						)}
 					</Modal.Body>
 				</Modal>
 			</div>
@@ -514,34 +519,60 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 					)}
 				</Form>
 			) : null}
-			{!fetching ? (
-				chosenDocs && docsData && docsData.length !== 0 ? (
-					chosenDocs.match(/(penalties__|missing-file)/im) ? (
-						renderBySeries(docsData as GroupedByGP, searchInput, {
-							deleteHandler: handleDeleteDocument,
-							docType: chosenDocs,
-							acceptHandler: handleAcceptDocument,
-						})
-					) : chosenDocs === 'missing-info' ? (
-						<MissingDocWrapper
-							data={docsData as MissingDocModel[]}
-							docType={chosenDocs}
-							handleDelete={handleDeleteDocument}
-						/>
-					) : chosenDocs === 'contact-message' ? (
-						<ContactDocWrapper
-							data={docsData as ContactDocModel[]}
-							docType={chosenDocs}
-							handleDelete={handleDeleteDocument}
-						/>
-					) : null
+			{!showModal ? (
+				!fetching ? (
+					chosenDocs && docsData && docsData.length !== 0 ? (
+						chosenDocs.match(/(penalties__|missing-file)/im) ? (
+							renderBySeries(docsData as GroupedByGP, searchInput, {
+								deleteHandler: handleDeleteDocument,
+								docType: chosenDocs,
+								acceptHandler: handleAcceptDocument,
+							})
+						) : chosenDocs === 'missing-info' ? (
+							<MissingDocWrapper
+								data={docsData as MissingDocModel[]}
+								docType={chosenDocs}
+								handleDelete={handleDeleteDocument}
+							/>
+						) : chosenDocs === 'contact-message' ? (
+							<ContactDocWrapper
+								data={docsData as ContactDocModel[]}
+								docType={chosenDocs}
+								handleDelete={handleDeleteDocument}
+							/>
+						) : null
+					) : (
+						<div className='m-5 text-center'>
+							<h3>No Documents Found</h3>
+						</div>
+					)
 				) : (
-					<div className='m-5 text-center'>
-						<h3>No Documents Found</h3>
-					</div>
+					<LoadingBar margin='2rem 5rem' />
 				)
+			) : chosenDocs && docsData && docsData.length !== 0 ? (
+				chosenDocs.match(/(penalties__|missing-file)/im) ? (
+					renderBySeries(docsData as GroupedByGP, searchInput, {
+						deleteHandler: handleDeleteDocument,
+						docType: chosenDocs,
+						acceptHandler: handleAcceptDocument,
+					})
+				) : chosenDocs === 'missing-info' ? (
+					<MissingDocWrapper
+						data={docsData as MissingDocModel[]}
+						docType={chosenDocs}
+						handleDelete={handleDeleteDocument}
+					/>
+				) : chosenDocs === 'contact-message' ? (
+					<ContactDocWrapper
+						data={docsData as ContactDocModel[]}
+						docType={chosenDocs}
+						handleDelete={handleDeleteDocument}
+					/>
+				) : null
 			) : (
-				<LoadingBar margin='2rem 5rem' />
+				<div className='m-5 text-center'>
+					<h3>No Documents Found</h3>
+				</div>
 			)}
 		</div>
 	) : (
