@@ -22,7 +22,7 @@ const handler = async (
 	if (tokenValid) {
 		if (req.method === 'GET') {
 			const { params } = req.query as { params: string[] };
-			const type = params[0];
+			const reqType = params[0];
 			const series = supportedSeries.find((s) => s === params[1].toLowerCase());
 			const year = params[2] || new Date().getFullYear().toString();
 			const manualUpload = params[3];
@@ -37,11 +37,11 @@ const handler = async (
 					? process.env.API_WORKER_URI
 					: process.env.API_WORKER_URI_DEV;
 
-			if (type === 'req-update-newest') {
-				if (!series) {
-					return res.status(422).json('Unsupported series.');
-				}
+			if (reqType === 'update-newest') {
 				try {
+					if (!series) {
+						return res.status(422).json('Unsupported series.');
+					}
 					if (!CRON_JOB_UPDATE_NEWEST_SECRET || !apiURI) {
 						throw new Error(
 							'Please define CRON_JOB_UPDATE_NEWEST_SECRET and API_WORKER_URI environment variable inside .env.local'
@@ -61,11 +61,11 @@ const handler = async (
 					return res.status(404).json('Unknown server error.');
 				}
 			}
-			if (type === 'req-update-all') {
-				if (!series) {
-					return res.status(422).json('Unsupported series.');
-				}
+			if (reqType === 'update-all') {
 				try {
+					if (!series) {
+						return res.status(422).json('Unsupported series.');
+					}
 					if (!CRON_JOB_UPDATE_ALL_SECRET || !apiURI) {
 						throw new Error(
 							'Please define CRON_JOB_UPDATE_ALL_SECRET and API_WORKER_URI environment variable inside .env.local'
@@ -84,15 +84,15 @@ const handler = async (
 					return res.status(404).json('Unknown server error.');
 				}
 			}
-			if (type === 'penalties') {
-				if (!series) {
-					return res.status(422).json('Unsupported series.');
-				}
-				const seriesYearDB = dbNameList[`${series}_${year}_db`];
-				if (!seriesYearDB) {
-					return res.status(422).json('Unsupported year.');
-				}
+			if (reqType === 'penalties') {
 				try {
+					if (!series) {
+						return res.status(422).json('Unsupported series.');
+					}
+					const seriesYearDB = dbNameList[`${series}_${year}_db`];
+					if (!seriesYearDB) {
+						return res.status(422).json('Unsupported year.');
+					}
 					const conn = await connectMongo(seriesYearDB);
 					const query = manualUpload ? { manual_upload: true } : {};
 					const document_list: PenaltyModel[] =
@@ -114,7 +114,7 @@ const handler = async (
 						.json('Unknown server error. Failed to get documents.');
 				}
 			}
-			if (type === 'missing-info') {
+			if (reqType === 'missing-info') {
 				try {
 					const conn = await connectMongo(dbNameList.other_documents_db);
 					const document_list: MissingDocModel[] =
@@ -126,7 +126,7 @@ const handler = async (
 						.json('Unknown server error. Failed to get documents.');
 				}
 			}
-			if (type === 'missing-file') {
+			if (reqType === 'missing-file') {
 				try {
 					const conn = await connectMongo(dbNameList.other_documents_db);
 					const query = manualUpload ? { manual_upload: true } : {};
@@ -149,7 +149,7 @@ const handler = async (
 						.json('Unknown server error. Failed to get documents.');
 				}
 			}
-			if (type === 'contact-message') {
+			if (reqType === 'contact-message') {
 				try {
 					const conn = await connectMongo(dbNameList.other_documents_db);
 					const document_list: ContactDocModel[] =
@@ -164,24 +164,24 @@ const handler = async (
 			return res.status(405).end();
 		} else if (req.method === 'DELETE') {
 			const { params } = req.query as { params: string[] };
-			const docType = params[0];
+			const reqType = params[0];
 			const series = supportedSeries.find((s) => s === params[1].toLowerCase());
 			const docId = params[2];
 			const year = params[3];
 			if (!docId) {
 				return res.status(403).json('Document Id is required.');
 			}
-			if (docType === 'penalties') {
-				let seriesYearDB: string;
-				if (series === 'missing-file') {
-					seriesYearDB = dbNameList.other_documents_db;
-				} else {
-					seriesYearDB = dbNameList[`${series}_${year}_db`];
-				}
-				if (!seriesYearDB) {
-					return res.status(422).json('Unsupported year.');
-				}
+			if (reqType === 'penalties') {
 				try {
+					let seriesYearDB: string;
+					if (series === 'missing-file') {
+						seriesYearDB = dbNameList.other_documents_db;
+					} else {
+						seriesYearDB = dbNameList[`${series}_${year}_db`];
+					}
+					if (!seriesYearDB) {
+						return res.status(422).json('Unsupported year.');
+					}
 					const conn = await connectMongo(seriesYearDB);
 					await conn.models.Penalty_Doc.findByIdAndDelete(docId).exec();
 					return res.status(200).end();
@@ -191,7 +191,7 @@ const handler = async (
 						.json('Unknown server error. File was not deleted.');
 				}
 			}
-			if (docType === 'missing-info') {
+			if (reqType === 'missing-info') {
 				try {
 					const conn = await connectMongo(dbNameList.other_documents_db);
 					await conn.models.Missing_Doc.findByIdAndDelete(docId).exec();
@@ -202,7 +202,7 @@ const handler = async (
 						.json('Unknown server error. File was not deleted.');
 				}
 			}
-			if (docType === 'contact-message') {
+			if (reqType === 'contact-message') {
 				try {
 					const conn = await connectMongo(dbNameList.other_documents_db);
 					await conn.models.Contact_Doc.findByIdAndDelete(docId).exec();
@@ -215,12 +215,12 @@ const handler = async (
 			}
 		} else if (req.method === 'PUT') {
 			const { params } = req.query as { params: string[] };
-			const [updateType, docId] = params;
-			if (updateType === 'accept-document') {
-				if (!docId) {
-					return res.status(403).json('Document Id is required.');
-				}
+			const [reqType, docId] = params;
+			if (reqType === 'accept-document') {
 				try {
+					if (!docId) {
+						return res.status(403).json('Document Id is required.');
+					}
 					const connOtherDB = await connectMongo(dbNameList.other_documents_db);
 					const document = await connOtherDB.models.Penalty_Doc.findById(
 						docId
