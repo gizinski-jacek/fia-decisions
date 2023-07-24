@@ -4,7 +4,7 @@ import {
 	ContactFormValues,
 	DataFormValues,
 	FileFormValues,
-	DashboardFormValues,
+	LoginFormValues,
 } from '../types/myTypes';
 
 // Main FIA domain.
@@ -81,7 +81,7 @@ export const defaultContactFormValues: ContactFormValues = {
 	message: '',
 };
 
-export const defaultDashboardFormValues: DashboardFormValues = {
+export const defaultDashboardFormValues: LoginFormValues = {
 	password: '',
 };
 

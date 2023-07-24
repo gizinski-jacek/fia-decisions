@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button, Form } from 'react-bootstrap';
 import { defaultDashboardFormValues } from '../../lib/myData';
-import { DashboardFormValues } from '../../types/myTypes';
+import { LoginFormValues } from '../../types/myTypes';
 import axios, { AxiosError } from 'axios';
 import LoadingBar from '../LoadingBar';
 
@@ -10,7 +10,7 @@ interface Props {
 }
 
 const DashboardForm = ({ handleSignIn }: Props) => {
-	const [formData, setFormData] = useState<DashboardFormValues>(
+	const [formData, setFormData] = useState<LoginFormValues>(
 		defaultDashboardFormValues
 	);
 	const [formErrors, setFormErrors] = useState<string[]>([]);
