@@ -162,10 +162,6 @@ const handler = async (
 				}
 			}
 			return res.status(405).end();
-		} else if (req.method === 'POST') {
-			//
-			//	Create new doc from manually inserted data.
-			//
 		} else if (req.method === 'DELETE') {
 			const { params } = req.query as { params: string[] };
 			const docType = params[0];
