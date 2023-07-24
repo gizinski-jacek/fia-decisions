@@ -21,10 +21,10 @@ const ContactForm = () => {
 	};
 
 	const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
-		e.preventDefault();
-		setSubmitSuccess(false);
-		setFormErrors([]);
 		try {
+			e.preventDefault();
+			setSubmitSuccess(false);
+			setFormErrors([]);
 			if (!formData.email && !formData.message) {
 				setFormErrors(['Must provide an Email and a Message.']);
 				return;

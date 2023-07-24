@@ -57,10 +57,10 @@ const FormulaSeries: NextPage = () => {
 	};
 
 	const getDocuments = useCallback(async () => {
-		if (!yearSelect || !router.query.series) {
-			return;
-		}
 		try {
+			if (!yearSelect || !router.query.series) {
+				return;
+			}
 			setFetchingError(null);
 			setFetching(true);
 			const res: FormulaSeriesResponseData = await axios.get(

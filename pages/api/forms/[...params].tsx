@@ -75,7 +75,6 @@ const handler = async (
 					if (part.byteCount > 1000000) {
 						return res.status(422).json(['File is too big, max size 1MB.']);
 					}
-
 					try {
 						const fileBuffer = await streamToBuffer(part);
 						const pdfData = await readPDFPages(fileBuffer);
@@ -161,16 +160,17 @@ const handler = async (
 				JWT_PAYLOAD_STRING,
 				JWT_STRATEGY_SECRET,
 			} = process.env;
-			if (
-				!DASHBOARD_ACCESS_PASSWORD ||
-				!JWT_PAYLOAD_STRING ||
-				!JWT_STRATEGY_SECRET
-			) {
-				throw new Error(
-					'Please define DASHBOARD_ACCESS_PASSWORD, JWT_PAYLOAD_STRING and JWT_STRATEGY_SECRET environment variables inside .env.local'
-				);
-			}
+
 			try {
+				if (
+					!DASHBOARD_ACCESS_PASSWORD ||
+					!JWT_PAYLOAD_STRING ||
+					!JWT_STRATEGY_SECRET
+				) {
+					throw new Error(
+						'Please define DASHBOARD_ACCESS_PASSWORD, JWT_PAYLOAD_STRING and JWT_STRATEGY_SECRET environment variables inside .env.local'
+					);
+				}
 				const fields = await parseFields(req);
 				const { errors } = await yupValidation(
 					dashboardFormValidationSchema,

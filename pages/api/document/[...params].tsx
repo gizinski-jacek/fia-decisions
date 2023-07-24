@@ -9,17 +9,17 @@ const handler = async (
 	res: NextApiResponse<GroupedByGP | string>
 ) => {
 	if (req.method === 'GET') {
-		const { params } = req.query as { params: string[] };
-		const series = supportedSeries.find((s) => s === params[0].toLowerCase());
-		const year = params[1] || new Date().getFullYear().toString();
-		if (!series) {
-			return res.status(422).json('Unsupported series.');
-		}
-		const seriesYearDB = dbNameList[`${series}_${year}_db`];
-		if (!seriesYearDB) {
-			return res.status(422).json('Unsupported year.');
-		}
 		try {
+			const { params } = req.query as { params: string[] };
+			const series = supportedSeries.find((s) => s === params[0].toLowerCase());
+			const year = params[1] || new Date().getFullYear().toString();
+			if (!series) {
+				return res.status(422).json('Unsupported series.');
+			}
+			const seriesYearDB = dbNameList[`${series}_${year}_db`];
+			if (!seriesYearDB) {
+				return res.status(422).json('Unsupported year.');
+			}
 			const conn = await connectMongo(seriesYearDB);
 			const document_list: PenaltyModel[] = await conn.models.Penalty_Doc.find()
 				.sort({ doc_date: -1 })

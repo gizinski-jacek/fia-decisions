@@ -38,10 +38,10 @@ const FileForm = () => {
 	};
 
 	const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
-		e.preventDefault();
-		setSubmitSuccess(false);
-		setFormErrors([]);
 		try {
+			e.preventDefault();
+			setSubmitSuccess(false);
+			setFormErrors([]);
 			if (!formData.series && !formData.file) {
 				setFormErrors(['Must choose a Series and a PDF file.']);
 				return;

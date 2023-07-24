@@ -25,10 +25,10 @@ const DataForm = () => {
 	};
 
 	const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
-		e.preventDefault();
-		setSubmitSuccess(false);
-		setFormErrors([]);
 		try {
+			e.preventDefault();
+			setSubmitSuccess(false);
+			setFormErrors([]);
 			if (!formData.series || !formData.year || !formData.description) {
 				setFormErrors([
 					'Must choose a Series, a Year and provide a Description.',
