@@ -9,7 +9,7 @@ import { readPDFPages } from '../../../lib/pdfReader';
 import { createPenaltyDocument } from '../../../lib/transformToPenaltyDoc';
 import yupValidation, {
 	contactFormValidationSchema,
-	dashboardFormValidationSchema,
+	loginFormValidationSchema,
 	dataFormValidationSchema,
 } from '../../../lib/yup';
 import { ContactDocModel, MissingDocModel } from '../../../types/myTypes';
@@ -173,7 +173,7 @@ const handler = async (
 				}
 				const fields = await parseFields(req);
 				const { errors } = await yupValidation(
-					dashboardFormValidationSchema,
+					loginFormValidationSchema,
 					fields
 				);
 				if (errors) {
