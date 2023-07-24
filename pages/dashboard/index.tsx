@@ -59,12 +59,12 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 	};
 
 	const getDocuments = useCallback(async () => {
-		if (!chosenDocs) {
-			setFetchingError('Must choose valid documents from the list.');
-			return;
-		}
-		const [docType, series, manualUpload] = chosenDocs.split('__');
 		try {
+			if (!chosenDocs) {
+				setFetchingError('Must choose valid documents from the list.');
+				return;
+			}
+			const [docType, series, manualUpload] = chosenDocs.split('__');
 			setFetching(true);
 			const res: DocumentsResponseData = await axios.get(
 				`/api/dashboard/${docType}/${series}/${yearSelect}/${
@@ -102,23 +102,23 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 	}, [chosenDocs, yearSelect, router]);
 
 	const handleDeleteDocument = async (query: string, docId: string) => {
-		// Error when deleting: !!!
-		// XML Parsing Error: no element found
-		// Location: http://localhost:3000/api/dashboard/missing?doc_id=6334be6da875c7c312b0f82e
-		// Line Number 1, Column 1:
-		if (
-			confirm(
-				'This action is irreversible. Are you sure You want to Delete this document?'
-			) === false
-		) {
-			return;
-		}
-		if (!query || !docId || !yearSelect) {
-			setFetchingError('Must choose documents and year from the list.');
-			return;
-		}
-		const [docType, series, manualUpload] = query.split('__');
 		try {
+			// ! Error when deleting: !!!
+			// XML Parsing Error: no element found
+			// Location: http://localhost:3000/api/dashboard/missing?doc_id=6334be6da875c7c312b0f82e
+			// Line Number 1, Column 1:
+			if (
+				confirm(
+					'This action is irreversible. Are you sure You want to Delete this document?'
+				) === false
+			) {
+				return;
+			}
+			if (!query || !docId || !yearSelect) {
+				setFetchingError('Must choose documents and year from the list.');
+				return;
+			}
+			const [docType, series, manualUpload] = query.split('__');
 			setFetching(true);
 			await axios.delete(
 				`/api/dashboard/${docType}/${series}/${docId}/${yearSelect || ''}`,
@@ -155,18 +155,18 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 	};
 
 	const handleAcceptDocument = async (series: string, docId: string) => {
-		// Error when accepting: !!!
-		// XML Parsing Error: no element found
-		// Location: http://localhost:3000/api/dashboard/missing?doc_id=6334be6da875c7c312b0f82e
-		// Line Number 1, Column 1:
-		if (confirm('Are you sure You want to Accept this document?') === false) {
-			return;
-		}
-		if (!series || !docId) {
-			setFetchingError('Series and document Id is required.');
-			return;
-		}
 		try {
+			// ! Error when accepting: !!!
+			// XML Parsing Error: no element found
+			// Location: http://localhost:3000/api/dashboard/missing?doc_id=6334be6da875c7c312b0f82e
+			// Line Number 1, Column 1:
+			if (confirm('Are you sure You want to Accept this document?') === false) {
+				return;
+			}
+			if (!series || !docId) {
+				setFetchingError('Series and document Id is required.');
+				return;
+			}
 			setFetching(true);
 			await axios.put(`/api/dashboard/accept-document/${docId}`, {
 				timeout: 15000,
@@ -271,7 +271,7 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 			if (!requestUpdateSeries) return;
 			setFetching(true);
 			await axios.get(
-				`/api/dashboard/req-update-newest/${requestUpdateSeries}/${
+				`/api/dashboard/update-newest/${requestUpdateSeries}/${
 					requestUpdateYear || ''
 				}`,
 				{ timeout: 25000 }
@@ -297,7 +297,7 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 			);
 			if (confirm) {
 				await axios.get(
-					`/api/dashboard/req-update-all/${requestUpdateSeries}/${requestUpdateYear}`,
+					`/api/dashboard/update-all/${requestUpdateSeries}/${requestUpdateYear}`,
 					{ timeout: 25000 }
 				);
 			}
