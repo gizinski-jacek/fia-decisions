@@ -118,6 +118,6 @@ export interface PenaltyColors {
 	[key: string]: { color: string; backgroundColor: string };
 }
 
-export interface DashboardFormValues {
+export interface LoginFormValues {
 	password: string;
 }
