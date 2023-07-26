@@ -13,11 +13,11 @@ const DashboardForm = ({ handleSignIn }: Props) => {
 	const [formData, setFormData] = useState<LoginFormValues>(
 		defaultDashboardFormValues
 	);
-	const [formErrors, setFormErrors] = useState<string[]>([]);
+	const [formErrors, setFormErrors] = useState<string[] | null>(null);
 	const [sending, setSending] = useState(false);
 
 	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		setFormErrors([]);
+		setFormErrors(null);
 		const { name, value } = e.target;
 		setFormData((prevState) => ({ ...prevState, [name]: value }));
 	};
@@ -25,7 +25,7 @@ const DashboardForm = ({ handleSignIn }: Props) => {
 	const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
 		try {
 			e.preventDefault();
-			setFormErrors([]);
+			setFormErrors(null);
 			if (!formData.password) {
 				setFormErrors(['Must provide a password.']);
 				return;
@@ -53,13 +53,13 @@ const DashboardForm = ({ handleSignIn }: Props) => {
 	};
 
 	return (
-		<Form className='w-50 mx-auto my-5 px-5 bg-light rounded text-center d-flex flex-column justify-content-center align-items-center'>
-			<h2 className='my-5'>Dashboard Access</h2>
+		<Form className='w-50 mx-auto my-5 p-3 bg-light rounded text-center d-flex flex-column gap-3 justify-content-center align-items-center'>
+			<h2>Dashboard Access</h2>
 			<Form.Group>
 				<Form.Label htmlFor=''>Dashboard Password</Form.Label>
 				<Form.Control
 					className={`${
-						formErrors.length > 0 && formData.password
+						formErrors && formData.password
 							? 'outline-error'
 							: formData.password.length < 8 || formData.password.length > 64
 							? 'outline-warning'
@@ -81,7 +81,7 @@ const DashboardForm = ({ handleSignIn }: Props) => {
 					Password 8-64 characters long
 				</Form.Text>
 			</Form.Group>
-			{formErrors.length > 0 && (
+			{formErrors && (
 				<div className='m-0 mt-4 alert alert-danger alert-dismissible'>
 					{formErrors.map((message, index) => (
 						<div key={index}>{message}</div>
@@ -89,15 +89,15 @@ const DashboardForm = ({ handleSignIn }: Props) => {
 					<button
 						type='button'
 						className='btn btn-close'
-						onClick={() => setFormErrors([])}
+						onClick={() => setFormErrors(null)}
 					></button>
 				</div>
 			)}
 			{sending && <LoadingBar margin='1rem 0' width='50%' />}
 			<Button
 				variant='dark'
-				className='fw-bolder my-2'
-				disabled={sending || !formData.password || !!formErrors.length}
+				className='fw-bolder'
+				disabled={sending || !formData.password || !!formErrors}
 				onClick={handleSubmit}
 			>
 				Submit
