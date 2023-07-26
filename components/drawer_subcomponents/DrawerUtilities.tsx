@@ -154,10 +154,10 @@ const DrawerUtilities = ({ screenIsSmall }: Props) => {
 			<Modal
 				show={showFormModal}
 				onHide={handleCloseFormModal}
-				dialogClassName='modal-md'
+				dialogClassName='modal-md custom-minwidth'
 			>
 				<Modal.Header closeButton>
-					<Modal.Title className='d-flex gap-5 me-2'>
+					<Modal.Title className='d-flex w-100 gap-3 justify-content-between me-3'>
 						<Button
 							variant={`success ${displayedForm === 'file' ? 'active' : ''}`}
 							className='fw-bolder'
@@ -194,10 +194,10 @@ const DrawerUtilities = ({ screenIsSmall }: Props) => {
 			<Modal
 				show={showCalendarModal}
 				onHide={handleCloseCalendarModal}
-				dialogClassName='modal-lg custom-modal-width'
+				dialogClassName='modal-lg custom-minwidth custom-maxwidth'
 			>
 				<Modal.Header closeButton>
-					<Modal.Title className='w-100 me-5'>
+					<Modal.Title className='w-100 me-3'>
 						<h3 className='fw-bold'>
 							Formula 1{' '}
 							{calendarData?.find((w) => w.season !== undefined)?.season} Race
