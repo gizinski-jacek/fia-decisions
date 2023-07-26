@@ -17,8 +17,27 @@ const FormulaSeries: NextPage = () => {
 	const [yearSelect, setYearSelect] = useState<string>('');
 	const [fetching, setFetching] = useState(true);
 	const [fetchingError, setFetchingError] = useState<string | null>(null);
+	const [screenIsSmall, setSmallScreen] = useState(false);
 
 	const router = useRouter();
+
+	useEffect(() => {
+		if (typeof window !== 'undefined') {
+			setSmallScreen(window.innerWidth < 576);
+		}
+	}, []);
+
+	useEffect(() => {
+		if (typeof window !== 'undefined') {
+			const toggleScreenIsSmall = () => {
+				setSmallScreen(window.innerWidth < 576);
+			};
+
+			window.addEventListener('resize', toggleScreenIsSmall);
+
+			return () => window.removeEventListener('resize', toggleScreenIsSmall);
+		}
+	}, []);
 
 	const handleShowSearchInput = () => {
 		setShowSearchInput(true);
@@ -99,7 +118,7 @@ const FormulaSeries: NextPage = () => {
 	}, [yearSelect, getDocuments, router]);
 
 	return (
-		<div className='m-2'>
+		<div className='d-flex flex-column gap-2 m-2'>
 			<div className='position-relative'>
 				<div
 					className={`custom-search 
@@ -114,7 +133,7 @@ const FormulaSeries: NextPage = () => {
 								<i className='bi bi-arrow-left fs-6'></i>
 							</Button>
 							<Form.Control
-								className='py-0 px-2 mx-1'
+								className='py-0 px-2 mx-2'
 								type='search'
 								name='search_input'
 								id='search_input'
@@ -137,7 +156,7 @@ const FormulaSeries: NextPage = () => {
 				</div>
 				<Form
 					className={`position-absolute top-0 end-0 mb-2 me-xl-0 custom-select 
-					${drawer.isHidden ? 'me-5' : ''} `}
+					${drawer.isHidden && screenIsSmall ? 'me-5' : ''} `}
 				>
 					<Form.Group>
 						<Form.Select
@@ -175,7 +194,7 @@ const FormulaSeries: NextPage = () => {
 				{router.query.series &&
 					`Formula ${router.query.series?.slice(-1)} Penalties`}
 			</h2>
-			<div className='my-lg-2'>
+			<div className='d-flex flex-column gap-2'>
 				{fetching ? (
 					<LoadingBar margin='5rem' />
 				) : docsData ? (
