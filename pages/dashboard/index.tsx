@@ -43,7 +43,8 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 	const [yearSelect, setYearSelect] = useState(
 		new Date().getFullYear().toString()
 	);
-	const [showModal, setShowModal] = useState<boolean>(false);
+	const [showRequestUpdateModal, setShowRequestUpdateModal] =
+		useState<boolean>(false);
 	const [requestUpdateSeries, setRequestUpdateSeries] = useState<string | null>(
 		null
 	);
@@ -277,14 +278,14 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 				{ timeout: 25000 }
 			);
 			setFetching(false);
-			handleCloseModal();
+			closeRequestUpdateModal();
 		} catch (error: any) {
 			setFetchingError(
 				error?.response?.data ||
 					'Unknown server error. Fetching documents failed.'
 			);
 			setFetching(false);
-			handleCloseModal();
+			closeRequestUpdateModal();
 		}
 	};
 
@@ -302,31 +303,31 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 				);
 			}
 			setFetching(false);
-			handleCloseModal();
+			closeRequestUpdateModal();
 		} catch (error: any) {
 			setFetchingError(
 				error?.response?.data ||
 					'Unknown server error. Fetching documents failed.'
 			);
 			setFetching(false);
-			handleCloseModal();
+			closeRequestUpdateModal();
 		}
 	};
 
-	const handleOpenModal = () => {
-		setShowModal(true);
+	const openRequestUpdateModal = () => {
+		setShowRequestUpdateModal(true);
 	};
 
-	const handleCloseModal = () => {
-		setShowModal(false);
+	const closeRequestUpdateModal = () => {
+		setShowRequestUpdateModal(false);
 		setRequestUpdateSeries(null);
 		setRequestUpdateYear(null);
 	};
 
 	return signedIn ? (
-		<div className='mt-5 m-2'>
-			<div className='d-flex justify-content-between align-items-start my-2'>
-				<Form className='rounded-2 p-2 my-2 bg-light'>
+		<div className='d-flex flex-column gap-3 m-2 my-5'>
+			<div className='d-flex gap-3 justify-content-between align-items-start'>
+				<Form className='rounded-2 p-2 bg-light'>
 					<Form.Group>
 						<Form.Label
 							htmlFor='documents'
@@ -370,7 +371,7 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 					</Form.Group>
 				</Form>
 				{fetchingError && (
-					<div className='mx-4 alert alert-danger alert-dismissible'>
+					<div className='alert alert-danger alert-dismissible'>
 						<strong>{fetchingError}</strong>
 						<button
 							type='button'
@@ -384,23 +385,23 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 					variant='primary'
 					size='sm'
 					disabled={fetching}
-					onClick={handleOpenModal}
+					onClick={openRequestUpdateModal}
 				>
 					Request Update
 				</Button>
 				<Modal
-					show={showModal}
-					onHide={handleCloseModal}
-					dialogClassName='modal-md'
+					show={showRequestUpdateModal}
+					onHide={closeRequestUpdateModal}
+					dialogClassName='modal-md custom-minwidth'
 				>
 					<Modal.Header closeButton>
-						<Modal.Title className='d-flex gap-5 me-2'>
+						<Modal.Title className='d-flex gap-5 me-3'>
 							<h3>Request Update Documents</h3>
 						</Modal.Title>
 					</Modal.Header>
 					<Modal.Body>
-						{!fetching && showModal ? (
-							<Form className='d-flex flex-column gap-4 w-50 my-4 mx-auto'>
+						{!fetching ? (
+							<Form className='d-flex flex-column gap-4 w-50 my-3 mx-auto'>
 								<Form.Group>
 									<Form.Select
 										className='py-0'
@@ -460,10 +461,10 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 				</Modal>
 			</div>
 			{chosenDocs !== 'contact-message' && chosenDocs !== 'missing-info' ? (
-				<Form className='rounded-2 p-2 my-2 bg-light d-flex'>
-					<Form.Group className='d-flex flex-grow-1'>
+				<Form className='d-flex gap-5 rounded-2 p-2 bg-light'>
+					<Form.Group className='d-flex flex-grow-1 gap-2'>
 						<Form.Control
-							className='py-0 px-2 me-2'
+							className='py-0 px-2'
 							type='search'
 							name='search_input'
 							id='search_input'
@@ -483,7 +484,7 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 						</Button>
 					</Form.Group>
 					{chosenDocs !== 'missing-file' && (
-						<Form.Group className='ms-5'>
+						<Form.Group>
 							<Form.Select
 								className='py-0 px-1 fs-5 custom-select'
 								name='year_select'
@@ -519,7 +520,7 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 					)}
 				</Form>
 			) : null}
-			{!showModal ? (
+			{!showRequestUpdateModal ? (
 				!fetching ? (
 					chosenDocs && docsData && docsData.length !== 0 ? (
 						chosenDocs.match(/(penalties__|missing-file)/im) ? (
