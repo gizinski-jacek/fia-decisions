@@ -209,7 +209,11 @@ table {
 	}
 }
 
-.custom-modal-width {
+.custom-minwidth {
+	min-width: calc(440px - 1rem) !important;
+}
+
+.custom-maxwidth {
 	max-width: 1000px !important;
 }
 
