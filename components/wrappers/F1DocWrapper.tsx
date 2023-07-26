@@ -50,7 +50,7 @@ const F1DocWrapper = ({ data, cmsProps }: Props) => {
 		for (const [key, value] of Object.entries(obj.document_info)) {
 			content.push(
 				<div key={`document_info-${key}`}>
-					<p className='fw-bold m-0 d-inline'>{key}:</p> {value}
+					<p className='fw-bold d-inline'>{key}:</p> {value}
 				</div>
 			);
 		}
@@ -91,12 +91,12 @@ const F1DocWrapper = ({ data, cmsProps }: Props) => {
 
 	return (
 		<>
-			<Accordion id={data._id} className='my-1'>
+			<Accordion id={data._id}>
 				<Accordion.Item eventKey='0'>
-					<Accordion.Header className='p-0 m-0'>
-						<div className='d-flex flex-column w-100 flex-sm-row align-items-center custom-container'>
+					<Accordion.Header>
+						<div className='d-flex flex-column w-100 flex-sm-row align-items-center gap-1 gap-sm-1 me-3 custom-container'>
 							<div
-								className='rounded-pill border border-dark p-1 me-sm-1 text-capitalize text-center text-nowrap fw-bold'
+								className='rounded-pill border border-dark p-1 text-capitalize text-center text-nowrap fw-bold'
 								style={{
 									...penaltyTypeColors[
 										data.penalty_type as keyof PenaltyColors
@@ -108,39 +108,39 @@ const F1DocWrapper = ({ data, cmsProps }: Props) => {
 									data.incident_info.Decision[0]
 								)}
 							</div>
-							<div className='d-none d-sm-block m-1 me-sm-2 text-center fw-bold text-break'>
+							<div className='d-none d-sm-block text-center fw-bold text-break'>
 								{data.incident_info.Session}
 							</div>
-							<div className='m-1 me-sm-2 text-center text-sm-start fw-bold'>
+							<div className='text-center text-sm-start fw-bold flex-shrink-1'>
 								{data.incident_info.Driver}
 							</div>
-							<div className='me-sm-2 d-sm-none d-md-block text-capitalize text-center text-sm-start  flex-grow-1 fw-bold'>
+							<div className='d-sm-none d-md-block text-capitalize text-center text-sm-start flex-grow-1 fw-bold'>
 								{data.incident_title}
 							</div>
 						</div>
 					</Accordion.Header>
-					<Accordion.Body className='d-flex flex-column flex-sm-row justify-content-between'>
-						<div className='d-flex flex-grow-1 flex-column flex-md-row'>
+					<Accordion.Body className='d-flex flex-column flex-sm-row gap-3 justify-content-between'>
+						<div className='d-flex flex-grow-1 flex-column flex-md-row gap-md-3'>
 							<div className='d-block d-md-none'>
 								<p className='fw-bold d-inline'>Title: </p>
 								<p className='d-inline'>{data.doc_name}</p>
 							</div>
-							<div className='col-md-4 me-md-3 mx-lg-0 me-lg-4'>
-								<p className='fw-bold d-inline'>Date: </p>
+							<div className='col-md-4'>
+								<p className='d-inline fw-bold'>Date: </p>
 								<p className='d-inline'>
 									{data.document_info.Date} {data.document_info.Time}
 								</p>
 							</div>
 							<div className='d-block d-sm-none'>
-								<p className='fw-bold d-inline'>Session: </p>
+								<p className='d-inline fw-bold'>Session: </p>
 								<p className='d-inline'>{data.incident_info.Session}</p>
 							</div>
-							<div className='mx-md-3'>
+							<div>
 								{data.incident_info.Decision.map((str, i) => {
 									if (i === 0) {
 										return (
 											<div key={i}>
-												<p className='fw-bold m-0 d-inline'>Penalty: </p>
+												<p className='fw-bold d-inline'>Penalty: </p>
 												<p className='d-inline'>{str}</p>
 											</div>
 										);
@@ -150,32 +150,22 @@ const F1DocWrapper = ({ data, cmsProps }: Props) => {
 								})}
 							</div>
 						</div>
-						<div className='d-flex flex-column'>
+						<div className='d-flex flex-column flex-md-row gap-2'>
 							<Button
 								size='sm'
 								variant='info'
-								className='fw-bolder mt-2 mt-sm-0 custom-button'
+								className='fw-bolder text-nowrap custom-button'
 								onClick={handleOpenModal}
 							>
 								Details
 							</Button>
 							{cmsProps && (
 								<>
-									<Button
-										size='sm'
-										variant='danger'
-										className='fw-bolder mt-2 custom-button'
-										onClick={() =>
-											cmsProps.deleteHandler(cmsProps.docType, data._id)
-										}
-									>
-										Delete
-									</Button>
 									{cmsProps.docType === 'missing-file' && (
 										<Button
 											size='sm'
 											variant='success'
-											className='fw-bolder mt-2 custom-button'
+											className='fw-bolder text-nowrap custom-button'
 											onClick={() =>
 												cmsProps.acceptHandler(data.series, data._id)
 											}
@@ -183,6 +173,16 @@ const F1DocWrapper = ({ data, cmsProps }: Props) => {
 											Accept
 										</Button>
 									)}
+									<Button
+										size='sm'
+										variant='danger'
+										className='fw-bolder text-nowrap custom-button'
+										onClick={() =>
+											cmsProps.deleteHandler(cmsProps.docType, data._id)
+										}
+									>
+										Delete
+									</Button>
 								</>
 							)}
 						</div>
@@ -192,7 +192,7 @@ const F1DocWrapper = ({ data, cmsProps }: Props) => {
 			<Modal
 				show={showDocModal}
 				onHide={handleCloseModal}
-				dialogClassName='modal-lg'
+				dialogClassName='modal-lg custom-minwidth'
 			>
 				<Modal.Header closeButton>
 					<Modal.Title className='fw-bolder'>Document Details</Modal.Title>
