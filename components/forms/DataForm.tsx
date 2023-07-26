@@ -13,13 +13,13 @@ const DataForm = () => {
 	const [formData, setFormData] = useState<DataFormValues>(
 		defaultDataFormValues
 	);
-	const [formErrors, setFormErrors] = useState<string[]>([]);
+	const [formErrors, setFormErrors] = useState<string[] | null>(null);
 	const [sending, setSending] = useState(false);
 	const [submitSuccess, setSubmitSuccess] = useState(false);
 	const formRef = useRef<HTMLFormElement>(null);
 
 	const handleInputChange = async (e: React.ChangeEvent<HTMLElement>) => {
-		setFormErrors([]);
+		setFormErrors(null);
 		const { name, value } = e.target as HTMLSelectElement | HTMLInputElement;
 		setFormData((prevState) => ({ ...prevState, [name]: value }));
 	};
@@ -28,7 +28,7 @@ const DataForm = () => {
 		try {
 			e.preventDefault();
 			setSubmitSuccess(false);
-			setFormErrors([]);
+			setFormErrors(null);
 			if (!formData.series || !formData.year || !formData.description) {
 				setFormErrors([
 					'Must choose a Series, a Year and provide a Description.',
@@ -69,19 +69,19 @@ const DataForm = () => {
 	};
 
 	return (
-		<Form ref={formRef}>
+		<Form ref={formRef} className='d-flex flex-column gap-3'>
 			<h5>
 				Use this form to provide information about a penalty You believe is
 				missing from the list.
 			</h5>
-			<div className='p-3 my-3 rounded-2 bg-light'>
-				<Form.Group className='mb-3'>
+			<div className='d-flex flex-column gap-3 p-3 rounded-2 bg-light'>
+				<Form.Group>
 					<Form.Label htmlFor='series' className='fw-bolder'>
 						Select series
 					</Form.Label>
 					<Form.Select
 						className={
-							formErrors.length > 0 && !formData.series
+							formErrors && !formData.series
 								? 'outline-error'
 								: !formData.series
 								? 'outline-warning'
@@ -102,13 +102,13 @@ const DataForm = () => {
 						))}
 					</Form.Select>
 				</Form.Group>
-				<Form.Group className='mb-3'>
+				<Form.Group>
 					<Form.Label htmlFor='year' className='fw-bolder'>
 						Select year
 					</Form.Label>
 					<Form.Select
 						className={
-							formErrors.length > 0 && !formData.year
+							formErrors && !formData.year
 								? 'outline-error'
 								: !formData.year
 								? 'outline-warning'
@@ -145,14 +145,14 @@ const DataForm = () => {
 						Select series to see supported years
 					</Form.Text>
 				</Form.Group>
-				<Form.Group className='mb-3'>
+				<Form.Group>
 					<Form.Label htmlFor='title' className='fw-bolder'>
 						Penalty Description
 					</Form.Label>
 					<Form.Control
 						as='textarea'
 						className={
-							formErrors.length > 0 && !formData.description
+							formErrors && !formData.description
 								? 'outline-error'
 								: !formData.description ||
 								  formData.description.length < 16 ||
@@ -177,7 +177,7 @@ const DataForm = () => {
 						Description 16-512 characters long
 					</Form.Text>
 				</Form.Group>
-				{formErrors.length > 0 && (
+				{formErrors && (
 					<div className='m-0 mt-4 alert alert-danger alert-dismissible'>
 						{formErrors.map((message, index) => (
 							<div key={index}>{message}</div>
@@ -185,7 +185,7 @@ const DataForm = () => {
 						<button
 							type='button'
 							className='btn btn-close'
-							onClick={() => setFormErrors([])}
+							onClick={() => setFormErrors(null)}
 						></button>
 					</div>
 				)}
@@ -211,7 +211,7 @@ const DataForm = () => {
 						!formData.series ||
 						!formData.year ||
 						!formData.description ||
-						!!formErrors.length
+						!!formErrors
 					}
 					onClick={handleSubmit}
 				>

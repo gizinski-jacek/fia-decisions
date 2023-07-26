@@ -9,7 +9,7 @@ const FileForm = () => {
 	const [formData, setFormData] = useState<FileFormValues>(
 		defaultFileFormValues
 	);
-	const [formErrors, setFormErrors] = useState<string[]>([]);
+	const [formErrors, setFormErrors] = useState<string[] | null>(null);
 	const [sending, setSending] = useState(false);
 	const [submitSuccess, setSubmitSuccess] = useState(false);
 	const formRef = useRef<HTMLFormElement>(null);
@@ -17,13 +17,13 @@ const FileForm = () => {
 	const handleSelectChange = async (
 		e: React.ChangeEvent<HTMLSelectElement>
 	) => {
-		setFormErrors([]);
+		setFormErrors(null);
 		const { name, value } = e.target;
 		setFormData((prevState) => ({ ...prevState, [name]: value }));
 	};
 
 	const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-		setFormErrors([]);
+		setFormErrors(null);
 		const target = e.target;
 		const file = (target.files as FileList)[0];
 		if (file.size > 1000000) {
@@ -41,7 +41,7 @@ const FileForm = () => {
 		try {
 			e.preventDefault();
 			setSubmitSuccess(false);
-			setFormErrors([]);
+			setFormErrors(null);
 			if (!formData.series && !formData.file) {
 				setFormErrors(['Must choose a Series and a PDF file.']);
 				return;
@@ -80,7 +80,7 @@ const FileForm = () => {
 	};
 
 	return (
-		<Form ref={formRef}>
+		<Form ref={formRef} className='d-flex flex-column gap-3'>
 			<h5>
 				Use this form to send a PDF file of a penalty You believe is missing
 				from the list.
@@ -104,14 +104,14 @@ const FileForm = () => {
 					Example of a valid file.
 				</a>
 			</h5>
-			<div className='p-3 my-3 rounded-2 bg-light'>
-				<Form.Group className='mb-3'>
+			<div className='d-flex flex-column gap-3 p-3 rounded-2 bg-light'>
+				<Form.Group>
 					<Form.Label htmlFor='series' className='fw-bolder'>
 						Select series
 					</Form.Label>
 					<Form.Select
 						className={
-							formErrors.length > 0 && !formData.series
+							formErrors && !formData.series
 								? 'outline-error'
 								: !formData.series
 								? 'outline-warning'
@@ -132,13 +132,13 @@ const FileForm = () => {
 						))}
 					</Form.Select>
 				</Form.Group>
-				<Form.Group className='mb-3'>
+				<Form.Group>
 					<Form.Label htmlFor='file' className='fw-bolder'>
 						Select file
 					</Form.Label>
 					<Form.Control
 						className={
-							formErrors.length > 0 && !formData.file
+							formErrors && !formData.file
 								? 'outline-error'
 								: !formData.file
 								? 'outline-warning'
@@ -157,7 +157,7 @@ const FileForm = () => {
 						Only PDF files, max size 1MB
 					</Form.Text>
 				</Form.Group>
-				{formErrors.length > 0 && (
+				{formErrors && (
 					<div className='m-0 mt-4 alert alert-danger alert-dismissible'>
 						{formErrors.map((message, index) => (
 							<div key={index}>{message}</div>
@@ -165,7 +165,7 @@ const FileForm = () => {
 						<button
 							type='button'
 							className='btn btn-close'
-							onClick={() => setFormErrors([])}
+							onClick={() => setFormErrors(null)}
 						></button>
 					</div>
 				)}
@@ -186,7 +186,7 @@ const FileForm = () => {
 					variant='primary'
 					className='fw-bolder'
 					disabled={
-						sending || !formData.series || !formData.file || !!formErrors.length
+						sending || !formData.series || !formData.file || !!formErrors
 					}
 					onClick={handleSubmit}
 				>
