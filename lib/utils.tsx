@@ -62,20 +62,20 @@ export const renderDocsGroupedByGP = (
 		}
 		for (const [key, array] of Object.entries(searchData)) {
 			dataRender.push(
-				<Accordion key={key} id={key} className='my-1'>
+				<Accordion key={key} id={key}>
 					<Accordion.Item eventKey='0'>
 						<Accordion.Header>
-							<div className='d-flex flex-column me-2 flex-sm-row w-100 align-items-center'>
-								<h4 className='me-sm-3 fw-bold text-capitalize'>{key}</h4>
-								<h4 className='me-sm-3 fw-bold text-capitalize'>
+							<div className='d-flex flex-column flex-sm-row w-100 gap-sm-3 me-3 align-items-center'>
+								<h4 className='fw-bold text-capitalize'>{key}</h4>
+								<h4 className='fw-bold text-capitalize'>
 									{array.find((doc) => doc.weekend)?.weekend}
 								</h4>
-								<h4 className='me-sm-3 fw-bold text-sm-end'>
+								<h4 className='fw-bold text-sm-end'>
 									{array.length} {array.length === 1 ? 'penalty' : 'penalties'}
 								</h4>
 							</div>
 						</Accordion.Header>
-						<Accordion.Body className='bg-light'>
+						<Accordion.Body className='d-flex flex-column gap-2 bg-light'>
 							{array.map((doc) => (
 								<F1DocWrapper key={doc._id} data={doc} cmsProps={cmsProps} />
 							))}
@@ -87,20 +87,20 @@ export const renderDocsGroupedByGP = (
 	} else {
 		for (const [key, array] of Object.entries(docsData)) {
 			dataRender.push(
-				<Accordion key={key} id={key} className='my-1'>
+				<Accordion key={key} id={key}>
 					<Accordion.Item eventKey='1'>
 						<Accordion.Header>
-							<div className='d-flex flex-column flex-sm-row w-100 align-items-center'>
-								<h4 className='me-sm-3 fw-bold text-capitalize'>{key}</h4>
-								<h4 className='me-sm-3 fw-bold text-capitalize'>
+							<div className='d-flex flex-column flex-sm-row w-100 gap-sm-3 me-3 align-items-center'>
+								<h4 className='fw-bold text-capitalize'>{key}</h4>
+								<h4 className='fw-bold text-capitalize'>
 									{array.find((doc) => doc.weekend)?.weekend}
 								</h4>
-								<h4 className='me-sm-3 fw-bold text-sm-end'>
+								<h4 className='fw-bold text-sm-end'>
 									{array.length} {array.length === 1 ? 'penalty' : 'penalties'}
 								</h4>
 							</div>
 						</Accordion.Header>
-						<Accordion.Body className='bg-light'>
+						<Accordion.Body className='d-flex flex-column gap-2 bg-light'>
 							{array.map((doc) => (
 								<F1DocWrapper key={doc._id} data={doc} cmsProps={cmsProps} />
 							))}
@@ -133,14 +133,14 @@ export const renderBySeries = (
 		for (const [key, value] of Object.entries(seriesDocs)) {
 			if (!value.length) continue;
 			seriesDocsWrapped.push(
-				<Accordion key={key} id={key} className='my-1'>
+				<Accordion key={key} id={key}>
 					<Accordion.Item eventKey='2'>
 						<Accordion.Header>
-							<h4 className='me-sm-3 fw-bold text-capitalize'>
+							<h4 className='me-3 fw-bold text-capitalize'>
 								{key.replace('f', 'Formula ')} Penalties
 							</h4>
 						</Accordion.Header>
-						<Accordion.Body className='p-0 px-1'>
+						<Accordion.Body className='d-flex flex-column gap-2'>
 							{value.map((docs: GroupedByGP) =>
 								renderDocsGroupedByGP(docs, searchQuery, cmsProps)
 							)}
