@@ -9,21 +9,21 @@ interface Props {
 
 const MissingDocWrapper = ({ data, docType, handleDelete }: Props) => {
 	return (
-		<Accordion className='col m-2'>
-			<Accordion.Item eventKey='0'>
+		<Accordion>
+			<Accordion.Item eventKey='2'>
 				<Accordion.Header>
-					<h4 className='fw-bold'>Missing Penalties</h4>
-					<h4 className='me-sm-3 fw-bold text-sm-end'>
-						{`${data.length} missing`}
-					</h4>
+					<div className='w-100 d-flex align-items-center gap-3 me-3'>
+						<h4 className='fw-bold'>Missing Penalties</h4>
+						<h4 className='fw-bold text-sm-end'>{`${data.length} missing`}</h4>
+					</div>
 				</Accordion.Header>
-				<Accordion.Body>
+				<Accordion.Body className='d-flex flex-column gap-2'>
 					{data.map((missing) => (
 						<div
 							key={missing._id}
-							className='p-2 mb-2 bg-light rounded text-break'
+							className='d-flex flex-column gap-2 p-2 bg-light border border-info rounded text-break'
 						>
-							<div className='d-flex justify-content-between'>
+							<div className='d-flex gap-3 justify-content-between'>
 								<div>
 									<strong>Series</strong>
 									<p className='text-capitalize'>{missing.series}</p>
@@ -31,7 +31,7 @@ const MissingDocWrapper = ({ data, docType, handleDelete }: Props) => {
 								<Button
 									variant='danger'
 									size='sm'
-									className='fw-bolder mt-2 mt-sm-0 custom-button'
+									className='fw-bolder text-nowrap custom-button'
 									onClick={() => handleDelete(docType, missing._id)}
 								>
 									Delete

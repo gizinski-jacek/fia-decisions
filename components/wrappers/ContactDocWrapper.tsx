@@ -9,21 +9,23 @@ interface Props {
 
 const ContactDocWrapper = ({ data, docType, handleDelete }: Props) => {
 	return (
-		<Accordion className='col m-2'>
+		<Accordion>
 			<Accordion.Item eventKey='1'>
 				<Accordion.Header>
-					<h4 className='fw-bold'>Contact Messages</h4>
-					<h4 className='me-sm-3 fw-bold text-sm-end'>
-						{`${data.length} ${data.length === 1 ? 'message' : 'messages'}`}
-					</h4>
+					<div className='w-100 d-flex align-items-center gap-3 me-3'>
+						<h4 className='fw-bold'>Contact Messages</h4>
+						<h4 className='fw-bold text-sm-end'>
+							{`${data.length} ${data.length === 1 ? 'message' : 'messages'}`}
+						</h4>
+					</div>
 				</Accordion.Header>
-				<Accordion.Body>
+				<Accordion.Body className='d-flex flex-column gap-2'>
 					{(data as ContactDocModel[]).map((contact) => (
 						<div
 							key={contact._id}
-							className='p-2 mb-2 bg-light rounded text-break'
+							className='d-flex flex-column gap-2 p-2 bg-light border border-info rounded text-break'
 						>
-							<div className='d-flex justify-content-between'>
+							<div className='d-flex gap-3 justify-content-between'>
 								<div>
 									<strong>Email</strong>
 									<a href={`mailto:${contact.email}`} className='d-block'>
@@ -37,7 +39,7 @@ const ContactDocWrapper = ({ data, docType, handleDelete }: Props) => {
 								<Button
 									variant='danger'
 									size='sm'
-									className='fw-bolder mt-2 mt-sm-0 custom-button'
+									className='fw-bolder text-nowrap custom-button'
 									onClick={() => handleDelete(docType, contact._id)}
 								>
 									Delete
