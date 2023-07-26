@@ -44,7 +44,7 @@ const Drawer = ({ children }: Props) => {
 						? 'd-flex flex-column'
 						: 'custom-md-grid'
 				}
-				${drawer.isHidden ? 'custom-nav-hide' : ''}`}
+				${drawer.isHidden && screenIsSmall ? 'custom-nav-hide' : ''}`}
 			>
 				<DrawerLinks screenIsSmall={screenIsSmall} />
 				<DrawerUtilities screenIsSmall={screenIsSmall} />
