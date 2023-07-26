@@ -81,7 +81,7 @@ const F1DocWrapper = ({ data, cmsProps }: Props) => {
 			}
 			content.push(
 				<div key={key}>
-					<p className='fw-bold  d-inline'>{key}:</p> {value}
+					<p className='fw-bold d-inline'>{key}:</p> {value}
 				</div>
 			);
 		}

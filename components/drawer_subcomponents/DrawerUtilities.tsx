@@ -94,7 +94,7 @@ const DrawerUtilities = ({ screenIsSmall }: Props) => {
 	return (
 		<>
 			<ul
-				className={`nav nav-fill nav-tabs flex-nowrap p-2  
+				className={`nav nav-fill nav-tabs flex-nowrap p-2 
 						${drawer.onLeft ? 'flex-sm-column gap-2' : 'flex-row gap-3'}
 						${screenIsSmall || drawer.onLeft ? '' : 'custom-border'}`}
 			>
