@@ -9,13 +9,13 @@ const ContactForm = () => {
 	const [formData, setFormData] = useState<ContactFormValues>(
 		defaultContactFormValues
 	);
-	const [formErrors, setFormErrors] = useState<string[]>([]);
+	const [formErrors, setFormErrors] = useState<string[] | null>();
 	const [sending, setSending] = useState(false);
 	const [submitSuccess, setSubmitSuccess] = useState(false);
 	const formRef = useRef<HTMLFormElement>(null);
 
 	const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-		setFormErrors([]);
+		setFormErrors(null);
 		const { name, value } = e.target;
 		setFormData((prevState) => ({ ...prevState, [name]: value }));
 	};
@@ -24,7 +24,7 @@ const ContactForm = () => {
 		try {
 			e.preventDefault();
 			setSubmitSuccess(false);
-			setFormErrors([]);
+			setFormErrors(null);
 			if (!formData.email && !formData.message) {
 				setFormErrors(['Must provide an Email and a Message.']);
 				return;
@@ -63,19 +63,19 @@ const ContactForm = () => {
 	};
 
 	return (
-		<Form ref={formRef}>
+		<Form ref={formRef} className='d-flex flex-column gap-3'>
 			<h5>
 				Use this form to report issue with the site or contact me about any
 				other matter.
 			</h5>
-			<div className='p-3 my-3 rounded-2 bg-light'>
-				<Form.Group className='mb-3'>
+			<div className='d-flex flex-column gap-3 p-3 rounded-2 bg-light'>
+				<Form.Group>
 					<Form.Label htmlFor='email' className='fw-bolder'>
 						Email
 					</Form.Label>
 					<Form.Control
 						className={` ${
-							formErrors.length > 0 && !formData.email
+							formErrors && !formData.email
 								? 'outline-error'
 								: !formData.email ||
 								  formData.email.length < 8 ||
@@ -99,14 +99,14 @@ const ContactForm = () => {
 						Valid email, 8-64 characters long
 					</Form.Text>
 				</Form.Group>
-				<Form.Group className='mb-3'>
+				<Form.Group>
 					<Form.Label htmlFor='message' className='fw-bolder'>
 						Message
 					</Form.Label>
 					<Form.Control
 						as='textarea'
 						className={
-							formErrors.length > 0 && !formData.message
+							formErrors && !formData.message
 								? 'outline-error'
 								: !formData.message ||
 								  formData.message.length < 4 ||
@@ -131,7 +131,7 @@ const ContactForm = () => {
 						Message 4-512 characters long
 					</Form.Text>
 				</Form.Group>
-				{formErrors.length > 0 && (
+				{formErrors && (
 					<div className='m-0 mt-4 alert alert-danger alert-dismissible'>
 						{formErrors.map((message, index) => (
 							<div key={index}>{message}</div>
@@ -139,7 +139,7 @@ const ContactForm = () => {
 						<button
 							type='button'
 							className='btn btn-close'
-							onClick={() => setFormErrors([])}
+							onClick={() => setFormErrors(null)}
 						></button>
 					</div>
 				)}
@@ -161,10 +161,7 @@ const ContactForm = () => {
 					type='submit'
 					className='fw-bolder'
 					disabled={
-						sending ||
-						!formData.email ||
-						!formData.message ||
-						!!formErrors.length
+						sending || !formData.email || !formData.message || !!formErrors
 					}
 					onClick={handleSubmit}
 				>
