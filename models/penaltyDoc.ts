@@ -32,7 +32,7 @@ const PenaltySchema = new Schema<PenaltyModel>(
 			Reason: { type: String, trim: true, required: true },
 		},
 		stewards: [{ type: String, trim: true, required: true }],
-		manual_upload: { type: Boolean, required: true },
+		manual_upload: { type: Boolean, required: true, default: false },
 	},
 	{ timestamps: true }
 );
