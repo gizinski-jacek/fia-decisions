@@ -192,7 +192,7 @@ const FormulaSeries: NextPage = () => {
 				style={{ lineHeight: '2.15rem' }}
 			>
 				{router.query.series &&
-					`Formula ${router.query.series?.slice(-1)} Penalties`}
+					`Track Limits - F${router.query.series?.slice(-1)} Penalties`}
 			</h2>
 			<div className='d-flex flex-column gap-2'>
 				{fetching ? (
