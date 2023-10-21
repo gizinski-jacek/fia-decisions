@@ -1,4 +1,4 @@
-# FIA Formula penalties
+# Track Limits - FIA Formula penalties
 
 An app built for Formula series fans who do not feel like going through news articles or downloading FIA documents to find out what penalties were given to their favorite drivers.
 
@@ -6,7 +6,7 @@ This project is complemented by [FIA decisions worker API](https://github.com/gi
 
 ## Table of contents
 
-- [FIA Formula penalties](#fia-formula-penalties)
+- [Track Limits - FIA Formula penalties](#track-limits---fia-formula-penalties)
   - [Table of contents](#table-of-contents)
 - [Github \& Live](#github--live)
   - [Getting Started](#getting-started)
@@ -22,7 +22,7 @@ Github repo can be found [here](https://github.com/gizinski-jacek/fia-decisions)
 
 API worker repo can be found [here](https://github.com/gizinski-jacek/fia-decisions-worker-api).
 
-Live demo can be found on [Vercel](https://tracklimits.cfd).
+Live demo can be found on [Vercel](https://fia-penalties-gizinski-jacek.vercel.app).
 
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
