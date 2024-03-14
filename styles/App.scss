@@ -48,7 +48,8 @@ nav {
 		}
 
 		&:hover > div {
-			display: flex !important;
+			visibility: visible !important;
+			transition-delay: 0.05s;
 		}
 	}
 
@@ -215,6 +216,10 @@ table {
 
 .custom-maxwidth {
 	max-width: 1000px !important;
+}
+
+.custom-alert-maxheight {
+	max-height: 140px;
 }
 
 .custom-button {
