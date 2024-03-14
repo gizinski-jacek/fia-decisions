@@ -101,6 +101,8 @@ const UpdateDocsForm = ({ reloadRoute }: Props) => {
 					{ timeout: 25000 }
 				);
 			}
+			setFormData(defaultUpdateDocsFormValues);
+			formRef.current?.reset();
 			setSubmitSuccess(true);
 			setFetching(false);
 		} catch (error: any) {
