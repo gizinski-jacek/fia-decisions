@@ -45,6 +45,6 @@ export const defaultSeriesDataFormValues: SeriesDataFormValues = {
 	documents_url: '',
 };
 
-export const defaultDashboardFormValues: LoginFormValues = {
+export const defaultSignInFormValues: LoginFormValues = {
 	password: '',
 };
