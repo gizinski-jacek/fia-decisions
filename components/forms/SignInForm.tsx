@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { Button, Form } from 'react-bootstrap';
-import { defaultDashboardFormValues } from '../../lib/myData';
+import { defaultSignInFormValues } from '../../lib/myData';
 import { LoginFormValues } from '../../types/myTypes';
 import axios, { AxiosError } from 'axios';
 import LoadingBar from '../LoadingBar';
 import { useRouter } from 'next/router';
 
-const DashboardForm = () => {
+const SignInForm = () => {
 	const [formData, setFormData] = useState<LoginFormValues>(
-		defaultDashboardFormValues
+		defaultSignInFormValues
 	);
 	const [formErrors, setFormErrors] = useState<string[] | null>(null);
 	const [fetching, setFetching] = useState(false);
@@ -128,4 +128,4 @@ const DashboardForm = () => {
 	);
 };
 
-export default DashboardForm;
+export default SignInForm;
