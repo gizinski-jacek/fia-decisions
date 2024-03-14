@@ -2,7 +2,7 @@ import * as Yup from 'yup';
 import {
 	ContactFormValues,
 	LoginFormValues,
-	DataFormValues,
+	InformationFormValues,
 	SeriesDataFormValues,
 } from '../types/myTypes';
 import { fiaDomain, supportedSeries } from './myData';
@@ -20,7 +20,7 @@ export default async function yupValidation<T = Record<string, any>>(
 	}
 }
 
-export const dataFormValidationSchema: Yup.SchemaOf<DataFormValues> =
+export const informationFormValidationSchema: Yup.SchemaOf<InformationFormValues> =
 	Yup.object().shape({
 		series: Yup.string()
 			.required('Series is required.')
