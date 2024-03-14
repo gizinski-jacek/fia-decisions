@@ -6,16 +6,17 @@ import { Button, Form } from 'react-bootstrap';
 import { renderDocsGroupedByGP } from '../../lib/utils';
 import axios, { AxiosError } from 'axios';
 import LoadingBar from '../../components/LoadingBar';
-import { DrawerContext } from '../../hooks/DrawerProvider';
-import { SupportedSeriesDataContext } from '../../hooks/SupportedYearsProvider';
+import { DrawerContext } from '../../hooks/DrawerContextProvider';
+import { SeriesDataContext } from '../../hooks/SeriesDataContextProvider';
 
 const FormulaSeries: NextPage = () => {
 	const { drawer } = useContext(DrawerContext);
-	const { yearsBySeries } = useContext(SupportedSeriesDataContext);
-	const [docsData, setDocsData] = useState<GroupedByGP | null>(null);
+	const { yearsBySeries } = useContext(SeriesDataContext);
+	const [penaltiesDocsData, setPenaltiesDocsData] =
+		useState<GroupedByGP | null>(null);
 	const [showSearchInput, setShowSearchInput] = useState(false);
 	const [searchInput, setSearchInput] = useState('');
-	const [yearSelect, setYearSelect] = useState<number | null>(null);
+	const [selectedYear, setSelectedYear] = useState<number | null>(null);
 	const [fetching, setFetching] = useState(true);
 	const [fetchingErrors, setFetchingErrors] = useState<string[] | null>(null);
 	const [screenIsSmall, setSmallScreen] = useState(false);
@@ -40,52 +41,18 @@ const FormulaSeries: NextPage = () => {
 		}
 	}, []);
 
-	const handleShowSearchInput = () => {
-		setShowSearchInput(true);
-	};
-
-	const handleHideSearchInput = () => {
-		setSearchInput('');
-		setShowSearchInput(false);
-	};
-
-	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const { value } = e.target;
-		setSearchInput(value);
-	};
-
-	const handleYearSelectChange = async (
-		e: React.ChangeEvent<HTMLSelectElement>
-	) => {
-		if (!yearsBySeries) return;
-		const { series } = router.query as { series: string };
-		const { value } = e.target;
-		if (series) {
-			if (yearsBySeries[series]?.includes(parseInt(value))) {
-				router.push(`/${series}?year=${value}`, undefined, {
-					shallow: true,
-				});
-			} else {
-				router.push(`/${series}`, undefined, {
-					shallow: true,
-				});
-			}
-			setYearSelect(parseInt(value));
-		}
-	};
-
-	const getDocuments = useCallback(async () => {
+	const fetchDocuments = useCallback(async () => {
 		try {
-			if (!yearSelect || !router.query.series) {
+			if (!selectedYear || !router.query.series) {
 				return;
 			}
 			setFetchingErrors(null);
 			setFetching(true);
 			const res: FormulaSeriesResponseData = await axios.get(
-				`/api/document/penalties/${router.query.series}/${yearSelect}`,
+				`/api/document/penalties/${router.query.series}/${selectedYear}`,
 				{ timeout: 15000 }
 			);
-			setDocsData(res.data);
+			setPenaltiesDocsData(res.data);
 			setFetching(false);
 		} catch (error: any) {
 			if (error instanceof AxiosError) {
@@ -105,29 +72,63 @@ const FormulaSeries: NextPage = () => {
 						'Failed to get documents. Try refreshing the page. If this issue persists, please use the Contact form to report this issue.',
 				]);
 			}
-			setDocsData(null);
+			setPenaltiesDocsData(null);
 		}
-	}, [yearSelect, router.query.series]);
+	}, [selectedYear, router.query.series]);
+
+	const handleShowSearchInput = () => {
+		setShowSearchInput(true);
+	};
+
+	const handleHideSearchInput = () => {
+		setSearchInput('');
+		setShowSearchInput(false);
+	};
+
+	const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const { value } = e.target;
+		setSearchInput(value);
+	};
+
+	const handleSelectedYearChange = async (
+		e: React.ChangeEvent<HTMLSelectElement>
+	) => {
+		if (!yearsBySeries) return;
+		const { series } = router.query as { series: string };
+		const { value } = e.target;
+		if (series) {
+			if (yearsBySeries[series]?.includes(parseInt(value))) {
+				router.push(`/${series}?year=${value}`, undefined, {
+					shallow: true,
+				});
+			} else {
+				router.push(`/${series}`, undefined, {
+					shallow: true,
+				});
+			}
+			setSelectedYear(parseInt(value));
+		}
+	};
 
 	useEffect(() => {
 		const { series, year } = router.query as { series: string; year: string };
 		setSearchInput('');
 		if (series && yearsBySeries) {
 			if (year && yearsBySeries[series]?.includes(parseInt(year))) {
-				setYearSelect(parseInt(year));
+				setSelectedYear(parseInt(year));
 			} else if (yearsBySeries[series]?.length) {
-				setYearSelect(yearsBySeries[series][0]);
+				setSelectedYear(yearsBySeries[series][0]);
 			} else {
-				setYearSelect(null);
+				setSelectedYear(null);
 			}
 		}
 	}, [router, yearsBySeries]);
 
 	useEffect(() => {
-		if (yearSelect) {
-			getDocuments();
+		if (selectedYear) {
+			fetchDocuments();
 		}
-	}, [yearSelect, getDocuments, router]);
+	}, [selectedYear, fetchDocuments, router]);
 
 	return (
 		<div className='d-flex flex-column gap-2 m-2'>
@@ -153,15 +154,15 @@ const FormulaSeries: NextPage = () => {
 								name='search_input'
 								id='search_input'
 								maxLength={32}
-								onChange={handleInputChange}
+								onChange={handleSearchInputChange}
 								value={searchInput}
 								placeholder='Penalty / Name / Car #'
-								disabled={!showSearchInput || !docsData || fetching}
+								disabled={!showSearchInput || !penaltiesDocsData || fetching}
 							/>
 							<Button
 								size='sm'
 								variant='dark'
-								disabled={!showSearchInput || !docsData || fetching}
+								disabled={!showSearchInput || !penaltiesDocsData || fetching}
 								onClick={() => setSearchInput('')}
 							>
 								<i className='bi bi-x fs-6'></i>
@@ -187,8 +188,8 @@ const FormulaSeries: NextPage = () => {
 								<Form.Select
 									name='year_select'
 									id='year_select'
-									onChange={handleYearSelectChange}
-									value={yearSelect || ''}
+									onChange={handleSelectedYearChange}
+									value={selectedYear || ''}
 									disabled={fetching}
 								>
 									{yearsBySeries[series]?.map((year) => (
@@ -224,13 +225,13 @@ const FormulaSeries: NextPage = () => {
 							variant='primary'
 							size='sm'
 							className='position-absolute top-0 end-0 m-2'
-							onClick={getDocuments}
+							onClick={fetchDocuments}
 						>
 							Refresh
 						</Button>
 					</div>
-				) : docsData ? (
-					renderDocsGroupedByGP(docsData, searchInput)
+				) : penaltiesDocsData ? (
+					renderDocsGroupedByGP(penaltiesDocsData, searchInput)
 				) : (
 					<div className='m-5 text-center'>
 						<h3>No Documents Found</h3>
