@@ -1,15 +1,18 @@
 import { useState, useRef, useContext } from 'react';
 import { Button, Form } from 'react-bootstrap';
 import axios, { AxiosError } from 'axios';
-import { DataFormValues } from '../../types/myTypes';
-import { defaultDataFormValues, supportedSeries } from '../../lib/myData';
+import { InformationFormValues } from '../../types/myTypes';
+import {
+	defaultInformationFormValues,
+	supportedSeries,
+} from '../../lib/myData';
 import LoadingBar from '../LoadingBar';
-import { SupportedSeriesDataContext } from '../../hooks/SupportedYearsProvider';
+import { SeriesDataContext } from '../../hooks/SeriesDataContextProvider';
 
-const DataForm = () => {
-	const { yearsBySeries } = useContext(SupportedSeriesDataContext);
-	const [formData, setFormData] = useState<DataFormValues>(
-		defaultDataFormValues
+const InformationForm = () => {
+	const { yearsBySeries } = useContext(SeriesDataContext);
+	const [formData, setFormData] = useState<InformationFormValues>(
+		defaultInformationFormValues
 	);
 	const [formErrors, setFormErrors] = useState<string[] | null>(null);
 	const [fetching, setFetching] = useState(false);
@@ -38,7 +41,7 @@ const DataForm = () => {
 			}
 			setFetching(true);
 			await axios.post('/api/forms/info', uploadData, { timeout: 15000 });
-			setFormData(defaultDataFormValues);
+			setFormData(defaultInformationFormValues);
 			formRef.current?.reset();
 			setSubmitSuccess(true);
 			setFetching(false);
@@ -117,7 +120,7 @@ const DataForm = () => {
 						value={formData.year}
 						disabled={fetching || !formData.series}
 						required
-						aria-describedby='yearSelectHelpText'
+						aria-describedby='selectYearHelpText'
 					>
 						<option value=''>Select Year</option>
 						{(() => {
@@ -214,6 +217,4 @@ const DataForm = () => {
 	);
 };
 
-export default DataForm;
-
-// !!! Rename component to InformationForm and update all related names
+export default InformationForm;

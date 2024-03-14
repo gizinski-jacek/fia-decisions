@@ -1,24 +1,26 @@
 import { useState, useRef, useContext } from 'react';
 import { Button, Form } from 'react-bootstrap';
 import axios, { AxiosError } from 'axios';
-import { UpdateDocsFormValues } from '../../types/myTypes';
-import { defaultUpdateDocsFormValues, supportedSeries } from '../../lib/myData';
+import { UpdatePenaltiesFormValues } from '../../types/myTypes';
+import {
+	defaultUpdatePenaltiesFormValues,
+	supportedSeries,
+} from '../../lib/myData';
 import LoadingBar from '../LoadingBar';
-import { SupportedSeriesDataContext } from '../../hooks/SupportedYearsProvider';
+import { SeriesDataContext } from '../../hooks/SeriesDataContextProvider';
+import { useRouter } from 'next/router';
 
-interface Props {
-	reloadRoute: () => void;
-}
-
-const UpdateDocsForm = ({ reloadRoute }: Props) => {
-	const { yearsBySeries } = useContext(SupportedSeriesDataContext);
-	const [formData, setFormData] = useState<UpdateDocsFormValues>(
-		defaultUpdateDocsFormValues
+const UpdatePenaltiesForm = () => {
+	const { yearsBySeries } = useContext(SeriesDataContext);
+	const [formData, setFormData] = useState<UpdatePenaltiesFormValues>(
+		defaultUpdatePenaltiesFormValues
 	);
 	const [formErrors, setFormErrors] = useState<string[] | null>(null);
 	const [fetching, setFetching] = useState(false);
 	const [submitSuccess, setSubmitSuccess] = useState(false);
 	const formRef = useRef<HTMLFormElement>(null);
+
+	const router = useRouter();
 
 	const handleInputChange = async (e: React.ChangeEvent<HTMLElement>) => {
 		const { name, value } = e.target as HTMLSelectElement | HTMLInputElement;
@@ -33,7 +35,7 @@ const UpdateDocsForm = ({ reloadRoute }: Props) => {
 		}
 	};
 
-	const handleUpdateDocsNewest = async () => {
+	const handleUpdatePenaltiesNewest = async () => {
 		try {
 			setFormErrors(null);
 			setSubmitSuccess(false);
@@ -48,14 +50,14 @@ const UpdateDocsForm = ({ reloadRoute }: Props) => {
 				}`,
 				{ timeout: 25000 }
 			);
-			setFormData(defaultUpdateDocsFormValues);
+			setFormData(defaultUpdatePenaltiesFormValues);
 			formRef.current?.reset();
 			setSubmitSuccess(true);
 			setFetching(false);
 		} catch (error: any) {
 			if (error instanceof AxiosError) {
 				if (error.response?.status === 401) {
-					reloadRoute();
+					router.push('/sign-in');
 				} else {
 					Array.isArray(error?.response?.data)
 						? setFormErrors(
@@ -70,7 +72,7 @@ const UpdateDocsForm = ({ reloadRoute }: Props) => {
 				}
 			} else {
 				if (error.status === 401) {
-					reloadRoute();
+					router.push('/sign-in');
 				} else {
 					setFormErrors([
 						(error as Error).message ||
@@ -83,7 +85,7 @@ const UpdateDocsForm = ({ reloadRoute }: Props) => {
 		}
 	};
 
-	const handleUpdateDocsAll = async () => {
+	const handleUpdatePenaltiesAll = async () => {
 		try {
 			setFormErrors(null);
 			setSubmitSuccess(false);
@@ -101,14 +103,14 @@ const UpdateDocsForm = ({ reloadRoute }: Props) => {
 					{ timeout: 25000 }
 				);
 			}
-			setFormData(defaultUpdateDocsFormValues);
+			setFormData(defaultUpdatePenaltiesFormValues);
 			formRef.current?.reset();
 			setSubmitSuccess(true);
 			setFetching(false);
 		} catch (error: any) {
 			if (error instanceof AxiosError) {
 				if (error.response?.status === 401) {
-					reloadRoute();
+					router.push('/sign-in');
 				} else {
 					Array.isArray(error?.response?.data)
 						? setFormErrors(
@@ -123,7 +125,7 @@ const UpdateDocsForm = ({ reloadRoute }: Props) => {
 				}
 			} else {
 				if (error.status === 401) {
-					reloadRoute();
+					router.push('/sign-in');
 				} else {
 					setFormErrors([
 						(error as Error).message ||
@@ -235,7 +237,7 @@ const UpdateDocsForm = ({ reloadRoute }: Props) => {
 				disabled={
 					fetching || !formData.series || !formData.year || !!formErrors
 				}
-				onClick={handleUpdateDocsNewest}
+				onClick={handleUpdatePenaltiesNewest}
 			>
 				Update Newest
 			</Button>
@@ -245,7 +247,7 @@ const UpdateDocsForm = ({ reloadRoute }: Props) => {
 				disabled={
 					fetching || !formData.series || !formData.year || !!formErrors
 				}
-				onClick={handleUpdateDocsAll}
+				onClick={handleUpdatePenaltiesAll}
 			>
 				Update All
 			</Button>
@@ -253,4 +255,4 @@ const UpdateDocsForm = ({ reloadRoute }: Props) => {
 	);
 };
 
-export default UpdateDocsForm;
+export default UpdatePenaltiesForm;
