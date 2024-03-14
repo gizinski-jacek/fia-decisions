@@ -6,7 +6,7 @@ import {
 	DocumentsResponseData,
 	GroupedByGP,
 	MissingDocModel,
-	SelectDocsValues,
+	SelectDocumentsValues,
 } from '../../types/myTypes';
 import { Button, Form, Modal } from 'react-bootstrap';
 import axios, { AxiosError } from 'axios';
@@ -16,25 +16,25 @@ import { renderBySeries, verifyToken } from '../../lib/utils';
 import MissingDocWrapper from '../../components/wrappers/MissingDocWrapper';
 import ContactDocWrapper from '../../components/wrappers/ContactDocWrapper';
 import SeriesDataForm from '../../components/forms/SeriesDataForm';
-import { SupportedSeriesDataContext } from '../../hooks/SupportedYearsProvider';
-import UpdateDocsForm from '../../components/forms/UpdateDocsForm';
+import { SeriesDataContext } from '../../hooks/SeriesDataContextProvider';
+import UpdatePenaltiesForm from '../../components/forms/UpdatePenaltiesForm';
 
 interface Props {
 	signedIn: boolean;
 }
 
 const Dashboard: NextPage<Props> = ({ signedIn }) => {
-	const { yearsBySeries } = useContext(SupportedSeriesDataContext);
-	const [selectedDocs, setSelectedDocs] =
-		useState<SelectDocsValues>('contact-message');
-	const [docsData, setDocsData] = useState<
+	const { yearsBySeries } = useContext(SeriesDataContext);
+	const [selectedDocuments, setSelectedDocuments] =
+		useState<SelectDocumentsValues>('contact-message');
+	const [documentsData, setDocumentsData] = useState<
 		GroupedByGP | MissingDocModel[] | ContactDocModel[] | null
 	>(null);
 	const [fetching, setFetching] = useState(false);
 	const [fetchingErrors, setFetchingErrors] = useState<string[] | null>(null);
 	const [searchInput, setSearchInput] = useState('');
-	const [yearSelect, setYearSelect] = useState<number | null>(null);
-	const [showUpdateDocsModal, setShowUpdateDocsModal] =
+	const [selectedYear, setSelectedYear] = useState<number | null>(null);
+	const [showUpdatePenaltiesModal, setShowUpdatePenaltiesModal] =
 		useState<boolean>(false);
 	const [showUpdateSeriesDataModal, setShowUpdateSeriesDataModal] =
 		useState<boolean>(false);
@@ -42,7 +42,7 @@ const Dashboard: NextPage<Props> = ({ signedIn }) => {
 	const router = useRouter();
 
 	const fetchDocuments = useCallback(
-		async (documents: SelectDocsValues, year: number | null) => {
+		async (documents: SelectDocumentsValues, year: number | null) => {
 			try {
 				if (!documents) {
 					setFetchingErrors(['Must select valid Documents from the list.']);
@@ -59,12 +59,12 @@ const Dashboard: NextPage<Props> = ({ signedIn }) => {
 					{ timeout: 15000 }
 				);
 				setFetchingErrors(null);
-				setDocsData(res.data);
+				setDocumentsData(res.data);
 				setFetching(false);
 			} catch (error: any) {
 				if (error instanceof AxiosError) {
 					if (error.response?.status === 401) {
-						router.reload();
+						router.push('/sign-in');
 					} else {
 						Array.isArray(error?.response?.data)
 							? setFetchingErrors(
@@ -79,7 +79,7 @@ const Dashboard: NextPage<Props> = ({ signedIn }) => {
 					}
 				} else {
 					if (error.status === 401) {
-						router.reload();
+						router.push('/sign-in');
 					} else {
 						setFetchingErrors([
 							(error as Error).message ||
@@ -102,7 +102,7 @@ const Dashboard: NextPage<Props> = ({ signedIn }) => {
 			) {
 				return;
 			}
-			if (!yearSelect) {
+			if (!selectedYear) {
 				setFetchingErrors(['Must select year from the list.']);
 				return;
 			}
@@ -113,14 +113,14 @@ const Dashboard: NextPage<Props> = ({ signedIn }) => {
 			const [docType, series, manualUpload] = query.split('__');
 			setFetching(true);
 			await axios.delete(
-				`/api/dashboard/${docType}/${series}/${docId}/${yearSelect || ''}`,
+				`/api/dashboard/${docType}/${series}/${docId}/${selectedYear || ''}`,
 				{ timeout: 15000 }
 			);
-			fetchDocuments(selectedDocs, yearSelect);
+			fetchDocuments(selectedDocuments, selectedYear);
 		} catch (error: any) {
 			if (error instanceof AxiosError) {
 				if (error.response?.status === 401) {
-					router.reload();
+					router.push('/sign-in');
 				} else {
 					Array.isArray(error?.response?.data)
 						? setFetchingErrors(
@@ -135,7 +135,7 @@ const Dashboard: NextPage<Props> = ({ signedIn }) => {
 				}
 			} else {
 				if (error.status === 401) {
-					router.reload();
+					router.push('/sign-in');
 				} else {
 					setFetchingErrors([
 						(error as Error).message ||
@@ -160,11 +160,11 @@ const Dashboard: NextPage<Props> = ({ signedIn }) => {
 			await axios.put(`/api/dashboard/accept-document/${docId}`, {
 				timeout: 15000,
 			});
-			fetchDocuments(selectedDocs, yearSelect);
+			fetchDocuments(selectedDocuments, selectedYear);
 		} catch (error: any) {
 			if (error instanceof AxiosError) {
 				if (error.response?.status === 401) {
-					router.reload();
+					router.push('/sign-in');
 				} else {
 					Array.isArray(error?.response?.data)
 						? setFetchingErrors(
@@ -179,7 +179,7 @@ const Dashboard: NextPage<Props> = ({ signedIn }) => {
 				}
 			} else {
 				if (error.status === 401) {
-					router.reload();
+					router.push('/sign-in');
 				} else {
 					setFetchingErrors([
 						(error as Error).message ||
@@ -191,23 +191,25 @@ const Dashboard: NextPage<Props> = ({ signedIn }) => {
 		}
 	};
 
-	const handleDocSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+	const handleSelectedDocumentChange = (
+		e: React.ChangeEvent<HTMLSelectElement>
+	) => {
 		if (!yearsBySeries) return;
 		const { value } = e.target as {
-			value: SelectDocsValues;
+			value: SelectDocumentsValues;
 		};
 		const [docType, series, manualUpload] = value.split('__');
 		if (docType === 'penalties' && series) {
-			if (yearSelect && yearsBySeries[series]?.includes(yearSelect)) {
-				setYearSelect(yearSelect);
+			if (selectedYear && yearsBySeries[series]?.includes(selectedYear)) {
+				setSelectedYear(selectedYear);
 			} else if (yearsBySeries[series][0]) {
-				setYearSelect(yearsBySeries[series][0]);
+				setSelectedYear(yearsBySeries[series][0]);
 			} else {
-				setYearSelect(null);
+				setSelectedYear(null);
 			}
 		}
-		setSelectedDocs(value);
-		setDocsData(null);
+		setSelectedDocuments(value);
+		setDocumentsData(null);
 	};
 
 	useEffect(() => {
@@ -218,24 +220,24 @@ const Dashboard: NextPage<Props> = ({ signedIn }) => {
 		}
 	}, [signedIn, fetchDocuments, router]);
 
-	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+	const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const { value } = e.target;
 		setSearchInput(value);
 	};
 
-	const handleYearSelectChange = async (
+	const handleSelectedYearChange = async (
 		e: React.ChangeEvent<HTMLSelectElement>
 	) => {
 		const { value } = e.target;
-		setYearSelect(parseInt(value));
+		setSelectedYear(parseInt(value));
 	};
 
-	const openUpdateDocsModal = () => {
-		setShowUpdateDocsModal(true);
+	const openUpdatePenaltiesModal = () => {
+		setShowUpdatePenaltiesModal(true);
 	};
 
-	const closeUpdateDocsModal = () => {
-		setShowUpdateDocsModal(false);
+	const closeUpdatePenaltiesModal = () => {
+		setShowUpdatePenaltiesModal(false);
 	};
 
 	const openUpdateSeriesDataModal = async () => {
@@ -257,8 +259,8 @@ const Dashboard: NextPage<Props> = ({ signedIn }) => {
 						<Form.Select
 							name='documents_select'
 							id='documents_select'
-							onChange={handleDocSelectChange}
-							value={selectedDocs}
+							onChange={handleSelectedDocumentChange}
+							value={selectedDocuments}
 							disabled={fetching}
 							required
 						>
@@ -290,9 +292,9 @@ const Dashboard: NextPage<Props> = ({ signedIn }) => {
 						</Form.Select>
 					</Form.Group>
 					<div className='d-flex justify-content-between align-items-end'>
-						{selectedDocs.includes('penalties') &&
+						{selectedDocuments.includes('penalties') &&
 							(() => {
-								const series = selectedDocs.split('__')[1];
+								const series = selectedDocuments.split('__')[1];
 								if (!series || !yearsBySeries) return;
 								return (
 									<Form.Group>
@@ -305,8 +307,8 @@ const Dashboard: NextPage<Props> = ({ signedIn }) => {
 										<Form.Select
 											name='year_select'
 											id='year_select'
-											onChange={handleYearSelectChange}
-											value={yearSelect || undefined}
+											onChange={handleSelectedYearChange}
+											value={selectedYear || undefined}
 											disabled={fetching}
 										>
 											{yearsBySeries[series]?.map((year) => (
@@ -323,7 +325,7 @@ const Dashboard: NextPage<Props> = ({ signedIn }) => {
 							size='sm'
 							className='text-nowrap fw-bold ms-auto text-uppercase mt-3'
 							disabled={fetching}
-							onClick={() => fetchDocuments(selectedDocs, yearSelect)}
+							onClick={() => fetchDocuments(selectedDocuments, selectedYear)}
 						>
 							Fetch
 						</Button>
@@ -351,7 +353,7 @@ const Dashboard: NextPage<Props> = ({ signedIn }) => {
 								</Modal.Title>
 							</Modal.Header>
 							<Modal.Body>
-								<SeriesDataForm reloadRoute={router.reload} />
+								<SeriesDataForm />
 							</Modal.Body>
 						</Modal>
 						<Button
@@ -359,13 +361,13 @@ const Dashboard: NextPage<Props> = ({ signedIn }) => {
 							variant='warning'
 							size='sm'
 							disabled={fetching || !!fetchingErrors}
-							onClick={openUpdateDocsModal}
+							onClick={openUpdatePenaltiesModal}
 						>
 							Update Penalties
 						</Button>
 						<Modal
-							show={showUpdateDocsModal}
-							onHide={closeUpdateDocsModal}
+							show={showUpdatePenaltiesModal}
+							onHide={closeUpdatePenaltiesModal}
 							dialogClassName='modal-md custom-minwidth'
 						>
 							<Modal.Header closeButton>
@@ -374,11 +376,11 @@ const Dashboard: NextPage<Props> = ({ signedIn }) => {
 								</Modal.Title>
 							</Modal.Header>
 							<Modal.Body>
-								<UpdateDocsForm reloadRoute={router.reload} />
+								<UpdatePenaltiesForm />
 							</Modal.Body>
 						</Modal>
 					</div>
-					{selectedDocs.includes('penalties') && (
+					{selectedDocuments.includes('penalties') && (
 						<Form
 							className='d-flex gap-5 rounded-2 p-2 bg-light'
 							onSubmit={(e) => e.preventDefault()}
@@ -390,16 +392,16 @@ const Dashboard: NextPage<Props> = ({ signedIn }) => {
 									name='search_input'
 									id='search_input'
 									maxLength={32}
-									onChange={handleInputChange}
+									onChange={handleSearchInputChange}
 									value={searchInput}
 									placeholder='Penalty / Name / Car #'
-									disabled={!docsData || fetching}
+									disabled={!documentsData || fetching}
 								/>
 								<Button
 									variant='dark'
 									size='sm'
 									className='px-1 py-0'
-									disabled={!docsData || fetching}
+									disabled={!documentsData || fetching}
 									onClick={() => setSearchInput('')}
 								>
 									<i className='bi bi-x fs-5'></i>
@@ -426,15 +428,15 @@ const Dashboard: NextPage<Props> = ({ signedIn }) => {
 				</div>
 			)}
 			{!fetching ? (
-				selectedDocs && docsData ? (
-					typeof docsData === 'object' &&
-					!Array.isArray(docsData) &&
-					docsData !== null ? (
-						selectedDocs.match(/(penalties__|missing-file)/im) ? (
-							Object.keys(docsData).length ? (
-								renderBySeries(docsData as GroupedByGP, searchInput, {
+				selectedDocuments && documentsData ? (
+					typeof documentsData === 'object' &&
+					!Array.isArray(documentsData) &&
+					documentsData !== null ? (
+						selectedDocuments.match(/(penalties__|missing-file)/im) ? (
+							Object.keys(documentsData).length ? (
+								renderBySeries(documentsData as GroupedByGP, searchInput, {
 									deleteHandler: handleDeleteDocument,
-									docType: selectedDocs,
+									docType: selectedDocuments,
 									acceptHandler: handleAcceptDocument,
 								})
 							) : (
@@ -443,17 +445,17 @@ const Dashboard: NextPage<Props> = ({ signedIn }) => {
 								</div>
 							)
 						) : null
-					) : Array.isArray(docsData) && docsData.length ? (
-						selectedDocs === 'missing-info' ? (
+					) : Array.isArray(documentsData) && documentsData.length ? (
+						selectedDocuments === 'missing-info' ? (
 							<MissingDocWrapper
-								data={docsData as MissingDocModel[]}
-								docType={selectedDocs}
+								data={documentsData as MissingDocModel[]}
+								docType={selectedDocuments}
 								handleDelete={handleDeleteDocument}
 							/>
-						) : selectedDocs === 'contact-message' ? (
+						) : selectedDocuments === 'contact-message' ? (
 							<ContactDocWrapper
-								data={docsData as ContactDocModel[]}
-								docType={selectedDocs}
+								data={documentsData as ContactDocModel[]}
+								docType={selectedDocuments}
 								handleDelete={handleDeleteDocument}
 							/>
 						) : null
