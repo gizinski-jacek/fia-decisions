@@ -8,16 +8,12 @@ import {
 	supportedSeries,
 } from '../../lib/myData';
 import LoadingBar from '../LoadingBar';
-import { SupportedSeriesDataContext } from '../../hooks/SupportedYearsProvider';
+import { SeriesDataContext } from '../../hooks/SeriesDataContextProvider';
+import { useRouter } from 'next/router';
 
-interface Props {
-	reloadRoute: () => void;
-}
-
-const SeriesDataForm = ({ reloadRoute }: Props) => {
-	const { supportedSeriesData, fetchSeriesData } = useContext(
-		SupportedSeriesDataContext
-	);
+const SeriesDataForm = () => {
+	const { seriesData: supportedSeriesData, fetchSeriesData } =
+		useContext(SeriesDataContext);
 	const [formData, setFormData] = useState<SeriesDataFormValues>(
 		defaultSeriesDataFormValues
 	);
@@ -26,6 +22,8 @@ const SeriesDataForm = ({ reloadRoute }: Props) => {
 	const [submitSuccess, setSubmitSuccess] = useState(false);
 	const [showForm, setShowForm] = useState(false);
 	const formRef = useRef<HTMLFormElement>(null);
+
+	const router = useRouter();
 
 	const handleInputChange = async (e: React.ChangeEvent<HTMLElement>) => {
 		const { name, value } = e.target as HTMLSelectElement | HTMLInputElement;
@@ -65,7 +63,7 @@ const SeriesDataForm = ({ reloadRoute }: Props) => {
 		} catch (error: any) {
 			if (error instanceof AxiosError) {
 				if (error.response?.status === 401) {
-					reloadRoute();
+					router.push('/sign-in');
 				} else {
 					Array.isArray(error?.response?.data)
 						? setFormErrors(
@@ -80,7 +78,7 @@ const SeriesDataForm = ({ reloadRoute }: Props) => {
 				}
 			} else {
 				if (error.status === 401) {
-					reloadRoute();
+					router.push('/sign-in');
 				} else {
 					setFormErrors([
 						(error as Error).message ||
@@ -121,7 +119,7 @@ const SeriesDataForm = ({ reloadRoute }: Props) => {
 		} catch (error: any) {
 			if (error instanceof AxiosError) {
 				if (error.response?.status === 401) {
-					reloadRoute();
+					router.push('/sign-in');
 				} else {
 					Array.isArray(error?.response?.data)
 						? setFormErrors(
@@ -136,7 +134,7 @@ const SeriesDataForm = ({ reloadRoute }: Props) => {
 				}
 			} else {
 				if (error.status === 401) {
-					reloadRoute();
+					router.push('/sign-in');
 				} else {
 					setFormErrors([
 						(error as Error).message ||
@@ -209,7 +207,7 @@ const SeriesDataForm = ({ reloadRoute }: Props) => {
 										value={formData.year}
 										disabled={fetching || !formData.series}
 										required
-										aria-describedby='yearSelectHelpText'
+										aria-describedby='selectYearHelpText'
 									>
 										<option value=''>Select Year</option>
 										{(() => {
