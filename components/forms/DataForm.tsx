@@ -1,25 +1,22 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useContext } from 'react';
 import { Button, Form } from 'react-bootstrap';
 import axios, { AxiosError } from 'axios';
 import { DataFormValues } from '../../types/myTypes';
-import {
-	dbNameList,
-	defaultDataFormValues,
-	supportedSeries,
-} from '../../lib/myData';
+import { defaultDataFormValues, supportedSeries } from '../../lib/myData';
 import LoadingBar from '../LoadingBar';
+import { SupportedSeriesDataContext } from '../../hooks/SupportedYearsProvider';
 
 const DataForm = () => {
+	const { yearsBySeries } = useContext(SupportedSeriesDataContext);
 	const [formData, setFormData] = useState<DataFormValues>(
 		defaultDataFormValues
 	);
 	const [formErrors, setFormErrors] = useState<string[] | null>(null);
-	const [sending, setSending] = useState(false);
+	const [fetching, setFetching] = useState(false);
 	const [submitSuccess, setSubmitSuccess] = useState(false);
 	const formRef = useRef<HTMLFormElement>(null);
 
 	const handleInputChange = async (e: React.ChangeEvent<HTMLElement>) => {
-		setFormErrors(null);
 		const { name, value } = e.target as HTMLSelectElement | HTMLInputElement;
 		setFormData((prevState) => ({ ...prevState, [name]: value }));
 	};
@@ -31,7 +28,7 @@ const DataForm = () => {
 			setFormErrors(null);
 			if (!formData.series || !formData.year || !formData.description) {
 				setFormErrors([
-					'Must choose a Series, a Year and provide a Description.',
+					'Must select a Series, a Year and provide a Description.',
 				]);
 				return;
 			}
@@ -39,15 +36,13 @@ const DataForm = () => {
 			for (const [key, value] of Object.entries(formData)) {
 				uploadData.append(key, value);
 			}
-			setSending(true);
+			setFetching(true);
 			await axios.post('/api/forms/info', uploadData, { timeout: 15000 });
 			setFormData(defaultDataFormValues);
 			formRef.current?.reset();
 			setSubmitSuccess(true);
-			setSending(false);
+			setFetching(false);
 		} catch (error: any) {
-			setSubmitSuccess(false);
-			setSending(false);
 			if (error instanceof AxiosError) {
 				Array.isArray(error?.response?.data)
 					? setFormErrors(
@@ -65,6 +60,8 @@ const DataForm = () => {
 						'Unknown server error. If it is a reoccuring error, please use the Contact form to report this issue.',
 				]);
 			}
+			setSubmitSuccess(false);
+			setFetching(false);
 		}
 	};
 
@@ -77,7 +74,7 @@ const DataForm = () => {
 			<div className='d-flex flex-column gap-3 p-3 rounded-2 bg-light'>
 				<Form.Group>
 					<Form.Label htmlFor='series' className='fw-bolder'>
-						Select series
+						Series
 					</Form.Label>
 					<Form.Select
 						className={
@@ -91,10 +88,10 @@ const DataForm = () => {
 						id='series'
 						onChange={handleInputChange}
 						value={formData.series}
-						disabled={sending}
+						disabled={fetching}
 						required
 					>
-						<option value=''>Choose Formula series</option>
+						<option value=''>Select Formula Series</option>
 						{supportedSeries.map((series) => (
 							<option key={series} value={series}>
 								{series.replace('f', 'Formula ')}
@@ -104,7 +101,7 @@ const DataForm = () => {
 				</Form.Group>
 				<Form.Group>
 					<Form.Label htmlFor='year' className='fw-bolder'>
-						Select year
+						Year
 					</Form.Label>
 					<Form.Select
 						className={
@@ -118,23 +115,14 @@ const DataForm = () => {
 						id='year'
 						onChange={handleInputChange}
 						value={formData.year}
-						disabled={sending}
+						disabled={fetching || !formData.series}
 						required
 						aria-describedby='yearSelectHelpText'
 					>
-						<option value=''>Choose Year</option>
+						<option value=''>Select Year</option>
 						{(() => {
-							if (!formData.series) return null;
-							const seriesDbList = [];
-							for (const key of Object.keys(dbNameList)) {
-								if (key.includes(formData.series)) {
-									seriesDbList.push(key);
-								}
-							}
-							const yearsList = seriesDbList.map(
-								(series) => series.split('_')[1]
-							);
-							return yearsList.map((year) => (
+							if (!yearsBySeries || !formData.series) return;
+							return yearsBySeries[formData.series]?.map((year) => (
 								<option key={year} value={year}>
 									{year}
 								</option>
@@ -142,7 +130,7 @@ const DataForm = () => {
 						})()}
 					</Form.Select>
 					<Form.Text muted id='messageInputHelpText'>
-						Select series to see supported years
+						Select Series to see supported years.
 					</Form.Text>
 				</Form.Group>
 				<Form.Group>
@@ -150,7 +138,6 @@ const DataForm = () => {
 						Penalty Description
 					</Form.Label>
 					<Form.Control
-						as='textarea'
 						className={
 							formErrors && !formData.description
 								? 'outline-error'
@@ -161,6 +148,7 @@ const DataForm = () => {
 								: 'outline-success'
 						}
 						type='text'
+						as='textarea'
 						name='description'
 						id='description'
 						minLength={8}
@@ -169,18 +157,21 @@ const DataForm = () => {
 						onChange={handleInputChange}
 						value={formData.description}
 						placeholder='Description, Title or Link'
-						disabled={sending}
+						disabled={fetching}
 						required
 						aria-describedby='descriptionInputHelpText'
 					/>
 					<Form.Text muted id='descriptionInputHelpText'>
-						Description 16-512 characters long
+						Description, 16-512 characters long.
 					</Form.Text>
 				</Form.Group>
 				{formErrors && (
-					<div className='m-0 mt-4 alert alert-danger alert-dismissible'>
+					<div className='m-0 alert alert-danger alert-dismissible overflow-auto custom-alert-maxheight text-start'>
 						{formErrors.map((message, index) => (
-							<div key={index}>{message}</div>
+							<div className='d-flex mb-2' key={index}>
+								<i className='bi bi-exclamation-triangle-fill fs-5 m-0 me-2'></i>
+								<strong className='ms-2 me-4'>{message}</strong>
+							</div>
 						))}
 						<button
 							type='button'
@@ -190,8 +181,9 @@ const DataForm = () => {
 					</div>
 				)}
 				{submitSuccess && (
-					<div className='m-0 mt-4 alert alert-success alert-dismissible'>
-						<strong>Form submitted successfully!</strong>
+					<div className='d-flex m-0 mb-2 alert alert-success alert-dismissible overflow-auto custom-alert-maxheight text-start'>
+						<i className='bi bi-patch-check-fill fs-5 m-0 me-2'></i>
+						<strong>Update request issued successfully!</strong>
 						<button
 							type='button'
 							className='btn btn-close'
@@ -199,7 +191,7 @@ const DataForm = () => {
 						></button>
 					</div>
 				)}
-				{sending && <LoadingBar />}
+				{fetching && <LoadingBar />}
 			</div>
 			<div className='w-100 text-end'>
 				<Button
@@ -207,7 +199,7 @@ const DataForm = () => {
 					type='submit'
 					className='fw-bolder'
 					disabled={
-						sending ||
+						fetching ||
 						!formData.series ||
 						!formData.year ||
 						!formData.description ||
@@ -223,3 +215,5 @@ const DataForm = () => {
 };
 
 export default DataForm;
+
+// !!! Rename component to InformationForm and update all related names

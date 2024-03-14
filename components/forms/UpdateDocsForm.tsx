@@ -48,6 +48,8 @@ const UpdateDocsForm = ({ reloadRoute }: Props) => {
 				}`,
 				{ timeout: 25000 }
 			);
+			setFormData(defaultUpdateDocsFormValues);
+			formRef.current?.reset();
 			setSubmitSuccess(true);
 			setFetching(false);
 		} catch (error: any) {
@@ -228,7 +230,9 @@ const UpdateDocsForm = ({ reloadRoute }: Props) => {
 			<Button
 				className='w-50'
 				variant='warning'
-				disabled={fetching || !formData.series || !!formErrors}
+				disabled={
+					fetching || !formData.series || !formData.year || !!formErrors
+				}
 				onClick={handleUpdateDocsNewest}
 			>
 				Update Newest

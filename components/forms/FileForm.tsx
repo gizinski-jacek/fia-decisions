@@ -10,20 +10,18 @@ const FileForm = () => {
 		defaultFileFormValues
 	);
 	const [formErrors, setFormErrors] = useState<string[] | null>(null);
-	const [sending, setSending] = useState(false);
+	const [fetching, setFetching] = useState(false);
 	const [submitSuccess, setSubmitSuccess] = useState(false);
 	const formRef = useRef<HTMLFormElement>(null);
 
 	const handleSelectChange = async (
 		e: React.ChangeEvent<HTMLSelectElement>
 	) => {
-		setFormErrors(null);
 		const { name, value } = e.target;
 		setFormData((prevState) => ({ ...prevState, [name]: value }));
 	};
 
 	const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-		setFormErrors(null);
 		const target = e.target;
 		const file = (target.files as FileList)[0];
 		if (file.size > 1000000) {
@@ -43,22 +41,20 @@ const FileForm = () => {
 			setSubmitSuccess(false);
 			setFormErrors(null);
 			if (!formData.series && !formData.file) {
-				setFormErrors(['Must choose a Series and a PDF file.']);
+				setFormErrors(['Must select a Series and a PDF file.']);
 				return;
 			}
 			const uploadData = new FormData();
 			uploadData.append('file', formData.file as File);
-			setSending(true);
+			setFetching(true);
 			await axios.post(`/api/forms/file/${formData.series}`, uploadData, {
 				timeout: 15000,
 			});
 			setFormData(defaultFileFormValues);
 			formRef.current?.reset();
 			setSubmitSuccess(true);
-			setSending(false);
+			setFetching(false);
 		} catch (error: any) {
-			setSubmitSuccess(false);
-			setSending(false);
 			if (error instanceof AxiosError) {
 				Array.isArray(error?.response?.data)
 					? setFormErrors(
@@ -76,6 +72,8 @@ const FileForm = () => {
 						'Unknown server error. If it is a reoccuring error, please use the Contact form to report this issue.',
 				]);
 			}
+			setSubmitSuccess(false);
+			setFetching(false);
 		}
 	};
 
@@ -107,7 +105,7 @@ const FileForm = () => {
 			<div className='d-flex flex-column gap-3 p-3 rounded-2 bg-light'>
 				<Form.Group>
 					<Form.Label htmlFor='series' className='fw-bolder'>
-						Select series
+						Series
 					</Form.Label>
 					<Form.Select
 						className={
@@ -121,10 +119,10 @@ const FileForm = () => {
 						id='series'
 						onChange={handleSelectChange}
 						value={formData.series}
-						disabled={sending}
+						disabled={fetching}
 						required
 					>
-						<option value=''>Choose Formula series</option>
+						<option value=''>Select Formula Series</option>
 						{supportedSeries.map((series) => (
 							<option key={series} value={series}>
 								{series.replace('f', 'Formula ')}
@@ -134,7 +132,7 @@ const FileForm = () => {
 				</Form.Group>
 				<Form.Group>
 					<Form.Label htmlFor='file' className='fw-bolder'>
-						Select file
+						File
 					</Form.Label>
 					<Form.Control
 						className={
@@ -149,18 +147,21 @@ const FileForm = () => {
 						id='file'
 						accept='.pdf'
 						onChange={handleFileChange}
-						disabled={sending}
+						disabled={fetching || !formData.series}
 						required
 						aria-describedby='fileSelectHelpText'
 					/>
 					<Form.Text muted id='fileSelectHelpText'>
-						Only PDF files, max size 1MB
+						Only PDF files, max size 1MB.
 					</Form.Text>
 				</Form.Group>
 				{formErrors && (
-					<div className='m-0 mt-4 alert alert-danger alert-dismissible'>
+					<div className='m-0 alert alert-danger alert-dismissible overflow-auto custom-alert-maxheight text-start'>
 						{formErrors.map((message, index) => (
-							<div key={index}>{message}</div>
+							<div className='d-flex mb-2' key={index}>
+								<i className='bi bi-exclamation-triangle-fill fs-5 m-0 me-2'></i>
+								<strong className='ms-2 me-4'>{message}</strong>
+							</div>
 						))}
 						<button
 							type='button'
@@ -170,8 +171,9 @@ const FileForm = () => {
 					</div>
 				)}
 				{submitSuccess && (
-					<div className='m-0 mt-4 alert alert-success alert-dismissible'>
-						<strong>File submitted successfully!</strong>
+					<div className='d-flex m-0 mb-2 alert alert-success alert-dismissible overflow-auto custom-alert-maxheight text-start'>
+						<i className='bi bi-patch-check-fill fs-5 m-0 me-2'></i>
+						<strong>Update request issued successfully!</strong>
 						<button
 							type='button'
 							className='btn btn-close'
@@ -179,14 +181,15 @@ const FileForm = () => {
 						></button>
 					</div>
 				)}
-				{sending && <LoadingBar />}
+				{fetching && <LoadingBar />}
 			</div>
 			<div className='w-100 text-end'>
 				<Button
 					variant='primary'
+					type='submit'
 					className='fw-bolder'
 					disabled={
-						sending || !formData.series || !formData.file || !!formErrors
+						fetching || !formData.series || !formData.file || !!formErrors
 					}
 					onClick={handleSubmit}
 				>
