@@ -37,10 +37,10 @@ const handler = async (
 			const manualUpload = params[3];
 			if (reqType === 'missing-info') {
 				try {
-					const conn = await connectMongoDb('Other_Docs');
-					const document_list: MissingDocModel[] =
-						await conn.models.Missing_Doc.find().exec();
-					return res.status(200).json(document_list);
+					const connectionOtherDocsDb = await connectMongoDb('Other_Docs');
+					const document_list_missing: MissingDocModel[] =
+						await connectionOtherDocsDb.models.Missing_Doc.find().exec();
+					return res.status(200).json(document_list_missing);
 				} catch (error: any) {
 					return res
 						.status(404)
@@ -49,16 +49,16 @@ const handler = async (
 			}
 			if (reqType === 'missing-file') {
 				try {
-					const conn = await connectMongoDb('Other_Docs');
+					const connectionOtherDocsDb = await connectMongoDb('Other_Docs');
 					const query = manualUpload ? { manual_upload: true } : {};
-					const document_list: PenaltyModel[] =
-						await conn.models.Penalty_Doc.find(query)
+					const document_list_penalties: PenaltyModel[] =
+						await connectionOtherDocsDb.models.Penalty_Doc.find(query)
 							.sort({ doc_date: -1 })
 							.exec();
-					if (!document_list.length) {
+					if (!document_list_penalties.length) {
 						return res.status(200).json({});
 					}
-					const groupedByGP: GroupedByGP = document_list.reduce(
+					const groupedByGP: GroupedByGP = document_list_penalties.reduce(
 						(prev, curr) => {
 							prev[curr.grand_prix] = prev[curr.grand_prix] || [];
 							prev[curr.grand_prix].push(curr);
@@ -75,10 +75,10 @@ const handler = async (
 			}
 			if (reqType === 'contact-message') {
 				try {
-					const conn = await connectMongoDb('Other_Docs');
-					const document_list: ContactDocModel[] =
-						await conn.models.Contact_Doc.find().exec();
-					return res.status(200).json(document_list);
+					const connectionOtherDocsDb = await connectMongoDb('Other_Docs');
+					const document_list_contact: ContactDocModel[] =
+						await connectionOtherDocsDb.models.Contact_Doc.find().exec();
+					return res.status(200).json(document_list_contact);
 				} catch (error: any) {
 					return res
 						.status(404)
@@ -91,9 +91,9 @@ const handler = async (
 			if (!year) {
 				return res.status(422).json('Must provide Series Year.');
 			}
-			const connSupportedYears = await connectMongoDb('Series_Data');
+			const connectionSeriesDataDb = await connectMongoDb('Series_Data');
 			const document_list_series_data: SeriesDataDocModel[] =
-				await connSupportedYears.models.Series_Data_Doc.find({
+				await connectionSeriesDataDb.models.Series_Data_Doc.find({
 					series: series,
 				})
 					.sort({ year: -1 })
@@ -112,16 +112,16 @@ const handler = async (
 					const seriesYearDb = `${
 						selectedSeriesData.year
 					}_${selectedSeriesData.series.toUpperCase()}_WC_Docs`;
-					const conn = await connectMongoDb(seriesYearDb);
+					const connectionSeriesYearDb = await connectMongoDb(seriesYearDb);
 					const query = manualUpload ? { manual_upload: true } : {};
-					const document_list: PenaltyModel[] =
-						await conn.models.Penalty_Doc.find(query)
+					const document_list_penalties: PenaltyModel[] =
+						await connectionSeriesYearDb.models.Penalty_Doc.find(query)
 							.sort({ doc_date: -1 })
 							.exec();
-					if (!document_list.length) {
+					if (!document_list_penalties.length) {
 						return res.status(200).json({});
 					}
-					const groupedByGP: GroupedByGP = document_list.reduce(
+					const groupedByGP: GroupedByGP = document_list_penalties.reduce(
 						(prev, curr) => {
 							prev[curr.grand_prix] = prev[curr.grand_prix] || [];
 							prev[curr.grand_prix].push(curr);
@@ -202,8 +202,10 @@ const handler = async (
 			}
 			if (reqType === 'missing-info') {
 				try {
-					const conn = await connectMongoDb('Other_Docs');
-					await conn.models.Missing_Doc.findByIdAndDelete(docId).exec();
+					const connectionOtherDocsDb = await connectMongoDb('Other_Docs');
+					await connectionOtherDocsDb.models.Missing_Doc.findByIdAndDelete(
+						docId
+					).exec();
 					return res.status(200).end();
 				} catch (error: any) {
 					return res
@@ -213,8 +215,10 @@ const handler = async (
 			}
 			if (reqType === 'contact-message') {
 				try {
-					const conn = await connectMongoDb('Other_Docs');
-					await conn.models.Contact_Doc.findByIdAndDelete(docId).exec();
+					const connectionOtherDocsDb = await connectMongoDb('Other_Docs');
+					await connectionOtherDocsDb.models.Contact_Doc.findByIdAndDelete(
+						docId
+					).exec();
 					return res.status(200).end();
 				} catch (error: any) {
 					return res
@@ -224,8 +228,10 @@ const handler = async (
 			}
 			if (reqType === 'series-data') {
 				try {
-					const conn = await connectMongoDb('Series_Data');
-					await conn.models.Series_Data_Doc.findByIdAndDelete(docId).exec();
+					const connectionSeriesDataDb = await connectMongoDb('Series_Data');
+					await connectionSeriesDataDb.models.Series_Data_Doc.findByIdAndDelete(
+						docId
+					).exec();
 					return res.status(200).end();
 				} catch (error: any) {
 					return res
@@ -245,8 +251,10 @@ const handler = async (
 						series === 'missing-file'
 							? 'Other_Docs'
 							: `${year}_${series.toUpperCase()}_WC_Docs`;
-					const conn = await connectMongoDb(seriesYearDb);
-					await conn.models.Penalty_Doc.findByIdAndDelete(docId).exec();
+					const connectionSeriesYearDb = await connectMongoDb(seriesYearDb);
+					await connectionSeriesYearDb.models.Penalty_Doc.findByIdAndDelete(
+						docId
+					).exec();
 					return res.status(200).end();
 				} catch (error: any) {
 					return res
@@ -262,32 +270,34 @@ const handler = async (
 			}
 			if (reqType === 'accept-document') {
 				try {
-					const connOtherDocsDb = await connectMongoDb('Other_Docs');
-					const document = await connOtherDocsDb.models.Penalty_Doc.findById(
-						docId
-					).exec();
+					const cconnectionOtherDocs = await connectMongoDb('Other_Docs');
+					const document =
+						await cconnectionOtherDocs.models.Penalty_Doc.findById(
+							docId
+						).exec();
 					const docYear = new Date(document.doc_date).getFullYear();
 					const seriesYearDb = `${docYear}_${document.series.toUpperCase()}_WC_Docs`;
-					const connSeriesDb = await connectMongoDb(seriesYearDb);
-					const docExists = await connSeriesDb.models.Penalty_Doc.findOne({
-						series: document.series,
-						doc_type: document.doc_type,
-						doc_name: document.doc_name,
-						doc_date: document.doc_date,
-						penalty_type: document.penalty_type,
-						grand_prix: document.grand_prix,
-						weekend: document.weekend,
-						incident_title: document.incident_title,
-					});
+					const connectionSeriesYearDb = await connectMongoDb(seriesYearDb);
+					const docExists =
+						await connectionSeriesYearDb.models.Penalty_Doc.findOne({
+							series: document.series,
+							doc_type: document.doc_type,
+							doc_name: document.doc_name,
+							doc_date: document.doc_date,
+							penalty_type: document.penalty_type,
+							grand_prix: document.grand_prix,
+							weekend: document.weekend,
+							incident_title: document.incident_title,
+						});
 					if (docExists) {
 						return res.status(403).json('Document already exists.');
 					}
-					await connOtherDocsDb.models.Penalty_Doc.findByIdAndDelete(
+					await cconnectionOtherDocs.models.Penalty_Doc.findByIdAndDelete(
 						docId
 					).exec();
 					document._id = new mongoose.Types.ObjectId();
 					document.isNew = true;
-					await connSeriesDb.models.Penalty_Doc.insertMany(document);
+					await connectionSeriesYearDb.models.Penalty_Doc.insertMany(document);
 					return res.status(200).end();
 				} catch (error: any) {
 					return res

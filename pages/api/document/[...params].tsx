@@ -24,13 +24,13 @@ const handler = async (
 			const year = params[2];
 			if (docType === 'series-data') {
 				try {
-					const conn = await connectMongoDb('Series_Data');
-					const document_list: SeriesDataDocModel[] =
-						await conn.models.Series_Data_Doc.find()
+					const connectionSeriesDataDb = await connectMongoDb('Series_Data');
+					const document_list_series_data: SeriesDataDocModel[] =
+						await connectionSeriesDataDb.models.Series_Data_Doc.find()
 							.select('series year documents_url')
 							.sort({ series: 1, year: -1 })
 							.exec();
-					return res.status(200).json(document_list);
+					return res.status(200).json(document_list_series_data);
 				} catch (error: any) {
 					return res
 						.status(404)
@@ -43,9 +43,9 @@ const handler = async (
 				if (!year) {
 					return res.status(422).json('Must provide a Year.');
 				}
-				const connSupportedYears = await connectMongoDb('Series_Data');
+				const connectionSeriesDataDb = await connectMongoDb('Series_Data');
 				const document_list_series_data: SeriesDataDocModel[] =
-					await connSupportedYears.models.Series_Data_Doc.find({
+					await connectionSeriesDataDb.models.Series_Data_Doc.find({
 						series: series,
 					})
 						.sort({ year: -1 })
@@ -62,19 +62,22 @@ const handler = async (
 				const seriesYearDb = `${
 					selectedSeriesData.year
 				}_${selectedSeriesData.series.toUpperCase()}_WC_Docs`;
-				const connPenaltiesDb = await connectMongoDb(seriesYearDb);
-				const document_list: PenaltyModel[] =
-					await connPenaltiesDb.models.Penalty_Doc.find()
+				const connectionSeriesYearDb = await connectMongoDb(seriesYearDb);
+				const document_list_penalties: PenaltyModel[] =
+					await connectionSeriesYearDb.models.Penalty_Doc.find()
 						.sort({ doc_date: -1 })
 						.exec();
-				if (!document_list.length) {
+				if (!document_list_penalties.length) {
 					return res.status(200).json({});
 				}
-				const groupedByGP: GroupedByGP = document_list.reduce((prev, curr) => {
-					prev[curr.grand_prix] = prev[curr.grand_prix] || [];
-					prev[curr.grand_prix].push(curr);
-					return prev;
-				}, Object.create(null));
+				const groupedByGP: GroupedByGP = document_list_penalties.reduce(
+					(prev, curr) => {
+						prev[curr.grand_prix] = prev[curr.grand_prix] || [];
+						prev[curr.grand_prix].push(curr);
+						return prev;
+					},
+					Object.create(null)
+				);
 				return res.status(200).json(groupedByGP);
 			}
 		} catch (error: any) {

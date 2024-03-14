@@ -10,7 +10,7 @@ import { createPenaltyDocument } from '../../../lib/transformToPenaltyDoc';
 import yupValidation, {
 	contactFormValidationSchema,
 	loginFormValidationSchema,
-	dataFormValidationSchema,
+	informationFormValidationSchema,
 	seriesDataFormValidationSchema,
 } from '../../../lib/yup';
 import { SeriesDataFormValues } from '../../../types/myTypes';
@@ -83,8 +83,8 @@ const handler = async (
 							pdfData as any,
 							series as 'f1' | 'f2' | 'f3'
 						);
-						const conn = await connectMongoDb('Other_Docs');
-						await conn.models.Penalty_Doc.create({
+						const connectionOtherDocsDb = await connectMongoDb('Other_Docs');
+						await connectionOtherDocsDb.models.Penalty_Doc.create({
 							...transformed,
 							manual_upload: true,
 						});
@@ -115,15 +115,17 @@ const handler = async (
 			try {
 				const fields = await parseFields(req);
 				const { errors }: { errors: string[] } = await yupValidation(
-					dataFormValidationSchema,
+					informationFormValidationSchema,
 					fields
 				);
 				if (errors) {
 					return res.status(422).json(errors);
 				}
-				const conn = await connectMongoDb('Other_Docs');
-				const newReport = new conn.models.Missing_Doc(fields);
-				await newReport.save();
+				const connectionOtherDocsDb = await connectMongoDb('Other_Docs');
+				const newDocument = new connectionOtherDocsDb.models.Missing_Doc(
+					fields
+				);
+				await newDocument.save();
 				return res.status(200).end();
 			} catch (error: any) {
 				return res
@@ -143,9 +145,11 @@ const handler = async (
 				if (errors) {
 					return res.status(422).json(errors);
 				}
-				const conn = await connectMongoDb('Other_Docs');
-				const newReport = new conn.models.Contact_Doc(fields);
-				await newReport.save();
+				const connectionOtherDocsDb = await connectMongoDb('Other_Docs');
+				const newDocument = new connectionOtherDocsDb.models.Contact_Doc(
+					fields
+				);
+				await newDocument.save();
 				return res.status(200).end();
 			} catch (error: any) {
 				return res
@@ -216,16 +220,19 @@ const handler = async (
 					if (errors) {
 						return res.status(422).json(errors);
 					}
-					const conn = await connectMongoDb('Series_Data');
-					const docExists = await conn.models.Series_Data_Doc.findOne({
-						series: fieldsParseInt.series,
-						year: fieldsParseInt.year,
-					}).exec();
+					const connectionSeriesDataDb = await connectMongoDb('Series_Data');
+					const docExists =
+						await connectionSeriesDataDb.models.Series_Data_Doc.findOne({
+							series: fieldsParseInt.series,
+							year: fieldsParseInt.year,
+						}).exec();
 					if (docExists) {
 						return res.status(403).json('Entry already exists.');
 					}
-					const newReport = new conn.models.Series_Data_Doc(fieldsParseInt);
-					await newReport.save();
+					const newDocument = new connectionSeriesDataDb.models.Series_Data_Doc(
+						fieldsParseInt
+					);
+					await newDocument.save();
 					return res.status(200).end();
 				} catch (error: any) {
 					return res
