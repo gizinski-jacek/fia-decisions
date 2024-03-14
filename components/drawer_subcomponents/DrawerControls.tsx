@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { DrawerContext } from '../../hooks/DrawerProvider';
+import { DrawerContext } from '../../hooks/DrawerContextProvider';
 import { Button } from 'react-bootstrap';
 
 interface Props {

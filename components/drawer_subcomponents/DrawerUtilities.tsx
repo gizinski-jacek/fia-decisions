@@ -1,9 +1,9 @@
 import { useContext, useEffect, useState } from 'react';
-import { DrawerContext } from '../../hooks/DrawerProvider';
+import { DrawerContext } from '../../hooks/DrawerContextProvider';
 import { Button, Modal } from 'react-bootstrap';
 import { ErgastSeasonData, WeekendData } from '../../types/myTypes';
 import FileForm from '../forms/FileForm';
-import DataForm from '../forms/DataForm';
+import InformationForm from '../forms/InformationForm';
 import ContactForm from '../forms/ContactForm';
 import axios from 'axios';
 import CalendarWrapper from '../wrappers/CalendarWrapper';
@@ -189,7 +189,7 @@ const DrawerUtilities = ({ screenIsSmall }: Props) => {
 					{displayedForm === 'file' ? (
 						<FileForm />
 					) : displayedForm === 'data' ? (
-						<DataForm />
+						<InformationForm />
 					) : displayedForm === 'contact' ? (
 						<ContactForm />
 					) : null}

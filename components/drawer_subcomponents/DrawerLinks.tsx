@@ -1,9 +1,9 @@
 import { useContext } from 'react';
 import { useRouter } from 'next/router';
-import { DrawerContext } from '../../hooks/DrawerProvider';
+import { DrawerContext } from '../../hooks/DrawerContextProvider';
 import Link from 'next/link';
 import Image from 'next/image';
-import { SupportedSeriesDataContext } from '../../hooks/SupportedYearsProvider';
+import { SeriesDataContext } from '../../hooks/SeriesDataContextProvider';
 
 interface Props {
 	screenIsSmall: boolean;
@@ -11,7 +11,7 @@ interface Props {
 
 const DrawerLinks = ({ screenIsSmall }: Props) => {
 	const { drawer } = useContext(DrawerContext);
-	const { yearsBySeries } = useContext(SupportedSeriesDataContext);
+	const { yearsBySeries } = useContext(SeriesDataContext);
 
 	const router = useRouter();
 

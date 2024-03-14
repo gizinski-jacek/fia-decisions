@@ -1,8 +1,8 @@
 import dynamic from 'next/dynamic';
 import Head from 'next/head';
-import { DrawerContextProvider } from '../hooks/DrawerProvider';
+import { DrawerContextProvider } from '../hooks/DrawerContextProvider';
 import ScrollToTopBtn from './ScrollToTopBtn';
-import { SupportedYearsProvider } from '../hooks/SupportedYearsProvider';
+import { SeriesDataContextProvider } from '../hooks/SeriesDataContextProvider';
 
 interface Props {
 	children: React.ReactNode;
@@ -13,7 +13,7 @@ const Layout = ({ children }: Props) => {
 
 	return (
 		<DrawerContextProvider>
-			<SupportedYearsProvider>
+			<SeriesDataContextProvider>
 				<Head>
 					<title>Track Limits</title>
 					<meta
@@ -24,7 +24,7 @@ const Layout = ({ children }: Props) => {
 				</Head>
 				<DynamicDrawer>{children}</DynamicDrawer>
 				<ScrollToTopBtn />
-			</SupportedYearsProvider>
+			</SeriesDataContextProvider>
 		</DrawerContextProvider>
 	);
 };

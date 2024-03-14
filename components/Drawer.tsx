@@ -1,9 +1,9 @@
 import { useContext, useEffect, useState } from 'react';
-import { DrawerContext } from '../hooks/DrawerProvider';
+import { DrawerContext } from '../hooks/DrawerContextProvider';
 import DrawerLinks from './drawer_subcomponents/DrawerLinks';
 import DrawerUtilities from './drawer_subcomponents/DrawerUtilities';
 import DrawerControls from './drawer_subcomponents/DrawerControls';
-import { SupportedSeriesDataContext } from '../hooks/SupportedYearsProvider';
+import { SeriesDataContext } from '../hooks/SeriesDataContextProvider';
 
 interface Props {
 	children: React.ReactNode;
@@ -11,7 +11,7 @@ interface Props {
 
 const Drawer = ({ children }: Props) => {
 	const { drawer } = useContext(DrawerContext);
-	const { fetchingSeriesData } = useContext(SupportedSeriesDataContext);
+	const { fetchingSeriesData } = useContext(SeriesDataContext);
 	const [screenIsSmall, setSmallScreen] = useState(false);
 
 	useEffect(() => {
