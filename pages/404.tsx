@@ -22,7 +22,7 @@ const Custom404 = () => {
 			<h2>Page Not Found</h2>
 			<h3>
 				Redirecting to <Link href='/'>Home</Link> page in{' '}
-				<strong className='text-primary'>{countdown}</strong>
+				<strong className='text-primary'>{countdown} seconds</strong>
 			</h3>
 		</div>
 	);
