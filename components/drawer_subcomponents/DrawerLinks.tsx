@@ -52,7 +52,7 @@ const DrawerLinks = ({ screenIsSmall }: Props) => {
 					className={`invisible d-flex flex-wrap ${
 						drawer.onLeft
 							? 'flex-column top-0 start-100 ps-1'
-							: 'flex-row top-100 start-0 pt-1'
+							: 'flex-row w-100 top-100 start-0 pt-1'
 					} 
 					gap-1 position-absolute justify-content-center`}
 				>
@@ -102,7 +102,7 @@ const DrawerLinks = ({ screenIsSmall }: Props) => {
 					className={`invisible d-flex flex-wrap ${
 						drawer.onLeft
 							? 'flex-column top-0 start-100 ps-1'
-							: 'flex-row top-100 start-0 pt-1'
+							: 'flex-row w-100 top-100 start-0 pt-1'
 					} 
 					gap-1 position-absolute justify-content-center`}
 				>
@@ -152,7 +152,7 @@ const DrawerLinks = ({ screenIsSmall }: Props) => {
 					className={`invisible d-flex flex-wrap ${
 						drawer.onLeft
 							? 'flex-column top-0 start-100 ps-1'
-							: 'flex-row top-100 start-0 pt-1'
+							: 'flex-row w-100 top-100 start-0 pt-1'
 					} 
 					gap-1 position-absolute justify-content-center`}
 				>
