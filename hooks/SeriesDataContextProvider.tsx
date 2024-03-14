@@ -10,24 +10,24 @@ interface Props {
 	children: React.ReactNode;
 }
 
-interface SupportedSeriesDataProps {
-	supportedSeriesData: SeriesDataDocModel[] | null;
+interface SeriesDataContextProps {
+	seriesData: SeriesDataDocModel[] | null;
 	yearsBySeries: SupportedYearsData | null;
 	fetchingSeriesData: boolean;
 	fetchSeriesData: () => void;
 }
 
-const SupportedSeriesDataContext = createContext<SupportedSeriesDataProps>({
-	supportedSeriesData: null,
+const SeriesDataContext = createContext<SeriesDataContextProps>({
+	seriesData: null,
 	yearsBySeries: null,
 	fetchingSeriesData: true,
 	fetchSeriesData: () => null,
 });
 
-const SupportedYearsProvider = ({ children }: Props) => {
-	const [supportedSeriesData, setSupportedSeriesData] = useState<
-		SeriesDataDocModel[] | null
-	>(null);
+const SeriesDataContextProvider = ({ children }: Props) => {
+	const [seriesData, setSeriesData] = useState<SeriesDataDocModel[] | null>(
+		null
+	);
 	const [yearsBySeries, setYearsBySeries] = useState<SupportedYearsData | null>(
 		null
 	);
@@ -39,15 +39,14 @@ const SupportedYearsProvider = ({ children }: Props) => {
 				`/api/document/series-data`,
 				{ timeout: 15000 }
 			);
-			const yearsBySeries: SupportedYearsData = res.data.reduce(
-				(prev, curr) => {
-					prev[curr.series] = prev[curr.series] || [];
-					prev[curr.series].push(curr.year);
-					return prev;
-				},
-				Object.create(null)
-			);
-			setSupportedSeriesData(res.data);
+			const yearsBySeries: SupportedYearsData = res.data.length
+				? res.data.reduce((prev, curr) => {
+						prev[curr.series] = prev[curr.series] || [];
+						prev[curr.series].push(curr.year);
+						return prev;
+				  }, Object.create(null))
+				: null;
+			setSeriesData(res.data);
 			setYearsBySeries(yearsBySeries);
 			setFetchingSeriesData(false);
 		} catch (error: any) {
@@ -61,17 +60,17 @@ const SupportedYearsProvider = ({ children }: Props) => {
 	}, []);
 
 	return (
-		<SupportedSeriesDataContext.Provider
+		<SeriesDataContext.Provider
 			value={{
-				supportedSeriesData,
+				seriesData: seriesData,
 				yearsBySeries,
 				fetchingSeriesData,
 				fetchSeriesData,
 			}}
 		>
 			{children}
-		</SupportedSeriesDataContext.Provider>
+		</SeriesDataContext.Provider>
 	);
 };
 
-export { SupportedSeriesDataContext, SupportedYearsProvider };
+export { SeriesDataContext, SeriesDataContextProvider };
