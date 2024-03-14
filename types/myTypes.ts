@@ -50,18 +50,18 @@ export interface FileFormValues {
 	file: File | null;
 }
 
-export interface DataFormValues {
+export interface InformationFormValues {
 	series: string;
 	year: string;
 	description: string;
 }
 
-export interface UpdateDocsFormValues {
+export interface UpdatePenaltiesFormValues {
 	series: string;
 	year: string;
 }
 
-export interface MissingDocModel extends DataFormValues {
+export interface MissingDocModel extends InformationFormValues {
 	_id: string;
 	createdAt: string;
 	updatedAt: string;
@@ -139,7 +139,7 @@ export interface LoginFormValues {
 	password: string;
 }
 
-export type SelectDocsValues =
+export type SelectDocumentsValues =
 	| 'contact-message'
 	| 'missing-info'
 	| 'missing-file'
