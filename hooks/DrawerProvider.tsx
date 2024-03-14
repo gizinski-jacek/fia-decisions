@@ -5,12 +5,12 @@ interface Props {
 	children: React.ReactNode;
 }
 
-type DrawerProps = {
+interface DrawerProps {
 	drawer: { onLeft: boolean; isSmall: boolean; isHidden: boolean };
 	toggleDrawerPosition: () => void;
 	toggleDrawerSize: () => void;
 	toggleDrawerVisibility: () => void;
-};
+}
 
 const DrawerContext = createContext<DrawerProps>({
 	drawer: { onLeft: false, isSmall: false, isHidden: false },
