@@ -3,7 +3,7 @@ import { WeekendData } from '../../types/myTypes';
 
 interface Props {
 	calendarData: WeekendData[];
-	nextRace: WeekendData | null;
+	nextRace: WeekendData | null | undefined;
 }
 
 const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
