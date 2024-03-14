@@ -4,20 +4,19 @@ import { defaultDashboardFormValues } from '../../lib/myData';
 import { LoginFormValues } from '../../types/myTypes';
 import axios, { AxiosError } from 'axios';
 import LoadingBar from '../LoadingBar';
+import { useRouter } from 'next/router';
 
-interface Props {
-	handleSignIn: () => void;
-}
-
-const DashboardForm = ({ handleSignIn }: Props) => {
+const DashboardForm = () => {
 	const [formData, setFormData] = useState<LoginFormValues>(
 		defaultDashboardFormValues
 	);
 	const [formErrors, setFormErrors] = useState<string[] | null>(null);
-	const [sending, setSending] = useState(false);
+	const [fetching, setFetching] = useState(false);
+	const [showPassword, setShowPassword] = useState(false);
+
+	const router = useRouter();
 
 	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		setFormErrors(null);
 		const { name, value } = e.target;
 		setFormData((prevState) => ({ ...prevState, [name]: value }));
 	};
@@ -34,14 +33,13 @@ const DashboardForm = ({ handleSignIn }: Props) => {
 			for (const [key, value] of Object.entries(formData)) {
 				uploadData.append(key, value);
 			}
-			setSending(true);
+			setFetching(true);
 			await axios.post('/api/forms/dashboard-sign-in', uploadData, {
 				timeout: 15000,
 			});
-			setSending(false);
-			handleSignIn();
+			setFetching(false);
+			router.push('/dashboard');
 		} catch (error: any) {
-			setSending(false);
 			if (error instanceof AxiosError) {
 				Array.isArray(error?.response?.data)
 					? setFormErrors(error?.response?.data || ['Unknown server error.'])
@@ -49,7 +47,16 @@ const DashboardForm = ({ handleSignIn }: Props) => {
 			} else {
 				setFormErrors([(error as Error).message || 'Unknown server error.']);
 			}
+			setFetching(false);
 		}
+	};
+
+	const handleShowPassword = () => {
+		setShowPassword(true);
+	};
+
+	const handleHidePassword = () => {
+		setShowPassword(false);
 	};
 
 	return (
@@ -61,30 +68,44 @@ const DashboardForm = ({ handleSignIn }: Props) => {
 					className={`${
 						formErrors && formData.password
 							? 'outline-error'
-							: formData.password.length < 8 || formData.password.length > 64
+							: formData.password.length < 16 || formData.password.length > 64
 							? 'outline-warning'
 							: 'outline-success'
 					}`}
-					type='password'
+					type={showPassword ? 'text' : 'password'}
 					name='password'
 					id='password'
-					minLength={8}
+					minLength={16}
 					maxLength={64}
 					onChange={handleInputChange}
 					value={formData.password}
 					placeholder='Password'
-					disabled={sending}
+					disabled={fetching}
 					required
 					aria-describedby='dashboardPasswordInputHelpText'
 				/>
 				<Form.Text muted id='dashboardPasswordInputHelpText'>
-					Password 8-64 characters long
+					Password, 16-64 characters long.
 				</Form.Text>
+				{showPassword ? (
+					<i
+						className='bi bi-eye-slash-fill fs-5 m-0 ms-2'
+						onClick={handleHidePassword}
+					></i>
+				) : (
+					<i
+						className='bi bi-eye-fill fs-5 m-0 ms-2'
+						onClick={handleShowPassword}
+					></i>
+				)}
 			</Form.Group>
 			{formErrors && (
-				<div className='m-0 mt-4 alert alert-danger alert-dismissible'>
+				<div className='m-0 alert alert-danger alert-dismissible overflow-auto custom-alert-maxheight text-start'>
 					{formErrors.map((message, index) => (
-						<div key={index}>{message}</div>
+						<div className='d-flex mb-2' key={index}>
+							<i className='bi bi-exclamation-triangle-fill fs-5 m-0 me-2'></i>
+							<strong className='ms-2 me-4'>{message}</strong>
+						</div>
 					))}
 					<button
 						type='button'
@@ -93,11 +114,12 @@ const DashboardForm = ({ handleSignIn }: Props) => {
 					></button>
 				</div>
 			)}
-			{sending && <LoadingBar margin='1rem 0' width='50%' />}
+			{fetching && <LoadingBar margin='1rem 0' width='50%' />}
 			<Button
 				variant='dark'
+				type='submit'
 				className='fw-bolder'
-				disabled={sending || !formData.password || !!formErrors}
+				disabled={fetching || !formData.password || !!formErrors}
 				onClick={handleSubmit}
 			>
 				Submit
