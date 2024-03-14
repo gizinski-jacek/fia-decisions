@@ -37,8 +37,9 @@ const ContactDocWrapper = ({ data, docType, handleDelete }: Props) => {
 									<p>{new Date(contact.createdAt).toLocaleString()}</p>
 								</div>
 								<Button
-									variant='danger'
 									size='sm'
+									variant='danger'
+									type='submit'
 									className='fw-bolder text-nowrap custom-button'
 									onClick={() => handleDelete(docType, contact._id)}
 								>
