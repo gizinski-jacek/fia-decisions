@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { GetServerSidePropsContext, NextApiRequest, NextPage } from 'next';
 import { useRouter } from 'next/router';
-import DashboardForm from '../../components/forms/DashboardForm';
+import SignInForm from '../../components/forms/SignInForm';
 import { verifyToken } from '../../lib/utils';
 import Link from 'next/link';
 
@@ -34,7 +34,7 @@ const SignIn: NextPage<Props> = ({ signedIn }) => {
 			</h3>
 		</div>
 	) : (
-		<DashboardForm />
+		<SignInForm />
 	);
 };
 
