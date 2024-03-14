@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import { DrawerContext } from '../../hooks/DrawerProvider';
 import Link from 'next/link';
 import Image from 'next/image';
-import { supportedYears } from '../../lib/myData';
+import { SupportedSeriesDataContext } from '../../hooks/SupportedYearsProvider';
 
 interface Props {
 	screenIsSmall: boolean;
@@ -11,12 +11,13 @@ interface Props {
 
 const DrawerLinks = ({ screenIsSmall }: Props) => {
 	const { drawer } = useContext(DrawerContext);
+	const { yearsBySeries } = useContext(SupportedSeriesDataContext);
 
 	const router = useRouter();
 
 	return (
 		<ul
-			className={`nav nav-tabs nav-fill flex-nowrap p-2 py-2 p-md-2 
+			className={`nav nav-tabs nav-fill flex-nowrap p-2
 						${
 							drawer.onLeft
 								? 'flex-sm-column gap-2'
@@ -48,27 +49,29 @@ const DrawerLinks = ({ screenIsSmall }: Props) => {
 					</a>
 				</Link>
 				<div
-					className={`d-none flex-wrap ${
+					className={`invisible d-flex flex-wrap ${
 						drawer.onLeft
 							? 'flex-column top-0 start-100 ps-1'
 							: 'flex-row top-100 start-0 pt-1'
-					} gap-1 position-absolute`}
+					} 
+					gap-1 position-absolute justify-content-center`}
 				>
-					{supportedYears['f1'].map((year, i) => {
-						if (new Date().getFullYear() !== year) {
-							return (
-								<Link href={`/f1?year=${year}`} key={i}>
-									<a className='btn btn-sm btn-danger fw-bolder'>{year}</a>
-								</Link>
-							);
-						} else {
-							return (
-								<Link href='/f1' key={i}>
-									<a className='btn btn-sm btn-danger fw-bolder'>{year}</a>
-								</Link>
-							);
-						}
-					})}
+					{yearsBySeries &&
+						yearsBySeries['f1']?.map((year, i) => {
+							if (new Date().getFullYear() !== year) {
+								return (
+									<Link href={`/f1?year=${year}`} key={i}>
+										<a className='btn btn-sm btn-danger fw-bolder'>{year}</a>
+									</Link>
+								);
+							} else {
+								return (
+									<Link href='/f1' key={i}>
+										<a className='btn btn-sm btn-danger fw-bolder'>{year}</a>
+									</Link>
+								);
+							}
+						})}
 				</div>
 			</li>
 			<li className='nav-item position-relative'>
@@ -96,27 +99,29 @@ const DrawerLinks = ({ screenIsSmall }: Props) => {
 					</a>
 				</Link>
 				<div
-					className={`d-none ${
+					className={`invisible d-flex flex-wrap ${
 						drawer.onLeft
 							? 'flex-column top-0 start-100 ps-1'
 							: 'flex-row top-100 start-0 pt-1'
-					} gap-1 position-absolute`}
+					} 
+					gap-1 position-absolute justify-content-center`}
 				>
-					{supportedYears['f2'].map((year, i) => {
-						if (new Date().getFullYear() !== year) {
-							return (
-								<Link href={`/f2?year=${year}`} key={i}>
-									<a className='btn btn-sm btn-primary fw-bolder'>{year}</a>
-								</Link>
-							);
-						} else {
-							return (
-								<Link href='/f2' key={i}>
-									<a className='btn btn-sm btn-primary fw-bolder'>{year}</a>
-								</Link>
-							);
-						}
-					})}
+					{yearsBySeries &&
+						yearsBySeries['f2']?.map((year, i) => {
+							if (new Date().getFullYear() !== year) {
+								return (
+									<Link href={`/f2?year=${year}`} key={i}>
+										<a className='btn btn-sm btn-primary fw-bolder'>{year}</a>
+									</Link>
+								);
+							} else {
+								return (
+									<Link href='/f2' key={i}>
+										<a className='btn btn-sm btn-primary fw-bolder'>{year}</a>
+									</Link>
+								);
+							}
+						})}
 				</div>
 			</li>
 			<li className='nav-item position-relative'>
@@ -144,27 +149,29 @@ const DrawerLinks = ({ screenIsSmall }: Props) => {
 					</a>
 				</Link>
 				<div
-					className={`d-none ${
+					className={`invisible d-flex flex-wrap ${
 						drawer.onLeft
 							? 'flex-column top-0 start-100 ps-1'
 							: 'flex-row top-100 start-0 pt-1'
-					} gap-1 position-absolute`}
+					} 
+					gap-1 position-absolute justify-content-center`}
 				>
-					{supportedYears['f3'].map((year, i) => {
-						if (new Date().getFullYear() !== year) {
-							return (
-								<Link href={`/f3?year=${year}`} key={i}>
-									<a className='btn btn-sm btn-secondary fw-bolder'>{year}</a>
-								</Link>
-							);
-						} else {
-							return (
-								<Link href='/f3' key={i}>
-									<a className='btn btn-sm btn-secondary fw-bolder'>{year}</a>
-								</Link>
-							);
-						}
-					})}
+					{yearsBySeries &&
+						yearsBySeries['f3']?.map((year, i) => {
+							if (new Date().getFullYear() !== year) {
+								return (
+									<Link href={`/f3?year=${year}`} key={i}>
+										<a className='btn btn-sm btn-secondary fw-bolder'>{year}</a>
+									</Link>
+								);
+							} else {
+								return (
+									<Link href='/f3' key={i}>
+										<a className='btn btn-sm btn-secondary fw-bolder'>{year}</a>
+									</Link>
+								);
+							}
+						})}
 				</div>
 			</li>
 		</ul>

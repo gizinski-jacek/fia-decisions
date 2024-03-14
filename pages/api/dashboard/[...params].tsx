@@ -1,13 +1,14 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next';
-import connectMongo from '../../../lib/mongo';
+import connectMongoDb from '../../../lib/mongo';
 import mongoose from 'mongoose';
-import { dbNameList, supportedSeries } from '../../../lib/myData';
+import { supportedSeries } from '../../../lib/myData';
 import {
 	ContactDocModel,
 	PenaltyModel,
 	GroupedByGP,
 	MissingDocModel,
+	SeriesDataDocModel,
 } from '../../../types/myTypes';
 import { verifyToken } from '../../../lib/utils';
 import axios from 'axios';
@@ -15,7 +16,11 @@ import axios from 'axios';
 const handler = async (
 	req: NextApiRequest,
 	res: NextApiResponse<
-		MissingDocModel[] | ContactDocModel[] | GroupedByGP | string
+		| GroupedByGP
+		| MissingDocModel[]
+		| ContactDocModel[]
+		| SeriesDataDocModel[]
+		| string
 	>
 ) => {
 	const tokenValid = verifyToken(req);
@@ -23,10 +28,114 @@ const handler = async (
 		if (req.method === 'GET') {
 			const { params } = req.query as { params: string[] };
 			const reqType = params[0];
-			const series = supportedSeries.find((s) => s === params[1].toLowerCase());
-			const year = params[2] || new Date().getFullYear().toString();
+			const series =
+				params[1] &&
+				supportedSeries.find(
+					(s) => s.toLowerCase() === params[1].toLowerCase()
+				);
+			const year = params[2];
 			const manualUpload = params[3];
-
+			if (reqType === 'missing-info') {
+				try {
+					const conn = await connectMongoDb('Other_Docs');
+					const document_list: MissingDocModel[] =
+						await conn.models.Missing_Doc.find().exec();
+					return res.status(200).json(document_list);
+				} catch (error: any) {
+					return res
+						.status(404)
+						.json('Unknown server error. Failed to get documents.');
+				}
+			}
+			if (reqType === 'missing-file') {
+				try {
+					const conn = await connectMongoDb('Other_Docs');
+					const query = manualUpload ? { manual_upload: true } : {};
+					const document_list: PenaltyModel[] =
+						await conn.models.Penalty_Doc.find(query)
+							.sort({ doc_date: -1 })
+							.exec();
+					if (!document_list.length) {
+						return res.status(200).json({});
+					}
+					const groupedByGP: GroupedByGP = document_list.reduce(
+						(prev, curr) => {
+							prev[curr.grand_prix] = prev[curr.grand_prix] || [];
+							prev[curr.grand_prix].push(curr);
+							return prev;
+						},
+						Object.create(null)
+					);
+					return res.status(200).json(groupedByGP);
+				} catch (error: any) {
+					return res
+						.status(404)
+						.json('Unknown server error. Failed to get documents.');
+				}
+			}
+			if (reqType === 'contact-message') {
+				try {
+					const conn = await connectMongoDb('Other_Docs');
+					const document_list: ContactDocModel[] =
+						await conn.models.Contact_Doc.find().exec();
+					return res.status(200).json(document_list);
+				} catch (error: any) {
+					return res
+						.status(404)
+						.json('Unknown server error. Failed to get documents.');
+				}
+			}
+			if (!series) {
+				return res.status(422).json('Unsupported Series.');
+			}
+			if (!year) {
+				return res.status(422).json('Must provide Series Year.');
+			}
+			const connSupportedYears = await connectMongoDb('Series_Data');
+			const document_list_series_data: SeriesDataDocModel[] =
+				await connSupportedYears.models.Series_Data_Doc.find({
+					series: series,
+				})
+					.sort({ year: -1 })
+					.exec();
+			if (!document_list_series_data.length) {
+				return res.status(422).json('No data for selected Series found.');
+			}
+			const selectedSeriesData = document_list_series_data.find(
+				(doc) => parseInt(doc.year) === parseInt(year)
+			);
+			if (!selectedSeriesData) {
+				return res.status(422).json('Unsupported Series Year.');
+			}
+			if (reqType === 'penalties') {
+				try {
+					const seriesYearDb = `${
+						selectedSeriesData.year
+					}_${selectedSeriesData.series.toUpperCase()}_WC_Docs`;
+					const conn = await connectMongoDb(seriesYearDb);
+					const query = manualUpload ? { manual_upload: true } : {};
+					const document_list: PenaltyModel[] =
+						await conn.models.Penalty_Doc.find(query)
+							.sort({ doc_date: -1 })
+							.exec();
+					if (!document_list.length) {
+						return res.status(200).json({});
+					}
+					const groupedByGP: GroupedByGP = document_list.reduce(
+						(prev, curr) => {
+							prev[curr.grand_prix] = prev[curr.grand_prix] || [];
+							prev[curr.grand_prix].push(curr);
+							return prev;
+						},
+						Object.create(null)
+					);
+					return res.status(200).json(groupedByGP);
+				} catch (error: any) {
+					return res
+						.status(404)
+						.json('Unknown server error. Failed to get documents.');
+				}
+			}
 			const {
 				NODE_ENV,
 				CRON_JOB_UPDATE_NEWEST_SECRET,
@@ -36,19 +145,15 @@ const handler = async (
 				NODE_ENV === 'production'
 					? process.env.API_WORKER_URI
 					: process.env.API_WORKER_URI_DEV;
-
 			if (reqType === 'update-newest') {
 				try {
-					if (!series) {
-						return res.status(422).json('Unsupported series.');
-					}
 					if (!CRON_JOB_UPDATE_NEWEST_SECRET || !apiURI) {
 						throw new Error(
 							'Please define CRON_JOB_UPDATE_NEWEST_SECRET and API_WORKER_URI environment variable inside .env.local'
 						);
 					}
 					await axios.get(
-						`${apiURI}/api/update-newest/penalties/${series}/${year}`,
+						`${apiURI}/api/update-newest/penalties/${selectedSeriesData.series}/${selectedSeriesData.year}`,
 						{
 							headers: {
 								Authorization: `Bearer ${CRON_JOB_UPDATE_NEWEST_SECRET}`,
@@ -63,16 +168,13 @@ const handler = async (
 			}
 			if (reqType === 'update-all') {
 				try {
-					if (!series) {
-						return res.status(422).json('Unsupported series.');
-					}
 					if (!CRON_JOB_UPDATE_ALL_SECRET || !apiURI) {
 						throw new Error(
 							'Please define CRON_JOB_UPDATE_ALL_SECRET and API_WORKER_URI environment variable inside .env.local'
 						);
 					}
 					await axios.get(
-						`${apiURI}/api/update-all/penalties/${series}/${year}`,
+						`${apiURI}/api/update-all/penalties/${selectedSeriesData.series}/${selectedSeriesData.year}`,
 						{
 							headers: {
 								Authorization: `Bearer ${CRON_JOB_UPDATE_ALL_SECRET}`,
@@ -84,116 +186,23 @@ const handler = async (
 					return res.status(404).json('Unknown server error.');
 				}
 			}
-			if (reqType === 'penalties') {
-				try {
-					if (!series) {
-						return res.status(422).json('Unsupported series.');
-					}
-					const seriesYearDB = dbNameList[`${series}_${year}_db`];
-					if (!seriesYearDB) {
-						return res.status(422).json('Unsupported year.');
-					}
-					const conn = await connectMongo(seriesYearDB);
-					const query = manualUpload ? { manual_upload: true } : {};
-					const document_list: PenaltyModel[] =
-						await conn.models.Penalty_Doc.find(query)
-							.sort({ doc_date: -1 })
-							.exec();
-					const groupedByGP: GroupedByGP = document_list.reduce(
-						(prev, curr) => {
-							prev[curr.grand_prix] = prev[curr.grand_prix] || [];
-							prev[curr.grand_prix].push(curr);
-							return prev;
-						},
-						Object.create(null)
-					);
-					return res.status(200).json(groupedByGP);
-				} catch (error: any) {
-					return res
-						.status(404)
-						.json('Unknown server error. Failed to get documents.');
-				}
-			}
-			if (reqType === 'missing-info') {
-				try {
-					const conn = await connectMongo(dbNameList.other_documents_db);
-					const document_list: MissingDocModel[] =
-						await conn.models.Missing_Doc.find().exec();
-					return res.status(200).json(document_list);
-				} catch (error: any) {
-					return res
-						.status(404)
-						.json('Unknown server error. Failed to get documents.');
-				}
-			}
-			if (reqType === 'missing-file') {
-				try {
-					const conn = await connectMongo(dbNameList.other_documents_db);
-					const query = manualUpload ? { manual_upload: true } : {};
-					const document_list: PenaltyModel[] =
-						await conn.models.Penalty_Doc.find(query)
-							.sort({ doc_date: -1 })
-							.exec();
-					const groupedByGP: GroupedByGP = document_list.reduce(
-						(prev, curr) => {
-							prev[curr.grand_prix] = prev[curr.grand_prix] || [];
-							prev[curr.grand_prix].push(curr);
-							return prev;
-						},
-						Object.create(null)
-					);
-					return res.status(200).json(groupedByGP);
-				} catch (error: any) {
-					return res
-						.status(404)
-						.json('Unknown server error. Failed to get documents.');
-				}
-			}
-			if (reqType === 'contact-message') {
-				try {
-					const conn = await connectMongo(dbNameList.other_documents_db);
-					const document_list: ContactDocModel[] =
-						await conn.models.Contact_Doc.find().exec();
-					return res.status(200).json(document_list);
-				} catch (error: any) {
-					return res
-						.status(404)
-						.json('Unknown server error. Failed to get documents.');
-				}
-			}
 			return res.status(405).end();
 		} else if (req.method === 'DELETE') {
 			const { params } = req.query as { params: string[] };
 			const reqType = params[0];
-			const series = supportedSeries.find((s) => s === params[1].toLowerCase());
+			const series =
+				params[1] &&
+				supportedSeries.find(
+					(s) => s.toLowerCase() === params[1].toLowerCase()
+				);
 			const docId = params[2];
 			const year = params[3];
 			if (!docId) {
 				return res.status(403).json('Document Id is required.');
 			}
-			if (reqType === 'penalties') {
-				try {
-					let seriesYearDB: string;
-					if (series === 'missing-file') {
-						seriesYearDB = dbNameList.other_documents_db;
-					} else {
-						seriesYearDB = dbNameList[`${series}_${year}_db`];
-					}
-					if (!seriesYearDB) {
-						return res.status(422).json('Unsupported year.');
-					}
-					const conn = await connectMongo(seriesYearDB);
-					await conn.models.Penalty_Doc.findByIdAndDelete(docId).exec();
-					return res.status(200).end();
-				} catch (error: any) {
-					return res
-						.status(404)
-						.json('Unknown server error. File was not deleted.');
-				}
-			}
 			if (reqType === 'missing-info') {
 				try {
-					const conn = await connectMongo(dbNameList.other_documents_db);
+					const conn = await connectMongoDb('Other_Docs');
 					await conn.models.Missing_Doc.findByIdAndDelete(docId).exec();
 					return res.status(200).end();
 				} catch (error: any) {
@@ -204,8 +213,40 @@ const handler = async (
 			}
 			if (reqType === 'contact-message') {
 				try {
-					const conn = await connectMongo(dbNameList.other_documents_db);
+					const conn = await connectMongoDb('Other_Docs');
 					await conn.models.Contact_Doc.findByIdAndDelete(docId).exec();
+					return res.status(200).end();
+				} catch (error: any) {
+					return res
+						.status(404)
+						.json('Unknown server error. File was not deleted.');
+				}
+			}
+			if (reqType === 'series-data') {
+				try {
+					const conn = await connectMongoDb('Series_Data');
+					await conn.models.Series_Data_Doc.findByIdAndDelete(docId).exec();
+					return res.status(200).end();
+				} catch (error: any) {
+					return res
+						.status(404)
+						.json('Unknown server error. Data was not deleted.');
+				}
+			}
+			if (!series) {
+				return res.status(422).json('Unsupported Series.');
+			}
+			if (!year) {
+				return res.status(422).json('Must provide a Year.');
+			}
+			if (reqType === 'penalties') {
+				try {
+					const seriesYearDb =
+						series === 'missing-file'
+							? 'Other_Docs'
+							: `${year}_${series.toUpperCase()}_WC_Docs`;
+					const conn = await connectMongoDb(seriesYearDb);
+					await conn.models.Penalty_Doc.findByIdAndDelete(docId).exec();
 					return res.status(200).end();
 				} catch (error: any) {
 					return res
@@ -216,19 +257,19 @@ const handler = async (
 		} else if (req.method === 'PUT') {
 			const { params } = req.query as { params: string[] };
 			const [reqType, docId] = params;
+			if (!docId) {
+				return res.status(403).json('Document Id is required.');
+			}
 			if (reqType === 'accept-document') {
 				try {
-					if (!docId) {
-						return res.status(403).json('Document Id is required.');
-					}
-					const connOtherDB = await connectMongo(dbNameList.other_documents_db);
-					const document = await connOtherDB.models.Penalty_Doc.findById(
+					const connOtherDocsDb = await connectMongoDb('Other_Docs');
+					const document = await connOtherDocsDb.models.Penalty_Doc.findById(
 						docId
 					).exec();
-					const docYear = new Date(document.doc_date).getFullYear().toString();
-					const seriesDB = dbNameList[`${document.series}_${docYear}_db`];
-					const connSeriesDB = await connectMongo(seriesDB);
-					const docExists = await connSeriesDB.models.Penalty_Doc.findOne({
+					const docYear = new Date(document.doc_date).getFullYear();
+					const seriesYearDb = `${docYear}_${document.series.toUpperCase()}_WC_Docs`;
+					const connSeriesDb = await connectMongoDb(seriesYearDb);
+					const docExists = await connSeriesDb.models.Penalty_Doc.findOne({
 						series: document.series,
 						doc_type: document.doc_type,
 						doc_name: document.doc_name,
@@ -241,10 +282,12 @@ const handler = async (
 					if (docExists) {
 						return res.status(403).json('Document already exists.');
 					}
-					await connOtherDB.models.Penalty_Doc.findByIdAndDelete(docId).exec();
+					await connOtherDocsDb.models.Penalty_Doc.findByIdAndDelete(
+						docId
+					).exec();
 					document._id = new mongoose.Types.ObjectId();
 					document.isNew = true;
-					await connSeriesDB.models.Penalty_Doc.insertMany(document);
+					await connSeriesDb.models.Penalty_Doc.insertMany(document);
 					return res.status(200).end();
 				} catch (error: any) {
 					return res

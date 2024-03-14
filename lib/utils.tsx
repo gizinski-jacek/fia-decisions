@@ -123,6 +123,7 @@ export const renderBySeries = (
 	}
 ): JSX.Element[] | ReactElement | any => {
 	const groupedBySeries = supportedSeries.map((series) => {
+		const year = Object.values(docsData)[0][0].doc_date.slice(0, 4);
 		const seriesDocs: { [key: string]: GroupedByGP[] } = { [series]: [] };
 		for (const [key, value] of Object.entries(docsData)) {
 			if (value[0].series === series) {
@@ -137,7 +138,7 @@ export const renderBySeries = (
 					<Accordion.Item eventKey='2'>
 						<Accordion.Header>
 							<h4 className='me-3 fw-bold text-capitalize'>
-								{key.replace('f', 'Formula ')} Penalties
+								{year} {key.replace('f', 'Formula ')} Penalties
 							</h4>
 						</Accordion.Header>
 						<Accordion.Body className='d-flex flex-column gap-2'>

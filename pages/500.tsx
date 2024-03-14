@@ -22,7 +22,7 @@ const Custom500 = () => {
 			<h2>Server-side error occurred</h2>
 			<h3>
 				Redirecting to <Link href='/'>Home</Link> page in{' '}
-				<strong className='text-primary'>{countdown}</strong>
+				<strong className='text-primary'>{countdown} seconds</strong>
 			</h3>
 		</div>
 	);

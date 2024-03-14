@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { GetServerSidePropsContext, NextApiRequest, NextPage } from 'next';
 import { useRouter } from 'next/router';
 import {
@@ -6,108 +6,95 @@ import {
 	DocumentsResponseData,
 	GroupedByGP,
 	MissingDocModel,
+	SelectDocsValues,
 } from '../../types/myTypes';
-import DashboardForm from '../../components/forms/DashboardForm';
 import { Button, Form, Modal } from 'react-bootstrap';
 import axios, { AxiosError } from 'axios';
-import { dbNameList, supportedSeries, supportedYears } from '../../lib/myData';
+import { supportedSeries } from '../../lib/myData';
 import LoadingBar from '../../components/LoadingBar';
 import { renderBySeries, verifyToken } from '../../lib/utils';
 import MissingDocWrapper from '../../components/wrappers/MissingDocWrapper';
 import ContactDocWrapper from '../../components/wrappers/ContactDocWrapper';
+import SeriesDataForm from '../../components/forms/SeriesDataForm';
+import { SupportedSeriesDataContext } from '../../hooks/SupportedYearsProvider';
+import UpdateDocsForm from '../../components/forms/UpdateDocsForm';
 
 interface Props {
-	validToken: boolean;
+	signedIn: boolean;
 }
 
-const Dashboard: NextPage<Props> = ({ validToken }) => {
-	const [signedIn, setSignedIn] = useState(validToken);
-	const [chosenDocs, setChosenDocs] = useState<
-		| 'contact-message'
-		| 'missing-info'
-		| 'missing-file'
-		| 'penalties__f1__manual-upload'
-		| 'penalties__f1__manual-upload'
-		| 'penalties__f2__manual-upload'
-		| 'penalties__f3__manual-upload'
-		| 'penalties__f1'
-		| 'penalties__f2'
-		| 'penalties__f3'
-	>('contact-message');
+const Dashboard: NextPage<Props> = ({ signedIn }) => {
+	const { yearsBySeries } = useContext(SupportedSeriesDataContext);
+	const [selectedDocs, setSelectedDocs] =
+		useState<SelectDocsValues>('contact-message');
 	const [docsData, setDocsData] = useState<
 		GroupedByGP | MissingDocModel[] | ContactDocModel[] | null
 	>(null);
 	const [fetching, setFetching] = useState(false);
-	const [fetchingError, setFetchingError] = useState<string | null>(null);
+	const [fetchingErrors, setFetchingErrors] = useState<string[] | null>(null);
 	const [searchInput, setSearchInput] = useState('');
-	const [yearSelect, setYearSelect] = useState(
-		new Date().getFullYear().toString()
-	);
-	const [showRequestUpdateModal, setShowRequestUpdateModal] =
+	const [yearSelect, setYearSelect] = useState<number | null>(null);
+	const [showUpdateDocsModal, setShowUpdateDocsModal] =
 		useState<boolean>(false);
-	const [requestUpdateSeries, setRequestUpdateSeries] = useState<string | null>(
-		null
-	);
-	const [requestUpdateYear, setRequestUpdateYear] = useState<string | null>(
-		null
-	);
+	const [showUpdateSeriesDataModal, setShowUpdateSeriesDataModal] =
+		useState<boolean>(false);
 
 	const router = useRouter();
 
-	const handleSignIn = () => {
-		getDocuments();
-		setSignedIn(true);
-	};
-
-	const getDocuments = useCallback(async () => {
-		try {
-			if (!chosenDocs) {
-				setFetchingError('Must choose valid documents from the list.');
-				return;
-			}
-			const [docType, series, manualUpload] = chosenDocs.split('__');
-			setFetching(true);
-			const res: DocumentsResponseData = await axios.get(
-				`/api/dashboard/${docType}/${series}/${yearSelect}/${
-					manualUpload || ''
-				}`,
-				{ timeout: 15000 }
-			);
-			setFetching(false);
-			setFetchingError(null);
-			setDocsData(res.data);
-		} catch (error: any) {
-			setFetching(false);
-			if (error instanceof AxiosError) {
-				if (error.response?.status === 401) {
-					router.reload();
-				} else {
-					setFetchingError(
-						error?.response?.data ||
-							'Unknown server error. Fetching documents failed.'
-					);
-					setDocsData(null);
+	const fetchDocuments = useCallback(
+		async (documents: SelectDocsValues, year: number | null) => {
+			try {
+				if (!documents) {
+					setFetchingErrors(['Must select valid Documents from the list.']);
+					return;
 				}
-			} else {
-				if (error.status === 401) {
-					router.reload();
-				} else {
-					setFetchingError(
-						(error as Error).message ||
-							'Unknown server error. Fetching documents failed.'
-					);
-					setDocsData(null);
+				const [docType, series, manualUpload] = documents.split('__');
+				if (docType === 'penalties' && !year) {
+					setFetchingErrors(['Must select valid Year from the list.']);
+					return;
 				}
+				setFetching(true);
+				const res: DocumentsResponseData = await axios.get(
+					`/api/dashboard/${docType}/${series}/${year}/${manualUpload || ''}`,
+					{ timeout: 15000 }
+				);
+				setFetchingErrors(null);
+				setDocsData(res.data);
+				setFetching(false);
+			} catch (error: any) {
+				if (error instanceof AxiosError) {
+					if (error.response?.status === 401) {
+						router.reload();
+					} else {
+						Array.isArray(error?.response?.data)
+							? setFetchingErrors(
+									error?.response?.data || [
+										'Unknown server error. Fetching documents failed.',
+									]
+							  )
+							: setFetchingErrors([
+									error?.response?.data ||
+										'Unknown server error. Fetching documents failed.',
+							  ]);
+					}
+				} else {
+					if (error.status === 401) {
+						router.reload();
+					} else {
+						setFetchingErrors([
+							(error as Error).message ||
+								'Unknown server error. Fetching documents failed.',
+						]);
+					}
+				}
+				setFetching(false);
 			}
-		}
-	}, [chosenDocs, yearSelect, router]);
+		},
+		[router]
+	);
 
 	const handleDeleteDocument = async (query: string, docId: string) => {
 		try {
-			// ! Error when deleting: !!!
-			// XML Parsing Error: no element found
-			// Location: http://localhost:3000/api/dashboard/missing?doc_id=6334be6da875c7c312b0f82e
-			// Line Number 1, Column 1:
 			if (
 				confirm(
 					'This action is irreversible. Are you sure You want to Delete this document?'
@@ -115,8 +102,12 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 			) {
 				return;
 			}
-			if (!query || !docId || !yearSelect) {
-				setFetchingError('Must choose documents and year from the list.');
+			if (!yearSelect) {
+				setFetchingErrors(['Must select year from the list.']);
+				return;
+			}
+			if (!query || !docId) {
+				setFetchingErrors(['Must select document from the list.']);
 				return;
 			}
 			const [docType, series, manualUpload] = query.split('__');
@@ -125,120 +116,107 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 				`/api/dashboard/${docType}/${series}/${docId}/${yearSelect || ''}`,
 				{ timeout: 15000 }
 			);
-			getDocuments();
+			fetchDocuments(selectedDocs, yearSelect);
 		} catch (error: any) {
-			setFetching(false);
 			if (error instanceof AxiosError) {
 				if (error.response?.status === 401) {
 					router.reload();
 				} else {
 					Array.isArray(error?.response?.data)
-						? setFetchingError(
-								error?.response?.data.join(' ') ||
-									'Unknown server error. Delete request failed.'
+						? setFetchingErrors(
+								error?.response?.data || [
+									'Unknown server error. Delete request failed.',
+								]
 						  )
-						: setFetchingError(
+						: setFetchingErrors([
 								error?.response?.data ||
-									'Unknown server error. Delete request failed.'
-						  );
+									'Unknown server error. Delete request failed.',
+						  ]);
 				}
 			} else {
 				if (error.status === 401) {
 					router.reload();
 				} else {
-					setFetchingError(
+					setFetchingErrors([
 						(error as Error).message ||
-							'Unknown server error. Delete request failed.'
-					);
+							'Unknown server error. Delete request failed.',
+					]);
 				}
 			}
+			setFetching(false);
 		}
 	};
 
 	const handleAcceptDocument = async (series: string, docId: string) => {
 		try {
-			// ! Error when accepting: !!!
-			// XML Parsing Error: no element found
-			// Location: http://localhost:3000/api/dashboard/missing?doc_id=6334be6da875c7c312b0f82e
-			// Line Number 1, Column 1:
 			if (confirm('Are you sure You want to Accept this document?') === false) {
 				return;
 			}
 			if (!series || !docId) {
-				setFetchingError('Series and document Id is required.');
+				setFetchingErrors(['Series and document Id is required.']);
 				return;
 			}
 			setFetching(true);
 			await axios.put(`/api/dashboard/accept-document/${docId}`, {
 				timeout: 15000,
 			});
-			getDocuments();
+			fetchDocuments(selectedDocs, yearSelect);
 		} catch (error: any) {
-			setFetching(false);
 			if (error instanceof AxiosError) {
 				if (error.response?.status === 401) {
 					router.reload();
 				} else {
 					Array.isArray(error?.response?.data)
-						? setFetchingError(
-								error?.response?.data.join(' ') ||
-									'Unknown server error. Accept request failed.'
+						? setFetchingErrors(
+								error?.response?.data || [
+									'Unknown server error. Accept request failed.',
+								]
 						  )
-						: setFetchingError(
+						: setFetchingErrors([
 								error?.response?.data ||
-									'Unknown server error. Accept request failed.'
-						  );
+									'Unknown server error. Accept request failed.',
+						  ]);
 				}
 			} else {
 				if (error.status === 401) {
 					router.reload();
 				} else {
-					setFetchingError(
+					setFetchingErrors([
 						(error as Error).message ||
-							'Unknown server error. Delete request failed.'
-					);
+							'Unknown server error. Accept request failed.',
+					]);
 				}
 			}
+			setFetching(false);
 		}
 	};
 
 	const handleDocSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+		if (!yearsBySeries) return;
 		const { value } = e.target as {
-			value:
-				| 'contact-message'
-				| 'missing-info'
-				| 'missing-file'
-				| 'penalties__f1__manual-upload'
-				| 'penalties__f1__manual-upload'
-				| 'penalties__f2__manual-upload'
-				| 'penalties__f3__manual-upload'
-				| 'penalties__f1'
-				| 'penalties__f2'
-				| 'penalties__f3';
+			value: SelectDocsValues;
 		};
 		const [docType, series, manualUpload] = value.split('__');
-		if (
-			docType === 'penalties' &&
-			!supportedYears[series].includes(parseInt(yearSelect))
-		) {
-			setYearSelect(new Date().getFullYear().toString());
+		if (docType === 'penalties' && series) {
+			if (yearSelect && yearsBySeries[series]?.includes(yearSelect)) {
+				setYearSelect(yearSelect);
+			} else if (yearsBySeries[series][0]) {
+				setYearSelect(yearsBySeries[series][0]);
+			} else {
+				setYearSelect(null);
+			}
 		}
-		setChosenDocs(value);
+		setSelectedDocs(value);
 		setDocsData(null);
-	};
-
-	const handleDocsRefresh = () => {
-		getDocuments();
 	};
 
 	useEffect(() => {
 		if (signedIn) {
-			(() => {
-				setSearchInput('');
-				getDocuments();
-			})();
+			fetchDocuments('contact-message', null);
+		} else {
+			router.push('/sign-in');
 		}
-	}, [signedIn, getDocuments]);
+	}, [signedIn, fetchDocuments, router]);
 
 	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const { value } = e.target;
@@ -249,296 +227,233 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 		e: React.ChangeEvent<HTMLSelectElement>
 	) => {
 		const { value } = e.target;
-		setYearSelect(value);
+		setYearSelect(parseInt(value));
 	};
 
-	const handleRequestUpdateSeriesSelectChange = (
-		e: React.ChangeEvent<HTMLSelectElement>
-	) => {
-		const { value } = e.target;
-		setRequestUpdateSeries(value);
-		setRequestUpdateYear(null);
+	const openUpdateDocsModal = () => {
+		setShowUpdateDocsModal(true);
 	};
 
-	const handleRequestUpdateYearSelectChange = (
-		e: React.ChangeEvent<HTMLSelectElement>
-	) => {
-		const { value } = e.target;
-		setRequestUpdateYear(value);
+	const closeUpdateDocsModal = () => {
+		setShowUpdateDocsModal(false);
 	};
 
-	const requestUpdateNewest = async () => {
-		try {
-			if (!requestUpdateSeries) return;
-			setFetching(true);
-			await axios.get(
-				`/api/dashboard/update-newest/${requestUpdateSeries}/${
-					requestUpdateYear || ''
-				}`,
-				{ timeout: 25000 }
-			);
-			setFetching(false);
-			closeRequestUpdateModal();
-		} catch (error: any) {
-			setFetchingError(
-				error?.response?.data ||
-					'Unknown server error. Fetching documents failed.'
-			);
-			setFetching(false);
-			closeRequestUpdateModal();
-		}
+	const openUpdateSeriesDataModal = async () => {
+		setShowUpdateSeriesDataModal(true);
 	};
 
-	const requestUpdateAll = async () => {
-		try {
-			if (!requestUpdateSeries || !requestUpdateYear) return;
-			setFetching(true);
-			const confirm = window.confirm(
-				'This update process will take a long time. Are You sure you want to update all documents from this year?'
-			);
-			if (confirm) {
-				await axios.get(
-					`/api/dashboard/update-all/${requestUpdateSeries}/${requestUpdateYear}`,
-					{ timeout: 25000 }
-				);
-			}
-			setFetching(false);
-			closeRequestUpdateModal();
-		} catch (error: any) {
-			setFetchingError(
-				error?.response?.data ||
-					'Unknown server error. Fetching documents failed.'
-			);
-			setFetching(false);
-			closeRequestUpdateModal();
-		}
-	};
-
-	const openRequestUpdateModal = () => {
-		setShowRequestUpdateModal(true);
-	};
-
-	const closeRequestUpdateModal = () => {
-		setShowRequestUpdateModal(false);
-		setRequestUpdateSeries(null);
-		setRequestUpdateYear(null);
+	const closeUpdateSeriesDataModal = () => {
+		setShowUpdateSeriesDataModal(false);
 	};
 
 	return signedIn ? (
-		<div className='d-flex flex-column gap-3 m-2 my-5'>
-			<div className='d-flex gap-3 justify-content-between align-items-start'>
-				<Form className='rounded-2 p-2 bg-light'>
+		<div className='d-flex flex-column gap-3 mx-2 my-4'>
+			<div className='d-flex gap-2 justify-content-between'>
+				<Form className='flex-grow-0 rounded-2 p-2 bg-light'>
 					<Form.Group>
-						<Form.Label
-							htmlFor='documents'
-							className='fw-bolder d-flex justify-content-between align-items-center'
-						>
+						<Form.Label htmlFor='documents_select' className='fw-bolder'>
 							Documents
-							<span
-								className='d-flex align-items-center'
-								style={{ cursor: 'pointer' }}
-								onClick={handleDocsRefresh}
-							>
-								<h6 className='m-0'>Refresh</h6>
-								<i className='bi bi-arrow-repeat fs-6 ms-1'></i>
-							</span>
 						</Form.Label>
 						<Form.Select
 							name='documents_select'
 							id='documents_select'
 							onChange={handleDocSelectChange}
-							value={chosenDocs}
+							value={selectedDocs}
 							disabled={fetching}
 							required
 						>
 							<option value='contact-message'>Contact Messages</option>
-							<option value='missing-info'>Missing - Info</option>
-							<option value='missing-file'>Missing - Files</option>
-							{supportedSeries.map((series, i) => (
-								<option
-									key={series + i}
-									value={'penalties__' + series + '__manual-upload'}
-								>
-									{series.replace('f', 'F') + ' Penalties - Uploads'}
-								</option>
-							))}
-							{supportedSeries.map((series, i) => (
-								<option key={series + i} value={'penalties__' + series}>
-									{series.replace('f', 'Formula ') + ' Penalties'}
-								</option>
-							))}
+							<option value='missing-info'>Missing Penalty - Info</option>
+							<option value='missing-file'>Missing Penalty - File</option>
+							<option disabled>───────────────</option>
+							{yearsBySeries &&
+								supportedSeries.map((series, i) => (
+									<option
+										key={series + i}
+										value={'penalties__' + series + '__manual-upload'}
+										disabled={!yearsBySeries[series]?.length}
+									>
+										{series.replace('f', 'F') + ' Penalties - Uploads'}
+									</option>
+								))}
+							<option disabled>───────────────</option>
+							{yearsBySeries &&
+								supportedSeries.map((series, i) => (
+									<option
+										key={series + i}
+										value={'penalties__' + series}
+										disabled={!yearsBySeries[series]?.length}
+									>
+										{series.replace('f', 'F') + ' Penalties - API'}
+									</option>
+								))}
 						</Form.Select>
 					</Form.Group>
-				</Form>
-				{fetchingError && (
-					<div className='alert alert-danger alert-dismissible'>
-						<strong>{fetchingError}</strong>
-						<button
-							type='button'
-							className='btn btn-close'
-							onClick={() => setFetchingError(null)}
-						></button>
-					</div>
-				)}
-				<Button
-					className='text-nowrap'
-					variant='primary'
-					size='sm'
-					disabled={fetching}
-					onClick={openRequestUpdateModal}
-				>
-					Request Update
-				</Button>
-				<Modal
-					show={showRequestUpdateModal}
-					onHide={closeRequestUpdateModal}
-					dialogClassName='modal-md custom-minwidth'
-				>
-					<Modal.Header closeButton>
-						<Modal.Title className='d-flex gap-5 me-3'>
-							<h3>Request Update Documents</h3>
-						</Modal.Title>
-					</Modal.Header>
-					<Modal.Body>
-						{!fetching ? (
-							<Form className='d-flex flex-column gap-4 w-50 my-3 mx-auto'>
-								<Form.Group>
-									<Form.Select
-										className='py-0'
-										name='request_update_series_select'
-										id='request_update_series_select'
-										onChange={handleRequestUpdateSeriesSelectChange}
-										value={requestUpdateSeries || ''}
-										disabled={fetching}
-									>
-										<option value=''>Select Series</option>
-										{supportedSeries.map((series) => (
-											<option key={series} value={series}>
-												{series.replace('f', 'Formula ')}
-											</option>
-										))}
-									</Form.Select>
-								</Form.Group>
-								<Form.Group>
-									<Form.Select
-										className='py-0'
-										name='request_update_year_select'
-										id='request_update_year_select'
-										onChange={handleRequestUpdateYearSelectChange}
-										value={requestUpdateYear || ''}
-										disabled={fetching || !requestUpdateSeries}
-									>
-										<option value=''>Select Year</option>
-										{requestUpdateSeries &&
-											supportedYears[requestUpdateSeries].map((year) => (
+					<div className='d-flex justify-content-between align-items-end'>
+						{selectedDocs.includes('penalties') &&
+							(() => {
+								const series = selectedDocs.split('__')[1];
+								if (!series || !yearsBySeries) return;
+								return (
+									<Form.Group>
+										<Form.Label
+											htmlFor='year_select'
+											className='fw-bolder my-1'
+										>
+											Year
+										</Form.Label>
+										<Form.Select
+											name='year_select'
+											id='year_select'
+											onChange={handleYearSelectChange}
+											value={yearSelect || undefined}
+											disabled={fetching}
+										>
+											{yearsBySeries[series]?.map((year) => (
 												<option key={year} value={year}>
 													{year}
 												</option>
 											))}
-									</Form.Select>
-								</Form.Group>
-								<Button
-									variant='warning'
-									disabled={!requestUpdateSeries || fetching}
-									onClick={requestUpdateNewest}
-								>
-									Update Newest
-								</Button>
-								<Button
-									variant='danger'
-									disabled={
-										!requestUpdateSeries || !requestUpdateYear || fetching
-									}
-									onClick={requestUpdateAll}
-								>
-									Update All
-								</Button>
-							</Form>
-						) : (
-							<LoadingBar margin='2rem 5rem' />
-						)}
-					</Modal.Body>
-				</Modal>
-			</div>
-			{chosenDocs !== 'contact-message' && chosenDocs !== 'missing-info' ? (
-				<Form className='d-flex gap-5 rounded-2 p-2 bg-light'>
-					<Form.Group className='d-flex flex-grow-1 gap-2'>
-						<Form.Control
-							className='py-0 px-2'
-							type='search'
-							name='search_input'
-							id='search_input'
-							maxLength={32}
-							onChange={handleInputChange}
-							value={searchInput}
-							placeholder='Penalty / Name / Car #'
-							disabled={!docsData || fetching}
-						/>
+										</Form.Select>
+									</Form.Group>
+								);
+							})()}
 						<Button
-							variant='dark'
+							variant='primary'
 							size='sm'
-							disabled={!docsData || fetching}
-							onClick={() => setSearchInput('')}
+							className='text-nowrap fw-bold ms-auto text-uppercase mt-3'
+							disabled={fetching}
+							onClick={() => fetchDocuments(selectedDocs, yearSelect)}
 						>
-							<i className='bi bi-x fs-6'></i>
+							Fetch
 						</Button>
-					</Form.Group>
-					{chosenDocs !== 'missing-file' && (
-						<Form.Group>
-							<Form.Select
-								className='py-0 px-1 fs-5 custom-select'
-								name='year_select'
-								id='year_select'
-								onChange={handleYearSelectChange}
-								value={yearSelect}
-								disabled={!docsData || fetching}
-							>
-								{(() => {
-									const series = chosenDocs.split('__')[1];
-									if (!series) return;
-									const supported = supportedSeries.find(
-										(s) => s === series.toLowerCase()
-									);
-									if (!supported) return;
-									const seriesDbList = [];
-									for (const key of Object.keys(dbNameList)) {
-										if (key.includes(supported)) {
-											seriesDbList.push(key);
-										}
-									}
-									const yearsList = seriesDbList.map(
-										(series) => series.split('_')[1]
-									);
-									return yearsList.map((year) => (
-										<option key={year} value={year}>
-											{year}
-										</option>
-									));
-								})()}
-							</Form.Select>
-						</Form.Group>
-					)}
+					</div>
 				</Form>
-			) : null}
-			{!showRequestUpdateModal ? (
-				!fetching ? (
-					chosenDocs && docsData && docsData.length !== 0 ? (
-						chosenDocs.match(/(penalties__|missing-file)/im) ? (
-							renderBySeries(docsData as GroupedByGP, searchInput, {
-								deleteHandler: handleDeleteDocument,
-								docType: chosenDocs,
-								acceptHandler: handleAcceptDocument,
-							})
-						) : chosenDocs === 'missing-info' ? (
+				<div className='d-flex flex-column justify-content-between align-items-end'>
+					<div className='d-flex flex-column gap-3'>
+						<Button
+							className='fw-bold text-black'
+							variant='danger'
+							size='sm'
+							disabled={fetching || !!fetchingErrors}
+							onClick={openUpdateSeriesDataModal}
+						>
+							Update Series Data
+						</Button>
+						<Modal
+							show={showUpdateSeriesDataModal}
+							onHide={closeUpdateSeriesDataModal}
+							dialogClassName='modal-lg custom-minwidth'
+						>
+							<Modal.Header closeButton>
+								<Modal.Title className='d-flex gap-5 me-3'>
+									<h3>Update Series Data</h3>
+								</Modal.Title>
+							</Modal.Header>
+							<Modal.Body>
+								<SeriesDataForm reloadRoute={router.reload} />
+							</Modal.Body>
+						</Modal>
+						<Button
+							className='fw-bold text-black'
+							variant='warning'
+							size='sm'
+							disabled={fetching || !!fetchingErrors}
+							onClick={openUpdateDocsModal}
+						>
+							Update Penalties
+						</Button>
+						<Modal
+							show={showUpdateDocsModal}
+							onHide={closeUpdateDocsModal}
+							dialogClassName='modal-md custom-minwidth'
+						>
+							<Modal.Header closeButton>
+								<Modal.Title className='d-flex gap-5 me-3'>
+									<h3>Update Documents</h3>
+								</Modal.Title>
+							</Modal.Header>
+							<Modal.Body>
+								<UpdateDocsForm reloadRoute={router.reload} />
+							</Modal.Body>
+						</Modal>
+					</div>
+					{selectedDocs.includes('penalties') && (
+						<Form
+							className='d-flex gap-5 rounded-2 p-2 bg-light'
+							onSubmit={(e) => e.preventDefault()}
+						>
+							<Form.Group className='d-flex gap-2'>
+								<Form.Control
+									className='py-0 px-2'
+									type='search'
+									name='search_input'
+									id='search_input'
+									maxLength={32}
+									onChange={handleInputChange}
+									value={searchInput}
+									placeholder='Penalty / Name / Car #'
+									disabled={!docsData || fetching}
+								/>
+								<Button
+									variant='dark'
+									size='sm'
+									className='px-1 py-0'
+									disabled={!docsData || fetching}
+									onClick={() => setSearchInput('')}
+								>
+									<i className='bi bi-x fs-5'></i>
+								</Button>
+							</Form.Group>
+						</Form>
+					)}
+				</div>
+			</div>
+			{fetchingErrors && (
+				<div className='m-0 my-2 mx-sm-auto alert alert-danger alert-dismissible overflow-auto custom-alert-maxheight text-start'>
+					{fetchingErrors.map((message, index) => (
+						<div className='d-flex mb-2' key={index}>
+							<i className='bi bi-exclamation-triangle-fill fs-5 m-0 me-2'></i>
+							<strong className='ms-2 me-4'>{message}</strong>
+						</div>
+					))}
+					<button
+						type='button'
+						className='btn btn-close p-2'
+						id='live-alert'
+						onClick={() => setFetchingErrors(null)}
+					></button>
+				</div>
+			)}
+			{!fetching ? (
+				selectedDocs && docsData ? (
+					typeof docsData === 'object' &&
+					!Array.isArray(docsData) &&
+					docsData !== null ? (
+						selectedDocs.match(/(penalties__|missing-file)/im) ? (
+							Object.keys(docsData).length ? (
+								renderBySeries(docsData as GroupedByGP, searchInput, {
+									deleteHandler: handleDeleteDocument,
+									docType: selectedDocs,
+									acceptHandler: handleAcceptDocument,
+								})
+							) : (
+								<div className='m-5 text-center'>
+									<h3>No Penalties Found</h3>
+								</div>
+							)
+						) : null
+					) : Array.isArray(docsData) && docsData.length ? (
+						selectedDocs === 'missing-info' ? (
 							<MissingDocWrapper
 								data={docsData as MissingDocModel[]}
-								docType={chosenDocs}
+								docType={selectedDocs}
 								handleDelete={handleDeleteDocument}
 							/>
-						) : chosenDocs === 'contact-message' ? (
+						) : selectedDocs === 'contact-message' ? (
 							<ContactDocWrapper
 								data={docsData as ContactDocModel[]}
-								docType={chosenDocs}
+								docType={selectedDocs}
 								handleDelete={handleDeleteDocument}
 							/>
 						) : null
@@ -547,38 +462,12 @@ const Dashboard: NextPage<Props> = ({ validToken }) => {
 							<h3>No Documents Found</h3>
 						</div>
 					)
-				) : (
-					<LoadingBar margin='2rem 5rem' />
-				)
-			) : chosenDocs && docsData && docsData.length !== 0 ? (
-				chosenDocs.match(/(penalties__|missing-file)/im) ? (
-					renderBySeries(docsData as GroupedByGP, searchInput, {
-						deleteHandler: handleDeleteDocument,
-						docType: chosenDocs,
-						acceptHandler: handleAcceptDocument,
-					})
-				) : chosenDocs === 'missing-info' ? (
-					<MissingDocWrapper
-						data={docsData as MissingDocModel[]}
-						docType={chosenDocs}
-						handleDelete={handleDeleteDocument}
-					/>
-				) : chosenDocs === 'contact-message' ? (
-					<ContactDocWrapper
-						data={docsData as ContactDocModel[]}
-						docType={chosenDocs}
-						handleDelete={handleDeleteDocument}
-					/>
 				) : null
 			) : (
-				<div className='m-5 text-center'>
-					<h3>No Documents Found</h3>
-				</div>
+				<LoadingBar margin='2rem 5rem' />
 			)}
 		</div>
-	) : (
-		<DashboardForm handleSignIn={handleSignIn} />
-	);
+	) : null;
 };
 
 export const getServerSideProps = (context: GetServerSidePropsContext) => {
@@ -590,7 +479,7 @@ export const getServerSideProps = (context: GetServerSidePropsContext) => {
 	const tokenValid = verifyToken(context.req as NextApiRequest);
 	if (tokenValid) {
 		return {
-			props: { validToken: true },
+			props: { signedIn: true },
 		};
 	} else {
 		context.res.setHeader(
@@ -598,7 +487,7 @@ export const getServerSideProps = (context: GetServerSidePropsContext) => {
 			`token=; Path=/; httpOnly=true; SameSite=strict; Secure=true; Max-Age=0`
 		);
 		return {
-			props: { validToken: false },
+			props: { signedIn: false },
 		};
 	}
 };

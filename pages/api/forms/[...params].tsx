@@ -1,7 +1,7 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next';
-import connectMongo from '../../../lib/mongo';
-import { dbNameList, supportedSeries } from '../../../lib/myData';
+import connectMongoDb from '../../../lib/mongo';
+import { supportedSeries } from '../../../lib/myData';
 import multiparty from 'multiparty';
 import { parseFields } from '../../../lib/multiparty';
 import { streamToBuffer } from '../../../lib/streamToBuffer';
@@ -11,9 +11,11 @@ import yupValidation, {
 	contactFormValidationSchema,
 	loginFormValidationSchema,
 	dataFormValidationSchema,
+	seriesDataFormValidationSchema,
 } from '../../../lib/yup';
-import { ContactDocModel, MissingDocModel } from '../../../types/myTypes';
+import { SeriesDataFormValues } from '../../../types/myTypes';
 import jwt from 'jsonwebtoken';
+import { verifyToken } from '../../../lib/utils';
 
 export const config = {
 	api: {
@@ -24,20 +26,18 @@ export const config = {
 
 const handler = async (
 	req: NextApiRequest,
-	res: NextApiResponse<
-		| string
-		| string[]
-		| { missing: MissingDocModel[]; contact: ContactDocModel[] }
-		| { success: boolean }
-	>
+	res: NextApiResponse<string | string[]>
 ) => {
 	if (req.method === 'POST') {
 		const { params } = req.query as { params: string[] };
 		const [form, series] = params;
 		if (form === 'file') {
 			try {
-				if (!supportedSeries.find((s) => s === series)) {
-					return res.status(422).json('Unsupported series.');
+				const supported = supportedSeries.find(
+					(s) => s.toLowerCase() === series.toLowerCase()
+				);
+				if (!supported) {
+					return res.status(422).json('Unsupported Series.');
 				}
 				const form = new multiparty.Form();
 				// Errors may be emitted
@@ -67,13 +67,13 @@ const handler = async (
 						console.log('got error on part ' + error);
 					});
 					if (!part) {
-						return res.status(422).json(['Must choose a file.']);
+						return res.status(422).json('Must select a file.');
 					}
 					if (part.headers['content-type'] !== 'application/pdf') {
-						return res.status(422).json(['Only PDF files are allowed.']);
+						return res.status(422).json('Only PDF files are allowed.');
 					}
 					if (part.byteCount > 1000000) {
-						return res.status(422).json(['File is too big, max size 1MB.']);
+						return res.status(422).json('File is too big, max size 1MB.');
 					}
 					try {
 						const fileBuffer = await streamToBuffer(part);
@@ -83,7 +83,7 @@ const handler = async (
 							pdfData as any,
 							series as 'f1' | 'f2' | 'f3'
 						);
-						const conn = await connectMongo(dbNameList.other_documents_db);
+						const conn = await connectMongoDb('Other_Docs');
 						await conn.models.Penalty_Doc.create({
 							...transformed,
 							manual_upload: true,
@@ -92,9 +92,9 @@ const handler = async (
 					} catch (error: any) {
 						return res
 							.status(500)
-							.json([
-								'Unknown server error. If it is a reoccuring error, please use the Contact form to report this issue.',
-							]);
+							.json(
+								'Unknown server error. If it is a reoccuring error, please use the Contact form to report this issue.'
+							);
 					}
 				});
 				form.on('close', function () {
@@ -102,34 +102,35 @@ const handler = async (
 				});
 				// Parse req
 				form.parse(req);
+				return res.status(200).end();
 			} catch (error: any) {
 				return res
 					.status(500)
-					.json([
-						'Unknown server error. If it is a reoccuring error, please use the Contact form to report this issue.',
-					]);
+					.json(
+						'Unknown server error. If it is a reoccuring error, please use the Contact form to report this issue.'
+					);
 			}
 		}
 		if (form === 'info') {
 			try {
 				const fields = await parseFields(req);
-				const { errors } = await yupValidation(
+				const { errors }: { errors: string[] } = await yupValidation(
 					dataFormValidationSchema,
 					fields
 				);
 				if (errors) {
 					return res.status(422).json(errors);
 				}
-				const conn = await connectMongo(dbNameList.other_documents_db);
+				const conn = await connectMongoDb('Other_Docs');
 				const newReport = new conn.models.Missing_Doc(fields);
 				await newReport.save();
 				return res.status(200).end();
 			} catch (error: any) {
 				return res
 					.status(500)
-					.json([
-						'Unknown server error. If it is a reoccuring error, please use the Contact form to report this issue.',
-					]);
+					.json(
+						'Unknown server error. If it is a reoccuring error, please use the Contact form to report this issue.'
+					);
 			}
 		}
 		if (form === 'contact') {
@@ -142,16 +143,16 @@ const handler = async (
 				if (errors) {
 					return res.status(422).json(errors);
 				}
-				const conn = await connectMongo(dbNameList.other_documents_db);
+				const conn = await connectMongoDb('Other_Docs');
 				const newReport = new conn.models.Contact_Doc(fields);
 				await newReport.save();
 				return res.status(200).end();
 			} catch (error: any) {
 				return res
 					.status(500)
-					.json([
-						'Unknown server error. If it is a reoccuring error, please use the Contact form to report this issue.',
-					]);
+					.json(
+						'Unknown server error. If it is a reoccuring error, please use the Contact form to report this issue.'
+					);
 			}
 		}
 		if (form === 'dashboard-sign-in') {
@@ -180,7 +181,7 @@ const handler = async (
 					return res.status(422).json(errors);
 				}
 				if (fields.password !== DASHBOARD_ACCESS_PASSWORD) {
-					return res.status(403).json(['Password is incorrect.']);
+					return res.status(403).json('Password is incorrect.');
 				}
 				const token = jwt.sign(JWT_PAYLOAD_STRING, JWT_STRATEGY_SECRET);
 				res.setHeader(
@@ -191,9 +192,54 @@ const handler = async (
 			} catch (error: any) {
 				return res
 					.status(500)
-					.json([
-						'Unknown server error. If it is a reoccuring error, please use the Contact form to report this issue.',
-					]);
+					.json(
+						'Unknown server error. If it is a reoccuring error, please use the Contact form to report this issue.'
+					);
+			}
+		}
+		if (form === 'series-data') {
+			const tokenValid = verifyToken(req);
+			if (tokenValid) {
+				try {
+					const fields = await parseFields(req);
+					const fieldsParseInt: Omit<SeriesDataFormValues, 'year'> & {
+						year: Number;
+					} = {
+						series: fields.series,
+						year: parseInt(fields.year),
+						documents_url: fields.documents_url,
+					};
+					const { errors } = await yupValidation(
+						seriesDataFormValidationSchema,
+						fieldsParseInt
+					);
+					if (errors) {
+						return res.status(422).json(errors);
+					}
+					const conn = await connectMongoDb('Series_Data');
+					const docExists = await conn.models.Series_Data_Doc.findOne({
+						series: fieldsParseInt.series,
+						year: fieldsParseInt.year,
+					}).exec();
+					if (docExists) {
+						return res.status(403).json('Entry already exists.');
+					}
+					const newReport = new conn.models.Series_Data_Doc(fieldsParseInt);
+					await newReport.save();
+					return res.status(200).end();
+				} catch (error: any) {
+					return res
+						.status(500)
+						.json(
+							'Unknown server error. If it is a reoccuring error, please use the Contact form to report this issue.'
+						);
+				}
+			} else {
+				res.setHeader(
+					'Set-Cookie',
+					`token=; Path=/; httpOnly=true; SameSite=strict; Secure=true; Max-Age=0`
+				);
+				return res.status(401).end();
 			}
 		}
 		return res.status(405).end();

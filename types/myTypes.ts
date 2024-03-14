@@ -45,14 +45,6 @@ export interface GroupedByGP {
 	[key: string]: PenaltyModel[];
 }
 
-export interface DatabaseNameList {
-	[key: string]: string;
-}
-
-export interface FiaPageList {
-	[key: string]: string;
-}
-
 export interface FileFormValues {
 	series: string;
 	file: File | null;
@@ -62,6 +54,11 @@ export interface DataFormValues {
 	series: string;
 	year: string;
 	description: string;
+}
+
+export interface UpdateDocsFormValues {
+	series: string;
+	year: string;
 }
 
 export interface MissingDocModel extends DataFormValues {
@@ -81,12 +78,32 @@ export interface ContactDocModel extends ContactFormValues {
 	updatedAt: string;
 }
 
+export interface SeriesDataFormValues {
+	series: string;
+	year: string;
+	documents_url: string;
+}
+
+export interface SeriesDataDocModel extends SeriesDataFormValues {
+	_id: string;
+	createdAt: string;
+	updatedAt: string;
+}
+
+export interface SupportedYearsData {
+	[key: string]: number[];
+}
+
+export interface SeriesDataDocResponseData extends AxiosResponse {
+	data: SeriesDataDocModel[];
+}
+
 export interface FormulaSeriesResponseData extends AxiosResponse {
 	data: GroupedByGP;
 }
 
 export interface DocumentsResponseData extends AxiosResponse {
-	data: GroupedByGP | MissingDocModel[] | ContactDocModel[];
+	data: GroupedByGP | MissingDocModel[] | ContactDocModel[] | [];
 }
 
 export interface ErgastSeasonData extends AxiosResponse {
@@ -121,3 +138,15 @@ export interface PenaltyColors {
 export interface LoginFormValues {
 	password: string;
 }
+
+export type SelectDocsValues =
+	| 'contact-message'
+	| 'missing-info'
+	| 'missing-file'
+	| 'penalties__f1__manual-upload'
+	| 'penalties__f1__manual-upload'
+	| 'penalties__f2__manual-upload'
+	| 'penalties__f3__manual-upload'
+	| 'penalties__f1'
+	| 'penalties__f2'
+	| 'penalties__f3';
