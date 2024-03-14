@@ -188,11 +188,7 @@ const FormulaSeries: NextPage = () => {
 									name='year_select'
 									id='year_select'
 									onChange={handleYearSelectChange}
-									value={
-										yearSelect || yearsBySeries[series]
-											? yearsBySeries[series][0]
-											: ''
-									}
+									value={yearSelect || ''}
 									disabled={fetching}
 								>
 									{yearsBySeries[series]?.map((year) => (
