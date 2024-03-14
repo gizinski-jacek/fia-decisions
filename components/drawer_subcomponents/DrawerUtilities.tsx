@@ -23,11 +23,13 @@ const DrawerUtilities = ({ screenIsSmall }: Props) => {
 	const [showCalendarModal, setShowCalendarModal] = useState(false);
 	const [calendarData, setCalendarData] = useState<WeekendData[] | null>(null);
 	const [nextRace, setNextRace] = useState<WeekendData | null>(null);
+	const [fetching, setFetching] = useState(false);
 	const [calendarError, setCalendarError] = useState<string | null>(null);
 
 	const getCalendarData = async () => {
 		try {
 			const currentSeason = new Date().getFullYear();
+			setFetching(true);
 			let res: ErgastSeasonData = await axios.get(
 				`https://ergast.com/api/f1/${currentSeason}.json`,
 				{ timeout: 15000 }
@@ -58,10 +60,12 @@ const DrawerUtilities = ({ screenIsSmall }: Props) => {
 			}
 			setCalendarData(res.data.MRData.RaceTable.Races);
 			setNextRace(nextRace);
+			setFetching(false);
 		} catch (error: any) {
 			setCalendarData(null);
 			setNextRace(null);
 			setCalendarError('Error fetching calendar data.');
+			setFetching(false);
 		}
 	};
 
@@ -199,20 +203,27 @@ const DrawerUtilities = ({ screenIsSmall }: Props) => {
 				<Modal.Header closeButton>
 					<Modal.Title className='w-100 me-3'>
 						<h3 className='fw-bold'>
-							Formula 1{' '}
-							{calendarData?.find((w) => w.season !== undefined)?.season} Race
-							Calendar
+							{calendarData?.find((w) => w.season !== undefined)?.season}{' '}
+							Formula 1 Race Calendar
 						</h3>
 						<h6>All times shown are in your local time zone.</h6>
 					</Modal.Title>
 				</Modal.Header>
 				<Modal.Body className='bg-light rounded'>
-					{calendarError ? (
-						<div className='m-2 alert alert-danger text-capitalize'>
-							<h3>{calendarError}</h3>
-						</div>
-					) : calendarData ? (
-						<CalendarWrapper calendarData={calendarData} nextRace={nextRace} />
+					{!fetching ? (
+						calendarError ? (
+							<div className='d-flex p-2 m-2 alert alert-danger text-capitalize'>
+								<i className='bi bi-exclamation-triangle-fill fs-2 m-0 me-2 p-2'></i>
+								<h3 className='m-0'>{calendarError}</h3>
+							</div>
+						) : (
+							calendarData && (
+								<CalendarWrapper
+									calendarData={calendarData}
+									nextRace={nextRace}
+								/>
+							)
+						)
 					) : (
 						<LoadingBar margin='5rem' />
 					)}
