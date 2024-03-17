@@ -164,7 +164,7 @@ const SeriesDataForm = () => {
 			setSubmitSuccess(null);
 			setFormErrors(null);
 			const confirm = window.confirm(
-				'This action will try to automatically acquire Series Data from FIA site?'
+				'This action will try to automatically acquire Series Data from FIA website?'
 			);
 			if (!confirm) return;
 			setFetching(true);

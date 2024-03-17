@@ -91,7 +91,7 @@ const FileForm = () => {
 					target='_blank'
 					rel='noreferrer'
 				>
-					FIA site
+					FIA website
 				</a>{' '}
 				marked as <b className='text-danger'>Offence</b>,{' '}
 				<b className='text-danger'>Decision</b> or{' '}
