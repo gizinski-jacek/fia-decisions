@@ -280,7 +280,7 @@ const Dashboard: NextPage<Props> = ({ signedIn }) => {
 							<option value='contact-message'>Contact Messages</option>
 							<option value='missing-info'>Missing Penalty - Info</option>
 							<option value='missing-file'>Missing Penalty - File</option>
-							<option disabled>───────────────</option>
+							{yearsBySeries && <option disabled>───────────────</option>}
 							{yearsBySeries &&
 								supportedSeries.map((series, i) => (
 									<option
@@ -291,7 +291,7 @@ const Dashboard: NextPage<Props> = ({ signedIn }) => {
 										{series.replace('f', 'F') + ' Penalties - Uploads'}
 									</option>
 								))}
-							<option disabled>───────────────</option>
+							{yearsBySeries && <option disabled>───────────────</option>}
 							{yearsBySeries &&
 								supportedSeries.map((series, i) => (
 									<option
@@ -348,29 +348,6 @@ const Dashboard: NextPage<Props> = ({ signedIn }) => {
 					<div className='d-flex flex-column gap-3'>
 						<Button
 							className='fw-bold text-black'
-							variant='danger'
-							size='sm'
-							disabled={fetching || !!fetchingErrors}
-							onClick={openUpdateSeriesDataModal}
-						>
-							Update Series Data
-						</Button>
-						<Modal
-							show={showUpdateSeriesDataModal}
-							onHide={closeUpdateSeriesDataModal}
-							dialogClassName='modal-lg custom-minwidth'
-						>
-							<Modal.Header closeButton>
-								<Modal.Title className='d-flex gap-5 me-3'>
-									<h3>Update Series Data</h3>
-								</Modal.Title>
-							</Modal.Header>
-							<Modal.Body>
-								<SeriesDataForm />
-							</Modal.Body>
-						</Modal>
-						<Button
-							className='fw-bold text-black'
 							variant='warning'
 							size='sm'
 							disabled={fetching || !!fetchingErrors}
@@ -390,6 +367,29 @@ const Dashboard: NextPage<Props> = ({ signedIn }) => {
 							</Modal.Header>
 							<Modal.Body>
 								<UpdatePenaltiesForm />
+							</Modal.Body>
+						</Modal>
+						<Button
+							className='fw-bold text-black'
+							variant='danger'
+							size='sm'
+							disabled={fetching || !!fetchingErrors}
+							onClick={openUpdateSeriesDataModal}
+						>
+							Update Series Data
+						</Button>
+						<Modal
+							show={showUpdateSeriesDataModal}
+							onHide={closeUpdateSeriesDataModal}
+							dialogClassName='modal-lg custom-minwidth'
+						>
+							<Modal.Header closeButton>
+								<Modal.Title className='d-flex gap-5 me-3'>
+									<h3>Update Series Data</h3>
+								</Modal.Title>
+							</Modal.Header>
+							<Modal.Body>
+								<SeriesDataForm />
 							</Modal.Body>
 						</Modal>
 					</div>
