@@ -4,7 +4,11 @@ import { ContactDocModel } from '../../types/myTypes';
 interface Props {
 	data: ContactDocModel[];
 	docType: string;
-	handleDelete: (docType: string, docId: string) => void;
+	handleDelete: (
+		e: React.MouseEvent<HTMLButtonElement>,
+		docType: string,
+		docId: string
+	) => void;
 }
 
 const ContactDocWrapper = ({ data, docType, handleDelete }: Props) => {
@@ -41,7 +45,7 @@ const ContactDocWrapper = ({ data, docType, handleDelete }: Props) => {
 									variant='danger'
 									type='submit'
 									className='fw-bolder text-nowrap custom-button'
-									onClick={() => handleDelete(docType, contact._id)}
+									onClick={(e) => handleDelete(e, docType, contact._id)}
 								>
 									Delete
 								</Button>
