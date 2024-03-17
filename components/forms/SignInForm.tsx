@@ -80,7 +80,7 @@ const SignInForm = () => {
 					onChange={handleInputChange}
 					value={formData.password}
 					placeholder='Password'
-					disabled={fetching}
+					disabled={fetching || !!formErrors}
 					required
 					aria-describedby='dashboardPasswordInputHelpText'
 				/>
