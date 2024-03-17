@@ -85,6 +85,29 @@ const handler = async (
 						.json('Unknown server error. Failed to get documents.');
 				}
 			}
+			if (reqType === 'auto-update-series-data') {
+				try {
+					const { NODE_ENV, AUTO_UPDATE_SERIES_DATA_SECRET } = process.env;
+					const apiURI =
+						NODE_ENV === 'production'
+							? process.env.API_WORKER_URI
+							: process.env.API_WORKER_URI_DEV;
+					if (!AUTO_UPDATE_SERIES_DATA_SECRET || !apiURI) {
+						throw new Error(
+							'Please define AUTO_UPDATE_SERIES_DATA_SECRET and API_WORKER_URI environment variable inside .env.local'
+						);
+					}
+					await axios.get(`${apiURI}/api/update-series-data`, {
+						headers: {
+							Authorization: `Bearer ${AUTO_UPDATE_SERIES_DATA_SECRET}`,
+						},
+					});
+					return res.status(202).json('Update request accepted.');
+				} catch (error: any) {
+					console.log(error);
+					return res.status(404).json('Unknown server error.');
+				}
+			}
 			if (!series) {
 				return res.status(422).json('Unsupported Series.');
 			}
@@ -138,25 +161,25 @@ const handler = async (
 			}
 			const {
 				NODE_ENV,
-				CRON_JOB_UPDATE_NEWEST_SECRET,
-				CRON_JOB_UPDATE_ALL_SECRET,
+				UPDATE_PENALTIES_NEWEST_SECRET,
+				UPDATE_PENALTIES_ALL_SECRET,
 			} = process.env;
 			const apiURI =
 				NODE_ENV === 'production'
 					? process.env.API_WORKER_URI
 					: process.env.API_WORKER_URI_DEV;
-			if (reqType === 'update-newest') {
+			if (reqType === 'update-penalties-newest') {
 				try {
-					if (!CRON_JOB_UPDATE_NEWEST_SECRET || !apiURI) {
+					if (!UPDATE_PENALTIES_NEWEST_SECRET || !apiURI) {
 						throw new Error(
 							'Please define CRON_JOB_UPDATE_NEWEST_SECRET and API_WORKER_URI environment variable inside .env.local'
 						);
 					}
 					await axios.get(
-						`${apiURI}/api/update-newest/penalties/${selectedSeriesData.series}/${selectedSeriesData.year}`,
+						`${apiURI}/api/update-penalties-newest/penalties/${selectedSeriesData.series}/${selectedSeriesData.year}`,
 						{
 							headers: {
-								Authorization: `Bearer ${CRON_JOB_UPDATE_NEWEST_SECRET}`,
+								Authorization: `Bearer ${UPDATE_PENALTIES_NEWEST_SECRET}`,
 							},
 						}
 					);
@@ -166,18 +189,18 @@ const handler = async (
 					return res.status(404).json('Unknown server error.');
 				}
 			}
-			if (reqType === 'update-all') {
+			if (reqType === 'update-penalties-all') {
 				try {
-					if (!CRON_JOB_UPDATE_ALL_SECRET || !apiURI) {
+					if (!UPDATE_PENALTIES_ALL_SECRET || !apiURI) {
 						throw new Error(
 							'Please define CRON_JOB_UPDATE_ALL_SECRET and API_WORKER_URI environment variable inside .env.local'
 						);
 					}
 					await axios.get(
-						`${apiURI}/api/update-all/penalties/${selectedSeriesData.series}/${selectedSeriesData.year}`,
+						`${apiURI}/api/update-penalties-all/penalties/${selectedSeriesData.series}/${selectedSeriesData.year}`,
 						{
 							headers: {
-								Authorization: `Bearer ${CRON_JOB_UPDATE_ALL_SECRET}`,
+								Authorization: `Bearer ${UPDATE_PENALTIES_ALL_SECRET}`,
 							},
 						}
 					);
