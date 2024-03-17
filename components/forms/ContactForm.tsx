@@ -11,7 +11,7 @@ const ContactForm = () => {
 	);
 	const [formErrors, setFormErrors] = useState<string[] | null>(null);
 	const [fetching, setFetching] = useState(false);
-	const [submitSuccess, setSubmitSuccess] = useState(false);
+	const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
 	const formRef = useRef<HTMLFormElement>(null);
 
 	const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -22,7 +22,7 @@ const ContactForm = () => {
 	const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
 		try {
 			e.preventDefault();
-			setSubmitSuccess(false);
+			setSubmitSuccess(null);
 			setFormErrors(null);
 			if (!formData.email && !formData.message) {
 				setFormErrors(['Must provide an Email and a Message.']);
@@ -36,7 +36,7 @@ const ContactForm = () => {
 			await axios.post('/api/forms/contact', uploadData, { timeout: 15000 });
 			setFormData(defaultContactFormValues);
 			formRef.current?.reset();
-			setSubmitSuccess(true);
+			setSubmitSuccess('Form submitted successfully!');
 			setFetching(false);
 		} catch (error: any) {
 			if (error instanceof AxiosError) {
@@ -56,7 +56,7 @@ const ContactForm = () => {
 						'Unknown server error. If it is a reoccuring error, please use the Contact form to report this issue.',
 				]);
 			}
-			setSubmitSuccess(false);
+			setSubmitSuccess(null);
 			setFetching(false);
 		}
 	};
@@ -90,7 +90,7 @@ const ContactForm = () => {
 						onChange={handleInputChange}
 						value={formData.email}
 						placeholder='Your Email'
-						disabled={fetching}
+						disabled={fetching || !!formErrors}
 						required
 						aria-describedby='emailInputHelpText'
 					/>
@@ -122,7 +122,7 @@ const ContactForm = () => {
 						onChange={handleInputChange}
 						value={formData.message}
 						placeholder='Insert your message'
-						disabled={fetching}
+						disabled={fetching || !!formErrors}
 						required
 						aria-describedby='messageInputHelpText'
 					/>
@@ -148,11 +148,11 @@ const ContactForm = () => {
 				{submitSuccess && (
 					<div className='d-flex m-0 mb-2 alert alert-success alert-dismissible overflow-auto custom-alert-maxheight text-start'>
 						<i className='bi bi-patch-check-fill fs-5 m-0 me-2'></i>
-						<strong>Update request issued successfully!</strong>
+						<strong>{submitSuccess}</strong>
 						<button
 							type='button'
 							className='btn btn-close'
-							onClick={() => setSubmitSuccess(false)}
+							onClick={() => setSubmitSuccess(null)}
 						></button>
 					</div>
 				)}
