@@ -6,9 +6,17 @@ import { PenaltyModel, PenaltyColors } from '../../types/myTypes';
 interface Props {
 	data: PenaltyModel;
 	cmsProps?: {
-		deleteHandler: (docType: string, docId: string) => void;
+		deleteHandler: (
+			e: React.MouseEvent<HTMLButtonElement>,
+			docType: string,
+			docId: string
+		) => void;
 		docType: string;
-		acceptHandler: (series: string, docId: string) => void;
+		acceptHandler: (
+			e: React.MouseEvent<HTMLButtonElement>,
+			series: string,
+			docId: string
+		) => void;
 	};
 }
 
@@ -166,8 +174,8 @@ const F1DocWrapper = ({ data, cmsProps }: Props) => {
 											size='sm'
 											variant='success'
 											className='fw-bolder text-nowrap custom-button'
-											onClick={() =>
-												cmsProps.acceptHandler(data.series, data._id)
+											onClick={(e) =>
+												cmsProps.acceptHandler(e, data.series, data._id)
 											}
 										>
 											Accept
@@ -177,8 +185,8 @@ const F1DocWrapper = ({ data, cmsProps }: Props) => {
 										size='sm'
 										variant='danger'
 										className='fw-bolder text-nowrap custom-button'
-										onClick={() =>
-											cmsProps.deleteHandler(cmsProps.docType, data._id)
+										onClick={(e) =>
+											cmsProps.deleteHandler(e, cmsProps.docType, data._id)
 										}
 									>
 										Delete
