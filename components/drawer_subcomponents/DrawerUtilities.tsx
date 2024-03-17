@@ -28,8 +28,8 @@ const DrawerUtilities = ({ screenIsSmall }: Props) => {
 
 	const getCalendarData = async () => {
 		try {
-			const currentSeason = new Date().getFullYear();
 			setFetching(true);
+			const currentSeason = new Date().getFullYear();
 			let res: ErgastSeasonData = await axios.get(
 				`https://ergast.com/api/f1/${currentSeason}.json`,
 				{ timeout: 15000 }
