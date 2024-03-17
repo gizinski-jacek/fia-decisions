@@ -44,6 +44,7 @@ const Dashboard: NextPage<Props> = ({ signedIn }) => {
 	const fetchDocuments = useCallback(
 		async (documents: SelectDocumentsValues, year: number | null) => {
 			try {
+				setFetchingErrors(null);
 				if (!documents) {
 					setFetchingErrors(['Must select valid Documents from the list.']);
 					return;
@@ -93,15 +94,18 @@ const Dashboard: NextPage<Props> = ({ signedIn }) => {
 		[router]
 	);
 
-	const handleDeleteDocument = async (query: string, docId: string) => {
+	const handleDeleteDocument = async (
+		e: React.MouseEvent<HTMLButtonElement>,
+		query: string,
+		docId: string
+	) => {
 		try {
-			if (
-				confirm(
-					'This action is irreversible. Are you sure You want to Delete this document?'
-				) === false
-			) {
-				return;
-			}
+			e.preventDefault();
+			setFetchingErrors(null);
+			const confirm = window.confirm(
+				'This action is irreversible. Are you sure You want to Delete this document?'
+			);
+			if (!confirm) return;
 			if (!selectedYear) {
 				setFetchingErrors(['Must select year from the list.']);
 				return;
@@ -117,6 +121,7 @@ const Dashboard: NextPage<Props> = ({ signedIn }) => {
 				{ timeout: 15000 }
 			);
 			fetchDocuments(selectedDocuments, selectedYear);
+			setFetching(false);
 		} catch (error: any) {
 			if (error instanceof AxiosError) {
 				if (error.response?.status === 401) {
@@ -147,11 +152,18 @@ const Dashboard: NextPage<Props> = ({ signedIn }) => {
 		}
 	};
 
-	const handleAcceptDocument = async (series: string, docId: string) => {
+	const handleAcceptDocument = async (
+		e: React.MouseEvent<HTMLButtonElement>,
+		series: string,
+		docId: string
+	) => {
 		try {
-			if (confirm('Are you sure You want to Accept this document?') === false) {
-				return;
-			}
+			e.preventDefault();
+			setFetchingErrors(null);
+			const confirm = window.confirm(
+				'Are you sure You want to Accept this document?'
+			);
+			if (!confirm) return;
 			if (!series || !docId) {
 				setFetchingErrors(['Series and document Id is required.']);
 				return;
@@ -161,6 +173,7 @@ const Dashboard: NextPage<Props> = ({ signedIn }) => {
 				timeout: 15000,
 			});
 			fetchDocuments(selectedDocuments, selectedYear);
+			setFetching(false);
 		} catch (error: any) {
 			if (error instanceof AxiosError) {
 				if (error.response?.status === 401) {
@@ -261,7 +274,7 @@ const Dashboard: NextPage<Props> = ({ signedIn }) => {
 							id='documents_select'
 							onChange={handleSelectedDocumentChange}
 							value={selectedDocuments}
-							disabled={fetching}
+							disabled={fetching || !!fetchingErrors}
 							required
 						>
 							<option value='contact-message'>Contact Messages</option>
@@ -309,7 +322,7 @@ const Dashboard: NextPage<Props> = ({ signedIn }) => {
 											id='year_select'
 											onChange={handleSelectedYearChange}
 											value={selectedYear || undefined}
-											disabled={fetching}
+											disabled={fetching || !!fetchingErrors}
 										>
 											{yearsBySeries[series]?.map((year) => (
 												<option key={year} value={year}>
@@ -324,7 +337,7 @@ const Dashboard: NextPage<Props> = ({ signedIn }) => {
 							variant='primary'
 							size='sm'
 							className='text-nowrap fw-bold ms-auto text-uppercase mt-3'
-							disabled={fetching}
+							disabled={fetching || !!fetchingErrors}
 							onClick={() => fetchDocuments(selectedDocuments, selectedYear)}
 						>
 							Fetch
