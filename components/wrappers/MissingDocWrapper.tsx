@@ -4,7 +4,11 @@ import { MissingDocModel } from '../../types/myTypes';
 interface Props {
 	data: MissingDocModel[];
 	docType: string;
-	handleDelete: (docType: string, docId: string) => void;
+	handleDelete: (
+		e: React.MouseEvent<HTMLButtonElement>,
+		docType: string,
+		docId: string
+	) => void;
 }
 
 const MissingDocWrapper = ({ data, docType, handleDelete }: Props) => {
@@ -32,7 +36,7 @@ const MissingDocWrapper = ({ data, docType, handleDelete }: Props) => {
 									variant='danger'
 									size='sm'
 									className='fw-bolder text-nowrap custom-button'
-									onClick={() => handleDelete(docType, missing._id)}
+									onClick={(e) => handleDelete(e, docType, missing._id)}
 								>
 									Delete
 								</Button>
