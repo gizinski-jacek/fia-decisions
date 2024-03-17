@@ -43,10 +43,10 @@ const FormulaSeries: NextPage = () => {
 
 	const fetchDocuments = useCallback(async () => {
 		try {
+			setFetchingErrors(null);
 			if (!selectedYear || !router.query.series) {
 				return;
 			}
-			setFetchingErrors(null);
 			setFetching(true);
 			const res: FormulaSeriesResponseData = await axios.get(
 				`/api/document/penalties/${router.query.series}/${selectedYear}`,
@@ -190,7 +190,7 @@ const FormulaSeries: NextPage = () => {
 									id='year_select'
 									onChange={handleSelectedYearChange}
 									value={selectedYear || ''}
-									disabled={fetching}
+									disabled={fetching || !!fetchingErrors}
 								>
 									{yearsBySeries[series]?.map((year) => (
 										<option key={year} value={year}>
