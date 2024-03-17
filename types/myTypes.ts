@@ -86,6 +86,7 @@ export interface SeriesDataFormValues {
 
 export interface SeriesDataDocModel extends SeriesDataFormValues {
 	_id: string;
+	manual_upload: boolean;
 	createdAt: string;
 	updatedAt: string;
 }
