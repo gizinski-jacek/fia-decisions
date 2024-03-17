@@ -35,6 +35,7 @@ const SeriesDataContextProvider = ({ children }: Props) => {
 
 	const fetchSeriesData = async () => {
 		try {
+			setFetchingSeriesData(true);
 			const res: SeriesDataDocResponseData = await axios.get(
 				`/api/document/series-data`,
 				{ timeout: 15000 }
