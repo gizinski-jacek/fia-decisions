@@ -17,7 +17,7 @@ const UpdatePenaltiesForm = () => {
 	);
 	const [formErrors, setFormErrors] = useState<string[] | null>(null);
 	const [fetching, setFetching] = useState(false);
-	const [submitSuccess, setSubmitSuccess] = useState(false);
+	const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
 	const formRef = useRef<HTMLFormElement>(null);
 
 	const router = useRouter();
@@ -35,24 +35,27 @@ const UpdatePenaltiesForm = () => {
 		}
 	};
 
-	const handleUpdatePenaltiesNewest = async () => {
+	const handleUpdatePenaltiesNewest = async (
+		e: React.MouseEvent<HTMLButtonElement>
+	) => {
 		try {
+			e.preventDefault();
+			setSubmitSuccess(null);
 			setFormErrors(null);
-			setSubmitSuccess(false);
 			if (!formData.series) {
 				setFormErrors(['Must select a Series.']);
 				return;
 			}
 			setFetching(true);
 			await axios.get(
-				`/api/dashboard/update-newest/${formData.series}/${
+				`/api/dashboard/update-penalties-newest/${formData.series}/${
 					formData.year || ''
 				}`,
 				{ timeout: 25000 }
 			);
 			setFormData(defaultUpdatePenaltiesFormValues);
 			formRef.current?.reset();
-			setSubmitSuccess(true);
+			setSubmitSuccess('Request issued successfully!');
 			setFetching(false);
 		} catch (error: any) {
 			if (error instanceof AxiosError) {
@@ -80,32 +83,34 @@ const UpdatePenaltiesForm = () => {
 					]);
 				}
 			}
-			setSubmitSuccess(false);
+			setSubmitSuccess(null);
 			setFetching(false);
 		}
 	};
 
-	const handleUpdatePenaltiesAll = async () => {
+	const handleUpdatePenaltiesAll = async (
+		e: React.MouseEvent<HTMLButtonElement>
+	) => {
 		try {
+			e.preventDefault();
+			setSubmitSuccess(null);
 			setFormErrors(null);
-			setSubmitSuccess(false);
 			if (!formData.series || !formData.year) {
 				setFormErrors(['Must select a Series.']);
 				return;
 			}
-			setFetching(true);
 			const confirm = window.confirm(
 				'This update process will take a long time. Are You sure you want to update all documents from this year?'
 			);
-			if (confirm) {
-				await axios.get(
-					`/api/dashboard/update-all/${formData.series}/${formData.year}`,
-					{ timeout: 25000 }
-				);
-			}
+			if (!confirm) return;
+			setFetching(true);
+			await axios.get(
+				`/api/dashboard/update-penalties-all/${formData.series}/${formData.year}`,
+				{ timeout: 25000 }
+			);
 			setFormData(defaultUpdatePenaltiesFormValues);
 			formRef.current?.reset();
-			setSubmitSuccess(true);
+			setSubmitSuccess('Request issued successfully!');
 			setFetching(false);
 		} catch (error: any) {
 			if (error instanceof AxiosError) {
@@ -133,7 +138,7 @@ const UpdatePenaltiesForm = () => {
 					]);
 				}
 			}
-			setSubmitSuccess(false);
+			setSubmitSuccess(null);
 			setFetching(false);
 		}
 	};
@@ -162,7 +167,7 @@ const UpdatePenaltiesForm = () => {
 								id='series'
 								onChange={handleInputChange}
 								value={formData.series || ''}
-								disabled={fetching}
+								disabled={fetching || !!formErrors}
 							>
 								<option value=''>Select Formula Series</option>
 								{supportedSeries.map((series) => (
@@ -220,11 +225,11 @@ const UpdatePenaltiesForm = () => {
 					{submitSuccess && (
 						<div className='d-flex m-0 alert alert-success alert-dismissible overflow-auto custom-alert-maxheight text-start'>
 							<i className='bi bi-patch-check-fill fs-5 m-0 me-2'></i>
-							<strong>Update request issued successfully!</strong>
+							<strong>{submitSuccess}</strong>
 							<button
 								type='button'
 								className='btn btn-close'
-								onClick={() => setSubmitSuccess(false)}
+								onClick={() => setSubmitSuccess(null)}
 							></button>
 						</div>
 					)}
