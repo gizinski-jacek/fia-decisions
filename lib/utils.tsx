@@ -28,9 +28,17 @@ export const renderDocsGroupedByGP = (
 	docsData: GroupedByGP,
 	searchQuery?: string,
 	cmsProps?: {
-		deleteHandler: (docType: string, docId: string) => void;
+		deleteHandler: (
+			e: React.MouseEvent<HTMLButtonElement>,
+			docType: string,
+			docId: string
+		) => void;
 		docType: string;
-		acceptHandler: (series: string, docId: string) => void;
+		acceptHandler: (
+			e: React.MouseEvent<HTMLButtonElement>,
+			series: string,
+			docId: string
+		) => void;
 	}
 ): JSX.Element[] | ReactElement => {
 	if (Object.entries(docsData).length === 0) {
@@ -117,9 +125,17 @@ export const renderBySeries = (
 	docsData: GroupedByGP,
 	searchQuery?: string,
 	cmsProps?: {
-		deleteHandler: (docType: string, docId: string) => void;
+		deleteHandler: (
+			e: React.MouseEvent<HTMLButtonElement>,
+			docType: string,
+			docId: string
+		) => void;
 		docType: string;
-		acceptHandler: (series: string, docId: string) => void;
+		acceptHandler: (
+			e: React.MouseEvent<HTMLButtonElement>,
+			series: string,
+			docId: string
+		) => void;
 	}
 ): JSX.Element[] | ReactElement | any => {
 	const groupedBySeries = supportedSeries.map((series) => {
