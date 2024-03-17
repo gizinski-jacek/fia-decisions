@@ -19,7 +19,7 @@ const SeriesDataForm = () => {
 	);
 	const [formErrors, setFormErrors] = useState<string[] | null>(null);
 	const [fetching, setFetching] = useState(false);
-	const [submitSuccess, setSubmitSuccess] = useState(false);
+	const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
 	const [showForm, setShowForm] = useState(false);
 	const formRef = useRef<HTMLFormElement>(null);
 
@@ -33,7 +33,7 @@ const SeriesDataForm = () => {
 	const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
 		try {
 			e.preventDefault();
-			setSubmitSuccess(false);
+			setSubmitSuccess(null);
 			setFormErrors(null);
 			if (!formData.series || !formData.year || !formData.documents_url) {
 				setFormErrors([
@@ -57,7 +57,7 @@ const SeriesDataForm = () => {
 			});
 			setFormData(defaultSeriesDataFormValues);
 			formRef.current?.reset();
-			setSubmitSuccess(true);
+			setSubmitSuccess('Data submitted successfully!');
 			fetchSeriesData();
 			setFetching(false);
 		} catch (error: any) {
@@ -86,7 +86,7 @@ const SeriesDataForm = () => {
 					]);
 				}
 			}
-			setSubmitSuccess(false);
+			setSubmitSuccess(null);
 			setFetching(false);
 		}
 	};
@@ -99,13 +99,12 @@ const SeriesDataForm = () => {
 	) => {
 		try {
 			e.preventDefault();
-			if (
-				confirm(
-					'This action is irreversible. Are you sure You want to Delete this document?'
-				) === false
-			) {
-				return;
-			}
+			setSubmitSuccess(null);
+			setFormErrors(null);
+			const confirm = window.confirm(
+				'This action is irreversible. Are you sure You want to Delete this document?'
+			);
+			if (!confirm) return;
 			if (!series || !id || !year) {
 				setFormErrors(['Must provide a Series, a Year and an Id.']);
 				return;
@@ -114,6 +113,7 @@ const SeriesDataForm = () => {
 			await axios.delete(`/api/dashboard/series-data/${series}/${id}/${year}`, {
 				timeout: 15000,
 			});
+			setSubmitSuccess('Data deleted successfully!');
 			fetchSeriesData();
 			setFetching(false);
 		} catch (error: any) {
@@ -142,6 +142,7 @@ const SeriesDataForm = () => {
 					]);
 				}
 			}
+			setSubmitSuccess(null);
 			setFetching(false);
 		}
 	};
@@ -155,7 +156,54 @@ const SeriesDataForm = () => {
 		setShowForm(false);
 	};
 
-	return !fetching ? (
+	const handleAutomaticSeriesDataAcquire = async (
+		e: React.MouseEvent<HTMLButtonElement>
+	) => {
+		try {
+			e.preventDefault();
+			setSubmitSuccess(null);
+			setFormErrors(null);
+			const confirm = window.confirm(
+				'This action will try to automatically acquire Series Data from FIA site?'
+			);
+			if (!confirm) return;
+			setFetching(true);
+			await axios.get(`/api/dashboard/auto-update-series-data`, {
+				timeout: 15000,
+			});
+			setSubmitSuccess('Request issued successfully!');
+			setFetching(false);
+		} catch (error: any) {
+			if (error instanceof AxiosError) {
+				if (error.response?.status === 401) {
+					router.push('/sign-in');
+				} else {
+					Array.isArray(error?.response?.data)
+						? setFormErrors(
+								error?.response?.data || [
+									'Unknown server error. Request failed.',
+								]
+						  )
+						: setFormErrors([
+								error?.response?.data ||
+									'Unknown server error. Request failed.',
+						  ]);
+				}
+			} else {
+				if (error.status === 401) {
+					router.push('/sign-in');
+				} else {
+					setFormErrors([
+						(error as Error).message || 'Unknown server error. Request failed.',
+					]);
+				}
+			}
+			setSubmitSuccess(null);
+			setFetching(false);
+		}
+	};
+
+	return (
 		<>
 			<div className='d-flex flex-column gap-3 mb-3'>
 				{showForm ? (
@@ -178,7 +226,7 @@ const SeriesDataForm = () => {
 										id='series'
 										onChange={handleInputChange}
 										value={formData.series}
-										disabled={fetching}
+										disabled={fetching || !!formErrors}
 										required
 									>
 										<option value=''>Select Formula Series</option>
@@ -261,7 +309,7 @@ const SeriesDataForm = () => {
 									onChange={handleInputChange}
 									value={formData.documents_url}
 									placeholder='Provide URL'
-									disabled={fetching}
+									disabled={fetching || !!formErrors}
 									required
 									aria-describedby='documentsURLInputHelpText'
 								/>
@@ -301,15 +349,26 @@ const SeriesDataForm = () => {
 						</div>
 					</Form>
 				) : (
-					<Button
-						variant='primary'
-						type='button'
-						className='fw-bolder me-auto'
-						disabled={fetching}
-						onClick={handleShowForm}
-					>
-						Show Form
-					</Button>
+					<div className='d-flex gap-3 justify-content-between'>
+						<Button
+							variant='primary'
+							type='button'
+							className='fw-bolder text-nowrap'
+							disabled={fetching}
+							onClick={handleShowForm}
+						>
+							Show Form
+						</Button>
+						<Button
+							variant='warning'
+							type='button'
+							className='fw-bolder text-nowrap'
+							disabled={fetching || !!formErrors}
+							onClick={handleAutomaticSeriesDataAcquire}
+						>
+							Automatic Data Acquisition
+						</Button>
+					</div>
 				)}
 				{formErrors && (
 					<div className='m-0 alert alert-danger alert-dismissible overflow-auto custom-alert-maxheight text-start'>
@@ -329,16 +388,16 @@ const SeriesDataForm = () => {
 				{submitSuccess && (
 					<div className='d-flex m-0 mb-2 alert alert-success alert-dismissible overflow-auto custom-alert-maxheight text-start'>
 						<i className='bi bi-patch-check-fill fs-5 m-0 me-2'></i>
-						<strong>Update request issued successfully!</strong>
+						<strong>{submitSuccess}</strong>
 						<button
 							type='button'
 							className='btn btn-close'
-							onClick={() => setSubmitSuccess(false)}
+							onClick={() => setSubmitSuccess(null)}
 						></button>
 					</div>
 				)}
 			</div>
-			<Table size='sm' bordered responsive='xl'>
+			<Table size='md' bordered hover responsive='md' className='m-0'>
 				<thead className='align-top'>
 					<tr>
 						<th className='text-center'>
@@ -362,7 +421,7 @@ const SeriesDataForm = () => {
 								<td className='text-center text-nowrap'>
 									{data.series.toUpperCase()}
 								</td>
-								<td className='text-center text-nowrap'>{data.year}</td>
+								<td className='text-center text-nowrap '>{data.year}</td>
 								<td className='text-center text-wrap'>
 									<a href={data.documents_url} target='_blank' rel='noreferrer'>
 										{data.documents_url}
@@ -373,7 +432,7 @@ const SeriesDataForm = () => {
 										variant='danger'
 										size='sm'
 										className='px-1 py-0'
-										disabled={fetching}
+										disabled={fetching || !!formErrors}
 										onClick={(e) =>
 											handleDelete(e, data.series, data._id, data.year)
 										}
@@ -387,8 +446,6 @@ const SeriesDataForm = () => {
 				</tbody>
 			</Table>
 		</>
-	) : (
-		<LoadingBar margin='2rem 5rem' />
 	);
 };
 
