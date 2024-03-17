@@ -230,7 +230,7 @@ const handler = async (
 						return res.status(403).json('Entry already exists.');
 					}
 					const newDocument = new connectionSeriesDataDb.models.Series_Data_Doc(
-						fieldsParseInt
+						{ ...fieldsParseInt, manual_upload: true }
 					);
 					await newDocument.save();
 					return res.status(200).end();
