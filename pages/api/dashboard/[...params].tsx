@@ -104,7 +104,6 @@ const handler = async (
 					});
 					return res.status(202).json('Update request accepted.');
 				} catch (error: any) {
-					console.log(error);
 					return res.status(404).json('Unknown server error.');
 				}
 			}
@@ -185,7 +184,6 @@ const handler = async (
 					);
 					return res.status(202).json('Update request accepted.');
 				} catch (error: any) {
-					console.log(error);
 					return res.status(404).json('Unknown server error.');
 				}
 			}
