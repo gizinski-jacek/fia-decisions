@@ -22,7 +22,7 @@ Github repo can be found [here](https://github.com/gizinski-jacek/fia-decisions)
 
 API worker repo can be found [here](https://github.com/gizinski-jacek/fia-decisions-worker-api).
 
-Live demo can be found on [Vercel](https://fia-penalties-gizinski-jacek.vercel.app).
+Live demo can be found on [Vercel](https://fia-penalties-sandy.vercel.app).
 
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
