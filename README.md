@@ -57,7 +57,7 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 
 ## Deploy
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/docs) from the creators of Next.js.
 
 Don't forget to add **.env** file with these environment variables for the app:
 
@@ -72,8 +72,6 @@ UPDATE_PENALTIES_NEWEST_SECRET
 UPDATE_PENALTIES_ALL_SECRET
 ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
-
 ## Features
 
 - Support for all three Formula series
@@ -85,7 +83,10 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/deploym
   - Upload PDF file of a missing penalty
   - Send information about missing penalty
   - Contact site owner about any other issue
-- Simple CMS to view, accept or delete existing or uploaded penalties
+- CMS panel to:
+  - Browse, accept and delete penalties
+  - Force penalties update using API worker
+  - Update supported series data (FIA documents page URL)
 - Responsive and adjustable UI
 - Built with RWD in mind
 
