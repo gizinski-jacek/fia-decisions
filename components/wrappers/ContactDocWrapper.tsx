@@ -1,12 +1,12 @@
 import { Accordion, Button } from 'react-bootstrap';
-import { ContactDocModel } from '../../types/myTypes';
+import { ContactDocModel, SelectDocumentsValues } from '../../types/myTypes';
 
 interface Props {
 	data: ContactDocModel[];
-	docType: string;
+	docType: SelectDocumentsValues;
 	handleDelete: (
 		e: React.MouseEvent<HTMLButtonElement>,
-		docType: string,
+		docType: SelectDocumentsValues,
 		docId: string
 	) => void;
 }
