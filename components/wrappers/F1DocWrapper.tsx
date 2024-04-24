@@ -1,20 +1,26 @@
 import { useState } from 'react';
 import { Accordion, Button, Modal } from 'react-bootstrap';
 import { formatPenalty } from '../../lib/utils';
-import { PenaltyModel, PenaltyColors } from '../../types/myTypes';
+import {
+	PenaltyModel,
+	PenaltyColors,
+	SelectDocumentsValues,
+} from '../../types/myTypes';
 
 interface Props {
 	data: PenaltyModel;
 	cmsProps?: {
-		deleteHandler: (
+		handleDelete: (
 			e: React.MouseEvent<HTMLButtonElement>,
-			docType: string,
-			docId: string
+			queryType: SelectDocumentsValues,
+			docSeries: string,
+			docId: string,
+			docYear: string
 		) => void;
-		docType: string;
-		acceptHandler: (
+		queryType: SelectDocumentsValues;
+		handleAccept: (
 			e: React.MouseEvent<HTMLButtonElement>,
-			series: string,
+			docSeries: string,
 			docId: string
 		) => void;
 	};
@@ -169,13 +175,13 @@ const F1DocWrapper = ({ data, cmsProps }: Props) => {
 							</Button>
 							{cmsProps && (
 								<>
-									{cmsProps.docType === 'missing-file' && (
+									{cmsProps.queryType === 'missing-file' && (
 										<Button
 											size='sm'
 											variant='success'
 											className='fw-bolder text-nowrap custom-button'
 											onClick={(e) =>
-												cmsProps.acceptHandler(e, data.series, data._id)
+												cmsProps.handleAccept(e, data.series, data._id)
 											}
 										>
 											Accept
@@ -186,7 +192,13 @@ const F1DocWrapper = ({ data, cmsProps }: Props) => {
 										variant='danger'
 										className='fw-bolder text-nowrap custom-button'
 										onClick={(e) =>
-											cmsProps.deleteHandler(e, cmsProps.docType, data._id)
+											cmsProps.handleDelete(
+												e,
+												cmsProps.queryType,
+												data.series,
+												data._id,
+												data.doc_date.slice(0, 4)
+											)
 										}
 									>
 										Delete
