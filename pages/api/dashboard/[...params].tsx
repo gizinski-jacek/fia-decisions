@@ -266,12 +266,22 @@ const handler = async (
 			if (!year) {
 				return res.status(422).json('Must provide a Year.');
 			}
+			if (reqType === 'missing-file') {
+				try {
+					const connectionOtherDocsDb = await connectMongoDb('Other_Docs');
+					await connectionOtherDocsDb.models.Penalty_Doc.findByIdAndDelete(
+						docId
+					).exec();
+					return res.status(200).end();
+				} catch (error: any) {
+					return res
+						.status(404)
+						.json('Unknown server error. File was not deleted.');
+				}
+			}
 			if (reqType === 'penalties') {
 				try {
-					const seriesYearDb =
-						series === 'missing-file'
-							? 'Other_Docs'
-							: `${year}_${series.toUpperCase()}_WC_Docs`;
+					const seriesYearDb = `${year}_${series.toUpperCase()}_WC_Docs`;
 					const connectionSeriesYearDb = await connectMongoDb(seriesYearDb);
 					await connectionSeriesYearDb.models.Penalty_Doc.findByIdAndDelete(
 						docId
