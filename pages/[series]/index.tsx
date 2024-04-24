@@ -130,6 +130,12 @@ const FormulaSeries: NextPage = () => {
 		}
 	}, [selectedYear, fetchDocuments, router]);
 
+	const handleDocsRefresh = () => {
+		if (selectedYear) {
+			fetchDocuments();
+		}
+	};
+
 	return (
 		<div className='d-flex flex-column gap-2 m-2'>
 			<div className='position-relative'>
@@ -170,45 +176,59 @@ const FormulaSeries: NextPage = () => {
 						</Form.Group>
 					</Form>
 				</div>
-				<Form
-					className={`position-absolute top-0 end-0 mb-2 me-xl-0 custom-select 
+
+				<div
+					className={`position-absolute top-0 end-0 d-flex align-items-center gap-2 custom-select 
 					${drawer.isHidden && screenIsSmall ? 'me-5' : ''} `}
 				>
-					{(() => {
-						const series = router.query.series as string;
-						if (!series || !yearsBySeries) return;
-						return (
-							<Form.Group>
-								<Form.Label
-									htmlFor='year_select'
-									className='fw-bolder my-1 d-none'
-								>
-									Year
-								</Form.Label>
-								<Form.Select
-									name='year_select'
-									id='year_select'
-									onChange={handleSelectedYearChange}
-									value={selectedYear || ''}
-									disabled={fetching || !!fetchingErrors}
-								>
-									{yearsBySeries[series]?.map((year) => (
-										<option key={year} value={year}>
-											{year}
-										</option>
-									))}
-								</Form.Select>
-							</Form.Group>
-						);
-					})()}
-				</Form>
+					<Button
+						variant='light'
+						type='button'
+						className='py-1 px-2 border border-primary'
+						onClick={handleDocsRefresh}
+						disabled={!selectedYear}
+					>
+						<i className='bi bi-arrow-repeat fs-6 text-primary'></i>
+					</Button>
+					<Form>
+						{(() => {
+							const series = router.query.series as string;
+							if (!series || !yearsBySeries) return;
+							return (
+								<Form.Group>
+									<Form.Label
+										htmlFor='year_select'
+										className='fw-bolder my-1 d-none'
+									>
+										Year
+									</Form.Label>
+									<Form.Select
+										name='year_select'
+										id='year_select'
+										onChange={handleSelectedYearChange}
+										value={selectedYear || ''}
+										disabled={fetching || !!fetchingErrors}
+									>
+										{yearsBySeries[series]?.map((year) => (
+											<option key={year} value={year}>
+												{year}
+											</option>
+										))}
+									</Form.Select>
+								</Form.Group>
+							);
+						})()}
+					</Form>
+				</div>
 			</div>
 			<h2
 				className='text-center text-capitalize fw-bolder fst-italic'
 				style={{ lineHeight: '2.15rem' }}
 			>
 				{router.query.series &&
-					`Track Limits - F${router.query.series?.slice(-1)} Penalties`}
+					`${selectedYear ? selectedYear : ''} F${router.query.series?.slice(
+						-1
+					)} Penalties`}
 			</h2>
 			<div className='d-flex flex-column gap-2'>
 				{fetching ? (
