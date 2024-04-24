@@ -1,7 +1,7 @@
 import { NextApiRequest } from 'next';
 import jwt from 'jsonwebtoken';
 import { Accordion } from 'react-bootstrap';
-import { GroupedByGP } from '../types/myTypes';
+import { GroupedByGP, SelectDocumentsValues } from '../types/myTypes';
 import F1DocWrapper from '../components/wrappers/F1DocWrapper';
 import { ReactElement } from 'react';
 import { supportedSeries } from './myData';
@@ -28,15 +28,17 @@ export const renderDocsGroupedByGP = (
 	docsData: GroupedByGP,
 	searchQuery?: string,
 	cmsProps?: {
-		deleteHandler: (
+		handleDelete: (
 			e: React.MouseEvent<HTMLButtonElement>,
-			docType: string,
-			docId: string
+			queryType: SelectDocumentsValues,
+			docSeries: string,
+			docId: string,
+			docYear: string
 		) => void;
-		docType: string;
-		acceptHandler: (
+		queryType: SelectDocumentsValues;
+		handleAccept: (
 			e: React.MouseEvent<HTMLButtonElement>,
-			series: string,
+			docSeries: string,
 			docId: string
 		) => void;
 	}
@@ -125,15 +127,17 @@ export const renderBySeries = (
 	docsData: GroupedByGP,
 	searchQuery?: string,
 	cmsProps?: {
-		deleteHandler: (
+		handleDelete: (
 			e: React.MouseEvent<HTMLButtonElement>,
-			docType: string,
-			docId: string
+			queryType: SelectDocumentsValues,
+			docSeries: string,
+			docId: string,
+			docYear: string
 		) => void;
-		docType: string;
-		acceptHandler: (
+		queryType: SelectDocumentsValues;
+		handleAccept: (
 			e: React.MouseEvent<HTMLButtonElement>,
-			series: string,
+			docSeries: string,
 			docId: string
 		) => void;
 	}
