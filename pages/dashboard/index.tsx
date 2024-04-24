@@ -94,10 +94,12 @@ const Dashboard: NextPage<Props> = ({ signedIn }) => {
 		[router]
 	);
 
-	const handleDeleteDocument = async (
+	const handleDeletePenaltyDocument = async (
 		e: React.MouseEvent<HTMLButtonElement>,
-		query: string,
-		docId: string
+		queryType: SelectDocumentsValues,
+		docSeries: string,
+		docId: string,
+		docYear: string
 	) => {
 		try {
 			e.preventDefault();
@@ -106,18 +108,26 @@ const Dashboard: NextPage<Props> = ({ signedIn }) => {
 				'This action is irreversible. Are you sure You want to Delete this document?'
 			);
 			if (!confirm) return;
-			if (!selectedYear) {
-				setFetchingErrors(['Must select year from the list.']);
+			if (!yearsBySeries) return;
+			if (!queryType.includes('penalties') && queryType !== 'missing-file') {
+				setFetchingErrors(['Wrong document type.']);
 				return;
 			}
-			if (!query || !docId) {
+			if (!docSeries || !docId || !docYear) {
 				setFetchingErrors(['Must select document from the list.']);
 				return;
 			}
-			const [docType, series, manualUpload] = query.split('__');
+			if (
+				yearsBySeries &&
+				!yearsBySeries[docSeries].find((year) => year === parseInt(docYear))
+			) {
+				setFetchingErrors(['Document year error.']);
+				return;
+			}
+			const [docType, series, manualUpload] = queryType.split('__');
 			setFetching(true);
 			await axios.delete(
-				`/api/dashboard/${docType}/${series}/${docId}/${selectedYear || ''}`,
+				`/api/dashboard/${docType}/${docSeries}/${docId}/${docYear}`,
 				{ timeout: 15000 }
 			);
 			fetchDocuments(selectedDocuments, selectedYear);
@@ -152,9 +162,68 @@ const Dashboard: NextPage<Props> = ({ signedIn }) => {
 		}
 	};
 
+	const handleDeleteDocument = async (
+		e: React.MouseEvent<HTMLButtonElement>,
+		queryType: SelectDocumentsValues,
+		docId: string
+	) => {
+		try {
+			e.preventDefault();
+			setFetchingErrors(null);
+			const confirm = window.confirm(
+				'This action is irreversible. Are you sure You want to Delete this document?'
+			);
+			if (!confirm) return;
+			if (
+				!queryType.includes('contact-message') &&
+				!queryType.includes('missing-info')
+			) {
+				setFetchingErrors(['Wrong document type.']);
+				return;
+			}
+			if (!docId) {
+				setFetchingErrors(['Must select document from the list.']);
+				return;
+			}
+			setFetching(true);
+			await axios.delete(`/api/dashboard/${queryType}/null/${docId}`, {
+				timeout: 15000,
+			});
+			fetchDocuments(selectedDocuments, selectedYear);
+			setFetching(false);
+		} catch (error: any) {
+			if (error instanceof AxiosError) {
+				if (error.response?.status === 401) {
+					router.push('/sign-in');
+				} else {
+					Array.isArray(error?.response?.data)
+						? setFetchingErrors(
+								error?.response?.data || [
+									'Unknown server error. Delete request failed.',
+								]
+						  )
+						: setFetchingErrors([
+								error?.response?.data ||
+									'Unknown server error. Delete request failed.',
+						  ]);
+				}
+			} else {
+				if (error.status === 401) {
+					router.push('/sign-in');
+				} else {
+					setFetchingErrors([
+						(error as Error).message ||
+							'Unknown server error. Delete request failed.',
+					]);
+				}
+			}
+			setFetching(false);
+		}
+	};
+
 	const handleAcceptDocument = async (
 		e: React.MouseEvent<HTMLButtonElement>,
-		series: string,
+		docSeries: string,
 		docId: string
 	) => {
 		try {
@@ -164,7 +233,7 @@ const Dashboard: NextPage<Props> = ({ signedIn }) => {
 				'Are you sure You want to Accept this document?'
 			);
 			if (!confirm) return;
-			if (!series || !docId) {
+			if (!docSeries || !docId) {
 				setFetchingErrors(['Series and document Id is required.']);
 				return;
 			}
@@ -448,9 +517,9 @@ const Dashboard: NextPage<Props> = ({ signedIn }) => {
 						selectedDocuments.match(/(penalties__|missing-file)/im) ? (
 							Object.keys(documentsData).length ? (
 								renderBySeries(documentsData as GroupedByGP, searchInput, {
-									deleteHandler: handleDeleteDocument,
-									docType: selectedDocuments,
-									acceptHandler: handleAcceptDocument,
+									handleDelete: handleDeletePenaltyDocument,
+									queryType: selectedDocuments,
+									handleAccept: handleAcceptDocument,
 								})
 							) : (
 								<div className='m-5 text-center'>
