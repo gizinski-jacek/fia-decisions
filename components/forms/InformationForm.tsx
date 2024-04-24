@@ -194,7 +194,7 @@ const InformationForm = () => {
 						></button>
 					</div>
 				)}
-				{fetching && <LoadingBar />}
+				{fetching && <LoadingBar width='100%' />}
 			</div>
 			<div className='w-100 text-end'>
 				<Button
