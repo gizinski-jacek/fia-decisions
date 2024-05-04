@@ -45,9 +45,11 @@ const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
 							<span className='mx-1'>/</span>
 							<OverlayTrigger
 								placement='top'
-								overlay={<Tooltip>Qualifying</Tooltip>}
+								overlay={<Tooltip>Sprint Qualifying</Tooltip>}
 							>
-								<span className='text-danger text-decoration-underline'>Q</span>
+								<span className='text-danger text-decoration-underline'>
+									SQ
+								</span>
 							</OverlayTrigger>
 						</div>
 					</th>
@@ -61,23 +63,23 @@ const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
 								FP3
 							</span>
 						</OverlayTrigger>
+						<span className='mx-1'>/</span>
+						<OverlayTrigger
+							placement='top'
+							overlay={<Tooltip>Sprint Race</Tooltip>}
+						>
+							<span className='text-success text-decoration-underline'>SR</span>
+						</OverlayTrigger>
 					</th>
 					<th className='text-center'>
 						<p>Saturday</p>
 						<div>
 							<OverlayTrigger
 								placement='top'
-								overlay={<Tooltip>Qualifying</Tooltip>}
+								overlay={<Tooltip>Main Race Qualifying</Tooltip>}
 							>
-								<span className='text-danger text-decoration-underline'>Q</span>
-							</OverlayTrigger>
-							<span className='mx-1'>/</span>
-							<OverlayTrigger
-								placement='top'
-								overlay={<Tooltip>Sprint Race</Tooltip>}
-							>
-								<span className='text-success text-decoration-underline'>
-									Sprint
+								<span className='text-danger text-decoration-underline'>
+									Quali
 								</span>
 							</OverlayTrigger>
 						</div>
@@ -146,16 +148,6 @@ const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
 								<td>
 									<div className='text-danger text-center fw-semibold'>
 										{new Date(
-											weekend.Qualifying.date + ' ' + weekend.Qualifying.time
-										).toLocaleString(undefined, {
-											hour: '2-digit',
-											minute: '2-digit',
-										})}
-									</div>
-								</td>
-								<td>
-									<div className='text-primary text-center fw-semibold'>
-										{new Date(
 											weekend.SecondPractice.date +
 												' ' +
 												weekend.SecondPractice.time
@@ -169,6 +161,16 @@ const CalendarWrapper = ({ calendarData, nextRace }: Props) => {
 									<div className='text-success text-center fw-semibold'>
 										{new Date(
 											weekend.Sprint.date + ' ' + weekend.Sprint.time
+										).toLocaleString(undefined, {
+											hour: '2-digit',
+											minute: '2-digit',
+										})}
+									</div>
+								</td>
+								<td>
+									<div className='text-danger text-center fw-semibold'>
+										{new Date(
+											weekend.Qualifying.date + ' ' + weekend.Qualifying.time
 										).toLocaleString(undefined, {
 											hour: '2-digit',
 											minute: '2-digit',
