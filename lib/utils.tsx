@@ -1,10 +1,14 @@
 import { NextApiRequest } from 'next';
 import jwt from 'jsonwebtoken';
 import { Accordion } from 'react-bootstrap';
-import { GroupedByGP, SelectDocumentsValues } from '../types/myTypes';
+import {
+	GroupedByGrandPrix,
+	GroupedBySeries,
+	PenaltyModel,
+	SelectDocumentsValues,
+} from '../types/myTypes';
 import F1DocWrapper from '../components/wrappers/F1DocWrapper';
 import { ReactElement } from 'react';
-import { supportedSeries } from './myData';
 
 export const verifyToken = (req: NextApiRequest): boolean => {
 	const { JWT_STRATEGY_SECRET, JWT_PAYLOAD_STRING } = process.env;
@@ -24,8 +28,30 @@ export const verifyToken = (req: NextApiRequest): boolean => {
 	return true;
 };
 
-export const renderDocsGroupedByGP = (
-	docsData: GroupedByGP,
+export const groupByGrandPrix = (
+	documents_list: PenaltyModel[]
+): GroupedByGrandPrix => {
+	return documents_list.reduce((prev, curr) => {
+		prev[curr.grand_prix] = prev[curr.grand_prix] || [];
+		prev[curr.grand_prix].push(curr);
+		return prev;
+	}, Object.create(null));
+};
+
+export const groupBySeriesAndGrandPrix = (
+	documents_list: PenaltyModel[]
+): GroupedBySeries => {
+	return documents_list.reduce((prev, curr) => {
+		prev[curr.series] = prev[curr.series] || {};
+		prev[curr.series][curr.grand_prix] =
+			prev[curr.series][curr.grand_prix] || [];
+		prev[curr.series][curr.grand_prix].push(curr);
+		return prev;
+	}, Object.create(null));
+};
+
+export const renderGroupedByGrandPrix = (
+	docsData: GroupedByGrandPrix,
 	searchQuery?: string,
 	cmsProps?: {
 		handleDelete: (
@@ -52,7 +78,7 @@ export const renderDocsGroupedByGP = (
 	}
 	const dataRender = [];
 	if (searchQuery) {
-		let searchData = {} as GroupedByGP;
+		let searchData = {} as GroupedByGrandPrix;
 		for (const [key, array] of Object.entries(docsData)) {
 			const filtered = array.filter(
 				(doc) =>
@@ -67,7 +93,7 @@ export const renderDocsGroupedByGP = (
 			if (filtered.length === 0) {
 				continue;
 			} else {
-				searchData[key as keyof GroupedByGP] = filtered;
+				searchData[key as keyof GroupedByGrandPrix] = filtered;
 			}
 		}
 		for (const [key, array] of Object.entries(searchData)) {
@@ -123,8 +149,8 @@ export const renderDocsGroupedByGP = (
 	return dataRender;
 };
 
-export const renderBySeries = (
-	docsData: GroupedByGP,
+export const renderGroupedBySeries = (
+	docsData: GroupedBySeries,
 	searchQuery?: string,
 	cmsProps?: {
 		handleDelete: (
@@ -142,38 +168,37 @@ export const renderBySeries = (
 		) => void;
 	}
 ): JSX.Element[] | ReactElement | any => {
-	const groupedBySeries = supportedSeries.map((series) => {
-		const year = Object.values(docsData)[0][0].doc_date.slice(0, 4);
-		const seriesDocs: { [key: string]: GroupedByGP[] } = { [series]: [] };
-		for (const [key, value] of Object.entries(docsData)) {
-			if (value[0].series === series) {
-				seriesDocs[series].push({ [key]: value });
-			}
-		}
-		const seriesDocsWrapped = [];
-		for (const [key, value] of Object.entries(seriesDocs)) {
-			if (!value.length) continue;
-			seriesDocsWrapped.push(
-				<Accordion key={key} id={key}>
-					<Accordion.Item eventKey='2'>
-						<Accordion.Header>
-							<h4 className='me-3 fw-bold text-capitalize'>
-								{year} {key.replace('f', 'Formula ')} Penalties
-							</h4>
-						</Accordion.Header>
-						<Accordion.Body className='d-flex flex-column gap-2'>
-							{value.map((docs: GroupedByGP) =>
-								renderDocsGroupedByGP(docs, searchQuery, cmsProps)
-							)}
-						</Accordion.Body>
-					</Accordion.Item>
-				</Accordion>
-			);
-		}
+	const seriesDocsWrapped = [];
+	for (const [series, groupedByGrandPrix] of Object.entries(docsData)) {
+		if (!groupedByGrandPrix) continue;
+		const totalPenalties = Object.values(groupedByGrandPrix).reduce(
+			(prev, curr) => prev + curr.length,
+			0
+		);
+		seriesDocsWrapped.push(
+			<Accordion key={series} id={series}>
+				<Accordion.Item eventKey='2'>
+					<Accordion.Header>
+						<h4 className='me-3 fw-bold text-capitalize'>
+							{series.replace('f', 'Formula ')} Penalties
+						</h4>
+						<h4 className='me-3 fw-bold text-sm-end'>
+							{totalPenalties} {totalPenalties === 1 ? 'penalty' : 'penalties'}
+						</h4>
+					</Accordion.Header>
+					<Accordion.Body className='d-flex flex-column gap-2'>
+						{renderGroupedByGrandPrix(
+							groupedByGrandPrix,
+							searchQuery,
+							cmsProps
+						)}
+					</Accordion.Body>
+				</Accordion.Item>
+			</Accordion>
+		);
+	}
 
-		return seriesDocsWrapped;
-	});
-	return groupedBySeries;
+	return seriesDocsWrapped;
 };
 
 export const formatPenalty = (type: string, string: string): string => {
