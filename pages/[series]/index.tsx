@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import type { NextPage } from 'next';
 import { FormulaSeriesResponseData, GroupedByGP } from '../../types/myTypes';
 import { Button, Form } from 'react-bootstrap';
-import { renderDocsGroupedByGP } from '../../lib/utils';
+import { renderGroupedByGP } from '../../lib/utils';
 import axios, { AxiosError } from 'axios';
 import LoadingBar from '../../components/LoadingBar';
 import { DrawerContext } from '../../hooks/DrawerContextProvider';
@@ -251,7 +251,7 @@ const FormulaSeries: NextPage = () => {
 						</Button>
 					</div>
 				) : penaltiesDocsData ? (
-					renderDocsGroupedByGP(penaltiesDocsData, searchInput)
+					renderGroupedByGP(penaltiesDocsData, searchInput)
 				) : (
 					<div className='m-5 text-center'>
 						<h3>No Documents Found</h3>
