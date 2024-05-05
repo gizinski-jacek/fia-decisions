@@ -6,7 +6,6 @@ import { supportedSeries } from '../../../lib/myData';
 import {
 	ContactDocModel,
 	PenaltyModel,
-	GroupedByGP,
 	MissingDocModel,
 	SeriesDataDocModel,
 } from '../../../types/myTypes';
@@ -16,7 +15,7 @@ import axios from 'axios';
 const handler = async (
 	req: NextApiRequest,
 	res: NextApiResponse<
-		| GroupedByGP
+		| PenaltyModel[]
 		| MissingDocModel[]
 		| ContactDocModel[]
 		| SeriesDataDocModel[]
@@ -55,18 +54,7 @@ const handler = async (
 						await connectionOtherDocsDb.models.Penalty_Doc.find(query)
 							.sort({ doc_date: -1 })
 							.exec();
-					if (!document_list_penalties.length) {
-						return res.status(200).json({});
-					}
-					const groupedByGP: GroupedByGP = document_list_penalties.reduce(
-						(prev, curr) => {
-							prev[curr.grand_prix] = prev[curr.grand_prix] || [];
-							prev[curr.grand_prix].push(curr);
-							return prev;
-						},
-						Object.create(null)
-					);
-					return res.status(200).json(groupedByGP);
+					return res.status(200).json(document_list_penalties);
 				} catch (error: any) {
 					return res
 						.status(404)
@@ -140,18 +128,7 @@ const handler = async (
 						await connectionSeriesYearDb.models.Penalty_Doc.find(query)
 							.sort({ doc_date: -1 })
 							.exec();
-					if (!document_list_penalties.length) {
-						return res.status(200).json({});
-					}
-					const groupedByGP: GroupedByGP = document_list_penalties.reduce(
-						(prev, curr) => {
-							prev[curr.grand_prix] = prev[curr.grand_prix] || [];
-							prev[curr.grand_prix].push(curr);
-							return prev;
-						},
-						Object.create(null)
-					);
-					return res.status(200).json(groupedByGP);
+					return res.status(200).json(document_list_penalties);
 				} catch (error: any) {
 					return res
 						.status(404)
