@@ -3,14 +3,14 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import connectMongoDb from '../../../lib/mongo';
 import {
 	PenaltyModel,
-	GroupedByGP,
+	GroupedByGrandPrix,
 	SeriesDataDocModel,
 } from '../../../types/myTypes';
 import { supportedSeries } from '../../../lib/myData';
 
 const handler = async (
 	req: NextApiRequest,
-	res: NextApiResponse<GroupedByGP | SeriesDataDocModel[] | string>
+	res: NextApiResponse<PenaltyModel[] | SeriesDataDocModel[] | string>
 ) => {
 	if (req.method === 'GET') {
 		try {
@@ -67,18 +67,7 @@ const handler = async (
 					await connectionSeriesYearDb.models.Penalty_Doc.find()
 						.sort({ doc_date: -1 })
 						.exec();
-				if (!document_list_penalties.length) {
-					return res.status(200).json({});
-				}
-				const groupedByGP: GroupedByGP = document_list_penalties.reduce(
-					(prev, curr) => {
-						prev[curr.grand_prix] = prev[curr.grand_prix] || [];
-						prev[curr.grand_prix].push(curr);
-						return prev;
-					},
-					Object.create(null)
-				);
-				return res.status(200).json(groupedByGP);
+				return res.status(200).json(document_list_penalties);
 			}
 		} catch (error: any) {
 			return res
