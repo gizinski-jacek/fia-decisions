@@ -45,6 +45,10 @@ export interface GroupedByGP {
 	[key: string]: PenaltyModel[];
 }
 
+export interface GroupedBySeries {
+	[key: string]: GroupedByGP;
+}
+
 export interface FileFormValues {
 	series: string;
 	file: File | null;
@@ -104,7 +108,7 @@ export interface FormulaSeriesResponseData extends AxiosResponse {
 }
 
 export interface DocumentsResponseData extends AxiosResponse {
-	data: GroupedByGP | MissingDocModel[] | ContactDocModel[] | [];
+	data: PenaltyModel[] | MissingDocModel[] | ContactDocModel[] | [];
 }
 
 export interface ErgastSeasonData extends AxiosResponse {
