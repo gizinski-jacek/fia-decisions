@@ -1,9 +1,9 @@
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import type { NextPage } from 'next';
-import { FormulaSeriesResponseData, GroupedByGP } from '../../types/myTypes';
+import { FormulaSeriesResponseData, PenaltyModel } from '../../types/myTypes';
 import { Button, Form } from 'react-bootstrap';
-import { renderGroupedByGP } from '../../lib/utils';
+import { groupByGrandPrix, renderGroupedByGrandPrix } from '../../lib/utils';
 import axios, { AxiosError } from 'axios';
 import LoadingBar from '../../components/LoadingBar';
 import { DrawerContext } from '../../hooks/DrawerContextProvider';
@@ -12,8 +12,9 @@ import { SeriesDataContext } from '../../hooks/SeriesDataContextProvider';
 const FormulaSeries: NextPage = () => {
 	const { drawer } = useContext(DrawerContext);
 	const { yearsBySeries } = useContext(SeriesDataContext);
-	const [penaltiesDocsData, setPenaltiesDocsData] =
-		useState<GroupedByGP | null>(null);
+	const [penaltiesDocsData, setPenaltiesDocsData] = useState<
+		PenaltyModel[] | null
+	>(null);
 	const [showSearchInput, setShowSearchInput] = useState(false);
 	const [searchInput, setSearchInput] = useState('');
 	const [selectedYear, setSelectedYear] = useState<number | null>(null);
@@ -251,7 +252,10 @@ const FormulaSeries: NextPage = () => {
 						</Button>
 					</div>
 				) : penaltiesDocsData ? (
-					renderGroupedByGP(penaltiesDocsData, searchInput)
+					renderGroupedByGrandPrix(
+						groupByGrandPrix(penaltiesDocsData),
+						searchInput
+					)
 				) : (
 					<div className='m-5 text-center'>
 						<h3>No Documents Found</h3>
