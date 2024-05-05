@@ -41,12 +41,12 @@ export interface PenaltyModel extends TransformedPDFData {
 	updatedAt: string;
 }
 
-export interface GroupedByGP {
+export interface GroupedByGrandPrix {
 	[key: string]: PenaltyModel[];
 }
 
 export interface GroupedBySeries {
-	[key: string]: GroupedByGP;
+	[key: string]: GroupedByGrandPrix;
 }
 
 export interface FileFormValues {
@@ -104,7 +104,7 @@ export interface SeriesDataDocResponseData extends AxiosResponse {
 }
 
 export interface FormulaSeriesResponseData extends AxiosResponse {
-	data: GroupedByGP;
+	data: PenaltyModel[];
 }
 
 export interface DocumentsResponseData extends AxiosResponse {
