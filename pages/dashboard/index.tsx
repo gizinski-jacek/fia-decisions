@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 import {
 	ContactDocModel,
 	DocumentsResponseData,
-	GroupedByGP,
+	PenaltyModel,
 	MissingDocModel,
 	SelectDocumentsValues,
 } from '../../types/myTypes';
@@ -12,7 +12,11 @@ import { Button, Form, Modal } from 'react-bootstrap';
 import axios, { AxiosError } from 'axios';
 import { supportedSeries } from '../../lib/myData';
 import LoadingBar from '../../components/LoadingBar';
-import { renderBySeries, verifyToken } from '../../lib/utils';
+import {
+	groupBySeriesAndGrandPrix,
+	renderGroupedBySeries,
+	verifyToken,
+} from '../../lib/utils';
 import MissingDocWrapper from '../../components/wrappers/MissingDocWrapper';
 import ContactDocWrapper from '../../components/wrappers/ContactDocWrapper';
 import SeriesDataForm from '../../components/forms/SeriesDataForm';
@@ -28,7 +32,7 @@ const Dashboard: NextPage<Props> = ({ signedIn }) => {
 	const [selectedDocuments, setSelectedDocuments] =
 		useState<SelectDocumentsValues>('contact-message');
 	const [documentsData, setDocumentsData] = useState<
-		GroupedByGP | MissingDocModel[] | ContactDocModel[] | null
+		PenaltyModel[] | MissingDocModel[] | ContactDocModel[] | null
 	>(null);
 	const [fetching, setFetching] = useState(false);
 	const [fetchingErrors, setFetchingErrors] = useState<string[] | null>(null);
@@ -332,7 +336,7 @@ const Dashboard: NextPage<Props> = ({ signedIn }) => {
 
 	return signedIn ? (
 		<div className='d-flex flex-column gap-3 mx-2 my-4'>
-			<div className='d-flex gap-2 justify-content-between'>
+			<div className='d-flex gap-2 justify-content-between mb-2'>
 				<Form className='flex-grow-0 rounded-2 p-2 bg-light'>
 					<Form.Group>
 						<Form.Label htmlFor='documents_select' className='fw-bolder'>
@@ -373,7 +377,7 @@ const Dashboard: NextPage<Props> = ({ signedIn }) => {
 								))}
 						</Form.Select>
 					</Form.Group>
-					<div className='d-flex justify-content-between align-items-end'>
+					<div className='d-flex justify-content-between align-items-end mt-2'>
 						{selectedDocuments.includes('penalties') &&
 							(() => {
 								const series = selectedDocuments.split('__')[1];
@@ -404,8 +408,7 @@ const Dashboard: NextPage<Props> = ({ signedIn }) => {
 							})()}
 						<Button
 							variant='primary'
-							size='sm'
-							className='text-nowrap fw-bold ms-auto text-uppercase mt-3'
+							className='text-nowrap fw-bold ms-auto text-uppercase mt-5'
 							disabled={fetching || !!fetchingErrors}
 							onClick={() => fetchDocuments(selectedDocuments, selectedYear)}
 						>
@@ -511,24 +514,18 @@ const Dashboard: NextPage<Props> = ({ signedIn }) => {
 			)}
 			{!fetching ? (
 				selectedDocuments && documentsData ? (
-					typeof documentsData === 'object' &&
-					!Array.isArray(documentsData) &&
-					documentsData !== null ? (
+					documentsData.length ? (
 						selectedDocuments.match(/(penalties__|missing-file)/im) ? (
-							Object.keys(documentsData).length ? (
-								renderBySeries(documentsData as GroupedByGP, searchInput, {
+							renderGroupedBySeries(
+								groupBySeriesAndGrandPrix(documentsData as PenaltyModel[]),
+								searchInput,
+								{
 									handleDelete: handleDeletePenaltyDocument,
 									queryType: selectedDocuments,
 									handleAccept: handleAcceptDocument,
-								})
-							) : (
-								<div className='m-5 text-center'>
-									<h3>No Penalties Found</h3>
-								</div>
+								}
 							)
-						) : null
-					) : Array.isArray(documentsData) && documentsData.length ? (
-						selectedDocuments === 'missing-info' ? (
+						) : selectedDocuments === 'missing-info' ? (
 							<MissingDocWrapper
 								data={documentsData as MissingDocModel[]}
 								docType={selectedDocuments}
