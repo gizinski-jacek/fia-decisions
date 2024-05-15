@@ -1,11 +1,7 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next';
 import connectMongoDb from '../../../lib/mongo';
-import {
-	PenaltyModel,
-	GroupedByGrandPrix,
-	SeriesDataDocModel,
-} from '../../../types/myTypes';
+import { PenaltyModel, SeriesDataDocModel } from '../../../types/myTypes';
 import { supportedSeries } from '../../../lib/myData';
 
 const handler = async (
