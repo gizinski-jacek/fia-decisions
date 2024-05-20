@@ -63,7 +63,6 @@ const Dashboard: NextPage<Props> = ({ signedIn }) => {
 					`/api/dashboard/${docType}/${series}/${year}/${manualUpload || ''}`,
 					{ timeout: 15000 }
 				);
-				setFetchingErrors(null);
 				setDocumentsData(res.data);
 				setFetching(false);
 			} catch (error: any) {
