@@ -56,7 +56,6 @@ const ContactForm = () => {
 						'Unknown server error. If it is a reoccuring error, please use the Contact form to report this issue.',
 				]);
 			}
-			setSubmitSuccess(null);
 			setFetching(false);
 		}
 	};
