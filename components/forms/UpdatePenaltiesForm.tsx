@@ -23,6 +23,7 @@ const UpdatePenaltiesForm = () => {
 	const router = useRouter();
 
 	const handleInputChange = async (e: React.ChangeEvent<HTMLElement>) => {
+		handleDismissAlert();
 		const { name, value } = e.target as HTMLSelectElement | HTMLInputElement;
 		if (name === 'series') {
 			setFormData((prevState) => ({
@@ -40,8 +41,7 @@ const UpdatePenaltiesForm = () => {
 	) => {
 		try {
 			e.preventDefault();
-			setSubmitSuccess(null);
-			setFormErrors(null);
+			handleDismissAlert();
 			if (!formData.series) {
 				setFormErrors(['Must select a Series.']);
 				return;
@@ -83,7 +83,6 @@ const UpdatePenaltiesForm = () => {
 					]);
 				}
 			}
-			setSubmitSuccess(null);
 			setFetching(false);
 		}
 	};
@@ -93,8 +92,7 @@ const UpdatePenaltiesForm = () => {
 	) => {
 		try {
 			e.preventDefault();
-			setSubmitSuccess(null);
-			setFormErrors(null);
+			handleDismissAlert();
 			if (!formData.series || !formData.year) {
 				setFormErrors(['Must select a Series.']);
 				return;
@@ -138,9 +136,13 @@ const UpdatePenaltiesForm = () => {
 					]);
 				}
 			}
-			setSubmitSuccess(null);
 			setFetching(false);
 		}
+	};
+
+	const handleDismissAlert = () => {
+		setFormErrors(null);
+		setSubmitSuccess(null);
 	};
 
 	return (
@@ -167,7 +169,7 @@ const UpdatePenaltiesForm = () => {
 								id='series'
 								onChange={handleInputChange}
 								value={formData.series || ''}
-								disabled={fetching || !!formErrors}
+								disabled={fetching}
 							>
 								<option value=''>Select Formula Series</option>
 								{supportedSeries.map((series) => (
@@ -218,7 +220,7 @@ const UpdatePenaltiesForm = () => {
 							<button
 								type='button'
 								className='btn btn-close'
-								onClick={() => setFormErrors(null)}
+								onClick={handleDismissAlert}
 							></button>
 						</div>
 					)}
@@ -229,7 +231,7 @@ const UpdatePenaltiesForm = () => {
 							<button
 								type='button'
 								className='btn btn-close'
-								onClick={() => setSubmitSuccess(null)}
+								onClick={handleDismissAlert}
 							></button>
 						</div>
 					)}

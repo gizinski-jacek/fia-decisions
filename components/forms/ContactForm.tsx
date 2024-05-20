@@ -15,6 +15,7 @@ const ContactForm = () => {
 	const formRef = useRef<HTMLFormElement>(null);
 
 	const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+		handleDismissAlert();
 		const { name, value } = e.target;
 		setFormData((prevState) => ({ ...prevState, [name]: value }));
 	};
@@ -22,8 +23,7 @@ const ContactForm = () => {
 	const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
 		try {
 			e.preventDefault();
-			setSubmitSuccess(null);
-			setFormErrors(null);
+			handleDismissAlert();
 			if (!formData.email && !formData.message) {
 				setFormErrors(['Must provide an Email and a Message.']);
 				return;
@@ -60,6 +60,11 @@ const ContactForm = () => {
 		}
 	};
 
+	const handleDismissAlert = () => {
+		setFormErrors(null);
+		setSubmitSuccess(null);
+	};
+
 	return (
 		<Form ref={formRef} className='d-flex flex-column gap-3'>
 			<h5>
@@ -89,7 +94,7 @@ const ContactForm = () => {
 						onChange={handleInputChange}
 						value={formData.email}
 						placeholder='Your Email'
-						disabled={fetching || !!formErrors}
+						disabled={fetching}
 						required
 						aria-describedby='emailInputHelpText'
 					/>
@@ -121,7 +126,7 @@ const ContactForm = () => {
 						onChange={handleInputChange}
 						value={formData.message}
 						placeholder='Insert your message'
-						disabled={fetching || !!formErrors}
+						disabled={fetching}
 						required
 						aria-describedby='messageInputHelpText'
 					/>
@@ -140,7 +145,7 @@ const ContactForm = () => {
 						<button
 							type='button'
 							className='btn btn-close'
-							onClick={() => setFormErrors(null)}
+							onClick={handleDismissAlert}
 						></button>
 					</div>
 				)}
@@ -151,7 +156,7 @@ const ContactForm = () => {
 						<button
 							type='button'
 							className='btn btn-close'
-							onClick={() => setSubmitSuccess(null)}
+							onClick={handleDismissAlert}
 						></button>
 					</div>
 				)}

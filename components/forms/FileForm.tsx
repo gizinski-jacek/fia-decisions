@@ -17,11 +17,13 @@ const FileForm = () => {
 	const handleSelectChange = async (
 		e: React.ChangeEvent<HTMLSelectElement>
 	) => {
+		handleDismissAlert();
 		const { name, value } = e.target;
 		setFormData((prevState) => ({ ...prevState, [name]: value }));
 	};
 
 	const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+		handleDismissAlert();
 		const target = e.target;
 		const file = (target.files as FileList)[0];
 		if (file.size > 1000000) {
@@ -38,8 +40,7 @@ const FileForm = () => {
 	const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
 		try {
 			e.preventDefault();
-			setSubmitSuccess(null);
-			setFormErrors(null);
+			handleDismissAlert();
 			if (!formData.series && !formData.file) {
 				setFormErrors(['Must select a Series and a PDF file.']);
 				return;
@@ -72,9 +73,13 @@ const FileForm = () => {
 						'Unknown server error. If it is a reoccuring error, please use the Contact form to report this issue.',
 				]);
 			}
-			setSubmitSuccess(null);
 			setFetching(false);
 		}
+	};
+
+	const handleDismissAlert = () => {
+		setFormErrors(null);
+		setSubmitSuccess(null);
 	};
 
 	return (
@@ -119,7 +124,7 @@ const FileForm = () => {
 						id='series'
 						onChange={handleSelectChange}
 						value={formData.series}
-						disabled={fetching || !!formErrors}
+						disabled={fetching}
 						required
 					>
 						<option value=''>Select Formula Series</option>
@@ -166,7 +171,7 @@ const FileForm = () => {
 						<button
 							type='button'
 							className='btn btn-close'
-							onClick={() => setFormErrors(null)}
+							onClick={handleDismissAlert}
 						></button>
 					</div>
 				)}
@@ -177,7 +182,7 @@ const FileForm = () => {
 						<button
 							type='button'
 							className='btn btn-close'
-							onClick={() => setSubmitSuccess(null)}
+							onClick={handleDismissAlert}
 						></button>
 					</div>
 				)}

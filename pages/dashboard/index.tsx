@@ -48,7 +48,7 @@ const Dashboard: NextPage<Props> = ({ signedIn }) => {
 	const fetchDocuments = useCallback(
 		async (documents: SelectDocumentsValues, year: number | null) => {
 			try {
-				setFetchingErrors(null);
+				handleDismissAlert();
 				if (!documents) {
 					setFetchingErrors(['Must select valid Documents from the list.']);
 					return;
@@ -106,7 +106,7 @@ const Dashboard: NextPage<Props> = ({ signedIn }) => {
 	) => {
 		try {
 			e.preventDefault();
-			setFetchingErrors(null);
+			handleDismissAlert();
 			const confirm = window.confirm(
 				'This action is irreversible. Are you sure You want to Delete this document?'
 			);
@@ -172,7 +172,7 @@ const Dashboard: NextPage<Props> = ({ signedIn }) => {
 	) => {
 		try {
 			e.preventDefault();
-			setFetchingErrors(null);
+			handleDismissAlert();
 			const confirm = window.confirm(
 				'This action is irreversible. Are you sure You want to Delete this document?'
 			);
@@ -231,7 +231,7 @@ const Dashboard: NextPage<Props> = ({ signedIn }) => {
 	) => {
 		try {
 			e.preventDefault();
-			setFetchingErrors(null);
+			handleDismissAlert();
 			const confirm = window.confirm(
 				'Are you sure You want to Accept this document?'
 			);
@@ -306,6 +306,7 @@ const Dashboard: NextPage<Props> = ({ signedIn }) => {
 	}, [signedIn, fetchDocuments, router]);
 
 	const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		handleDismissAlert();
 		const { value } = e.target;
 		setSearchInput(value);
 	};
@@ -313,6 +314,7 @@ const Dashboard: NextPage<Props> = ({ signedIn }) => {
 	const handleSelectedYearChange = async (
 		e: React.ChangeEvent<HTMLSelectElement>
 	) => {
+		handleDismissAlert();
 		const { value } = e.target;
 		setSelectedYear(parseInt(value));
 	};
@@ -331,6 +333,10 @@ const Dashboard: NextPage<Props> = ({ signedIn }) => {
 
 	const closeUpdateSeriesDataModal = () => {
 		setShowUpdateSeriesDataModal(false);
+	};
+
+	const handleDismissAlert = () => {
+		setFetchingErrors(null);
 	};
 
 	return signedIn ? (
@@ -507,7 +513,7 @@ const Dashboard: NextPage<Props> = ({ signedIn }) => {
 						type='button'
 						className='btn btn-close p-2'
 						id='live-alert'
-						onClick={() => setFetchingErrors(null)}
+						onClick={handleDismissAlert}
 					></button>
 				</div>
 			)}

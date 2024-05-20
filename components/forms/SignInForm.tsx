@@ -17,6 +17,7 @@ const SignInForm = () => {
 	const router = useRouter();
 
 	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		handleDismissAlert();
 		const { name, value } = e.target;
 		setFormData((prevState) => ({ ...prevState, [name]: value }));
 	};
@@ -24,7 +25,7 @@ const SignInForm = () => {
 	const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
 		try {
 			e.preventDefault();
-			setFormErrors(null);
+			handleDismissAlert();
 			if (!formData.password) {
 				setFormErrors(['Must provide a password.']);
 				return;
@@ -59,6 +60,10 @@ const SignInForm = () => {
 		setShowPassword(false);
 	};
 
+	const handleDismissAlert = () => {
+		setFormErrors(null);
+	};
+
 	return (
 		<Form className='w-50 mx-auto my-5 p-3 bg-light rounded text-center d-flex flex-column gap-3 justify-content-center align-items-center'>
 			<h2>Dashboard Access</h2>
@@ -80,7 +85,7 @@ const SignInForm = () => {
 					onChange={handleInputChange}
 					value={formData.password}
 					placeholder='Password'
-					disabled={fetching || !!formErrors}
+					disabled={fetching}
 					required
 					aria-describedby='dashboardPasswordInputHelpText'
 				/>
@@ -110,7 +115,7 @@ const SignInForm = () => {
 					<button
 						type='button'
 						className='btn btn-close'
-						onClick={() => setFormErrors(null)}
+						onClick={handleDismissAlert}
 					></button>
 				</div>
 			)}

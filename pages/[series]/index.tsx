@@ -44,7 +44,7 @@ const FormulaSeries: NextPage = () => {
 
 	const fetchDocuments = useCallback(async () => {
 		try {
-			setFetchingErrors(null);
+			handleDismissAlert();
 			if (!selectedYear || !router.query.series) {
 				return;
 			}
@@ -135,6 +135,10 @@ const FormulaSeries: NextPage = () => {
 		if (selectedYear) {
 			fetchDocuments();
 		}
+	};
+
+	const handleDismissAlert = () => {
+		setFetchingErrors(null);
 	};
 
 	return (
@@ -242,14 +246,11 @@ const FormulaSeries: NextPage = () => {
 								<strong className='ms-2 me-5'>{message}</strong>
 							</div>
 						))}
-						<Button
-							variant='primary'
-							size='sm'
-							className='position-absolute top-0 end-0 m-2'
-							onClick={fetchDocuments}
-						>
-							Refresh
-						</Button>
+						<button
+							type='button'
+							className='btn btn-close'
+							onClick={handleDismissAlert}
+						></button>
 					</div>
 				) : penaltiesDocsData ? (
 					renderGroupedByGrandPrix(

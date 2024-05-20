@@ -20,6 +20,7 @@ const InformationForm = () => {
 	const formRef = useRef<HTMLFormElement>(null);
 
 	const handleInputChange = async (e: React.ChangeEvent<HTMLElement>) => {
+		handleDismissAlert();
 		const { name, value } = e.target as HTMLSelectElement | HTMLInputElement;
 		setFormData((prevState) => ({ ...prevState, [name]: value }));
 	};
@@ -27,8 +28,7 @@ const InformationForm = () => {
 	const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
 		try {
 			e.preventDefault();
-			setSubmitSuccess(null);
-			setFormErrors(null);
+			handleDismissAlert();
 			if (!formData.series || !formData.year || !formData.description) {
 				setFormErrors([
 					'Must select a Series, a Year and provide a Description.',
@@ -63,9 +63,13 @@ const InformationForm = () => {
 						'Unknown server error. If it is a reoccuring error, please use the Contact form to report this issue.',
 				]);
 			}
-			setSubmitSuccess(null);
 			setFetching(false);
 		}
+	};
+
+	const handleDismissAlert = () => {
+		setFormErrors(null);
+		setSubmitSuccess(null);
 	};
 
 	return (
@@ -91,7 +95,7 @@ const InformationForm = () => {
 						id='series'
 						onChange={handleInputChange}
 						value={formData.series}
-						disabled={fetching || !!formErrors}
+						disabled={fetching}
 						required
 					>
 						<option value=''>Select Formula Series</option>
@@ -160,7 +164,7 @@ const InformationForm = () => {
 						onChange={handleInputChange}
 						value={formData.description}
 						placeholder='Description, Title or Link'
-						disabled={fetching || !!formErrors}
+						disabled={fetching}
 						required
 						aria-describedby='descriptionInputHelpText'
 					/>
@@ -179,7 +183,7 @@ const InformationForm = () => {
 						<button
 							type='button'
 							className='btn btn-close'
-							onClick={() => setFormErrors(null)}
+							onClick={handleDismissAlert}
 						></button>
 					</div>
 				)}
@@ -190,7 +194,7 @@ const InformationForm = () => {
 						<button
 							type='button'
 							className='btn btn-close'
-							onClick={() => setSubmitSuccess(null)}
+							onClick={handleDismissAlert}
 						></button>
 					</div>
 				)}

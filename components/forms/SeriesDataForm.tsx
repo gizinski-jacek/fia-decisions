@@ -26,6 +26,7 @@ const SeriesDataForm = () => {
 	const router = useRouter();
 
 	const handleInputChange = async (e: React.ChangeEvent<HTMLElement>) => {
+		handleDismissAlert();
 		const { name, value } = e.target as HTMLSelectElement | HTMLInputElement;
 		setFormData((prevState) => ({ ...prevState, [name]: value }));
 	};
@@ -33,8 +34,7 @@ const SeriesDataForm = () => {
 	const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
 		try {
 			e.preventDefault();
-			setSubmitSuccess(null);
-			setFormErrors(null);
+			handleDismissAlert();
 			if (!formData.series || !formData.year || !formData.documents_url) {
 				setFormErrors([
 					'Must select a Series, a Year and provide a Documents Page URL.',
@@ -86,7 +86,6 @@ const SeriesDataForm = () => {
 					]);
 				}
 			}
-			setSubmitSuccess(null);
 			setFetching(false);
 		}
 	};
@@ -99,8 +98,7 @@ const SeriesDataForm = () => {
 	) => {
 		try {
 			e.preventDefault();
-			setSubmitSuccess(null);
-			setFormErrors(null);
+			handleDismissAlert();
 			const confirm = window.confirm(
 				'This action is irreversible. Are you sure You want to Delete this document?'
 			);
@@ -142,7 +140,6 @@ const SeriesDataForm = () => {
 					]);
 				}
 			}
-			setSubmitSuccess(null);
 			setFetching(false);
 		}
 	};
@@ -161,8 +158,7 @@ const SeriesDataForm = () => {
 	) => {
 		try {
 			e.preventDefault();
-			setSubmitSuccess(null);
-			setFormErrors(null);
+			handleDismissAlert();
 			const confirm = window.confirm(
 				'This action will try to automatically acquire Series Data from FIA website?'
 			);
@@ -198,9 +194,13 @@ const SeriesDataForm = () => {
 					]);
 				}
 			}
-			setSubmitSuccess(null);
 			setFetching(false);
 		}
+	};
+
+	const handleDismissAlert = () => {
+		setFormErrors(null);
+		setSubmitSuccess(null);
 	};
 
 	return (
@@ -226,7 +226,7 @@ const SeriesDataForm = () => {
 										id='series'
 										onChange={handleInputChange}
 										value={formData.series}
-										disabled={fetching || !!formErrors}
+										disabled={fetching}
 										required
 									>
 										<option value=''>Select Formula Series</option>
@@ -309,7 +309,7 @@ const SeriesDataForm = () => {
 									onChange={handleInputChange}
 									value={formData.documents_url}
 									placeholder='Provide URL'
-									disabled={fetching || !!formErrors}
+									disabled={fetching}
 									required
 									aria-describedby='documentsURLInputHelpText'
 								/>
@@ -381,7 +381,7 @@ const SeriesDataForm = () => {
 						<button
 							type='button'
 							className='btn btn-close'
-							onClick={() => setFormErrors(null)}
+							onClick={handleDismissAlert}
 						></button>
 					</div>
 				)}
@@ -392,7 +392,7 @@ const SeriesDataForm = () => {
 						<button
 							type='button'
 							className='btn btn-close'
-							onClick={() => setSubmitSuccess(null)}
+							onClick={handleDismissAlert}
 						></button>
 					</div>
 				)}
