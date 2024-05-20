@@ -72,8 +72,8 @@ export const seriesDataFormValidationSchema: Yup.SchemaOf<
 		.required('Year is required.'),
 	documents_url: Yup.string()
 		.required('Series documents page url is required.')
-		.min(64, 'Message min 64 characters.')
-		.max(512, 'Message max 512 characters.')
+		.min(64, 'URL min 64 characters.')
+		.max(512, 'URL max 512 characters.')
 		.url('URL is invalid.')
 		.test(
 			'url-points-to-fia-domain',
