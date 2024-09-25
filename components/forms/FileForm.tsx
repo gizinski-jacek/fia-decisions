@@ -92,7 +92,7 @@ const FileForm = () => {
 				Only official documents from{' '}
 				<a
 					className='fw-bold'
-					href='https://www.fia.com/documents/championships'
+					href='https://www.fia.com/documents'
 					target='_blank'
 					rel='noreferrer'
 				>
