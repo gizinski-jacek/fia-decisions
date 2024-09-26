@@ -1,4 +1,4 @@
-# Track Limits - FIA Formula penalties
+# Track Limits - FIA Formula penalties (Frontend Client)
 
 An app built for Formula series fans who do not feel like going through news articles or downloading FIA documents to find out what penalties were given to their favorite drivers.
 
@@ -6,7 +6,7 @@ This project is complemented by [FIA decisions worker API](https://github.com/gi
 
 ## Table of contents
 
-- [Track Limits - FIA Formula penalties](#track-limits---fia-formula-penalties)
+- [Track Limits - FIA Formula penalties (Frontend Client)](#track-limits---fia-formula-penalties-frontend-client)
   - [Table of contents](#table-of-contents)
 - [Github \& Live](#github--live)
   - [Getting Started](#getting-started)
