@@ -190,7 +190,7 @@ const handler = async (
 				const token = jwt.sign(JWT_PAYLOAD_STRING, JWT_STRATEGY_SECRET);
 				res.setHeader(
 					'Set-Cookie',
-					`token=${token}; Path=/; httpOnly=true; SameSite=strict; Secure=true; Max-Age=7200` // 2 hours
+					`token=${token}; Path=/; httpOnly=true; SameSite=strict; Secure=true; Max-Age=900` // 15 minutes
 				);
 				return res.status(200).end();
 			} catch (error: any) {
