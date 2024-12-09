@@ -29,7 +29,7 @@ const ContactDocWrapper = ({ data, docType, handleDelete }: Props) => {
 							key={contact._id}
 							className='d-flex flex-column gap-2 p-2 bg-light border border-info rounded text-break'
 						>
-							<div className='d-flex gap-3 justify-content-between'>
+							<div className='d-flex gap-3 justify-content-between align-items-start'>
 								<div>
 									<strong>Email</strong>
 									<a href={`mailto:${contact.email}`} className='d-block'>
@@ -44,7 +44,7 @@ const ContactDocWrapper = ({ data, docType, handleDelete }: Props) => {
 									size='sm'
 									variant='danger'
 									type='submit'
-									className='fw-bolder text-nowrap custom-button'
+									className='fw-bolder text-nowrap'
 									onClick={(e) => handleDelete(e, docType, contact._id)}
 								>
 									Delete

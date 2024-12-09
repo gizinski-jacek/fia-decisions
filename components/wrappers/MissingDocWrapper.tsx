@@ -27,7 +27,7 @@ const MissingDocWrapper = ({ data, docType, handleDelete }: Props) => {
 							key={missing._id}
 							className='d-flex flex-column gap-2 p-2 bg-light border border-info rounded text-break'
 						>
-							<div className='d-flex gap-3 justify-content-between'>
+							<div className='d-flex gap-3 justify-content-between align-items-start'>
 								<div>
 									<strong>Series</strong>
 									<p className='text-capitalize'>{missing.series}</p>
@@ -35,7 +35,7 @@ const MissingDocWrapper = ({ data, docType, handleDelete }: Props) => {
 								<Button
 									variant='danger'
 									size='sm'
-									className='fw-bolder text-nowrap custom-button'
+									className='fw-bolder text-nowrap'
 									onClick={(e) => handleDelete(e, docType, missing._id)}
 								>
 									Delete
