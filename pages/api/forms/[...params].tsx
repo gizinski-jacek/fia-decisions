@@ -48,34 +48,34 @@ const handler = async (
 				});
 				// Parts are emitted when parsing the form
 				form.on('part', async (part) => {
-					// You *must* act on the part by reading it
-					// NOTE: if you want to ignore it, just call "part.resume()"
-					if (part.filename === undefined) {
-						// filename is not defined when this is a field and not a file
-						// console.log('got field named ' + part.name);
-						// ignore field's content
-						part.resume();
-					}
-					if (part.filename !== undefined) {
-						// filename is defined when this is a file
-						// console.log('got file named ' + part.name);
-						// ignore file's content here
-						part.resume();
-					}
-					part.on('error', (error: any) => {
-						// decide what to do
-						console.log('got error on part ' + error);
-					});
-					if (!part) {
-						return res.status(422).json('Must select a file.');
-					}
-					if (part.headers['content-type'] !== 'application/pdf') {
-						return res.status(422).json('Only PDF files are allowed.');
-					}
-					if (part.byteCount > 1000000) {
-						return res.status(422).json('File is too big, max size 1MB.');
-					}
 					try {
+						// You *must* act on the part by reading it
+						// NOTE: if you want to ignore it, just call "part.resume()"
+						if (part.filename === undefined) {
+							// filename is not defined when this is a field and not a file
+							// console.log('got field named ' + part.name);
+							// ignore field's content
+							part.resume();
+						}
+						if (part.filename !== undefined) {
+							// filename is defined when this is a file
+							// console.log('got file named ' + part.name);
+							// ignore file's content here
+							part.resume();
+						}
+						part.on('error', (error: any) => {
+							// decide what to do
+							console.log('got error on part ' + error);
+						});
+						if (!part) {
+							return res.status(422).json('Must select a file.');
+						}
+						if (part.headers['content-type'] !== 'application/pdf') {
+							return res.status(422).json('Only PDF files are allowed.');
+						}
+						if (part.byteCount > 1000000) {
+							return res.status(422).json('File is too big, max size 1MB.');
+						}
 						const fileBuffer = await streamToBuffer(part);
 						const pdfData = await readPDFPages(fileBuffer);
 						const transformed = createPenaltyDocument(
@@ -97,12 +97,11 @@ const handler = async (
 							);
 					}
 				});
-				form.on('close', function () {
+				form.on('close', () => {
 					console.log('Upload completed!');
 				});
 				// Parse req
 				form.parse(req);
-				return res.status(200).end();
 			} catch (error: any) {
 				return res
 					.status(500)
@@ -190,7 +189,7 @@ const handler = async (
 				const token = jwt.sign(JWT_PAYLOAD_STRING, JWT_STRATEGY_SECRET);
 				res.setHeader(
 					'Set-Cookie',
-					`token=${token}; Path=/; httpOnly=true; SameSite=strict; Secure=true; Max-Age=900` // 15 minutes
+					`token=${token}; Path=/; httpOnly=true; SameSite=strict; Secure=true; Max-Age=1800` // 30 minutes
 				);
 				return res.status(200).end();
 			} catch (error: any) {
