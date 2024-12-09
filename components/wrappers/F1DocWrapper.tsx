@@ -164,22 +164,32 @@ const F1DocWrapper = ({ data, cmsProps }: Props) => {
 								})}
 							</div>
 						</div>
-						<div className='d-flex flex-column flex-md-row gap-2'>
+						<div className='d-flex flex-column flex-md-row align-items-start gap-2'>
 							<Button
 								size='sm'
 								variant='info'
-								className='fw-bolder text-nowrap custom-button'
+								className='fw-bolder text-nowrap'
 								onClick={handleOpenModal}
 							>
 								Details
 							</Button>
+							{data.pdf_original_url && (
+								<a
+									className='btn btn-sm btn-warning p-1 px-2 fw-bolder text-nowrap'
+									href={data.pdf_original_url}
+									target='_blank'
+									rel='noreferrer'
+								>
+									Original
+								</a>
+							)}
 							{cmsProps && (
 								<>
 									{cmsProps.queryType === 'missing-file' && (
 										<Button
 											size='sm'
 											variant='success'
-											className='fw-bolder text-nowrap custom-button'
+											className='fw-bolder text-nowrap'
 											onClick={(e) =>
 												cmsProps.handleAccept(e, data.series, data._id)
 											}
@@ -190,7 +200,7 @@ const F1DocWrapper = ({ data, cmsProps }: Props) => {
 									<Button
 										size='sm'
 										variant='danger'
-										className='fw-bolder text-nowrap custom-button'
+										className='fw-bolder text-nowrap'
 										onClick={(e) =>
 											cmsProps.handleDelete(
 												e,
