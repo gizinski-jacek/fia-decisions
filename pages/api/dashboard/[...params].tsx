@@ -305,7 +305,7 @@ const handler = async (
 					).exec();
 					document._id = new mongoose.Types.ObjectId();
 					document.isNew = true;
-					await connectionSeriesYearDb.models.Penalty_Doc.insertMany(document);
+					await connectionSeriesYearDb.models.Penalty_Doc.create(document);
 					return res.status(200).end();
 				} catch (error: any) {
 					return res
