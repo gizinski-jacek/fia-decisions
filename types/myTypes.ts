@@ -12,6 +12,7 @@ export interface TransformedPDFData {
 	document_info: DocumentDetails;
 	incident_info: IncidentDetails;
 	stewards: string[];
+	pdf_original_url: string | null;
 }
 
 export interface DocumentDetails {
