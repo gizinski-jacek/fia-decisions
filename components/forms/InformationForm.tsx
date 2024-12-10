@@ -8,6 +8,7 @@ import {
 } from '../../lib/myData';
 import LoadingBar from '../LoadingBar';
 import { SeriesDataContext } from '../../hooks/SeriesDataContextProvider';
+import ErrorMsg from '../ErrorMsg';
 
 const InformationForm = () => {
 	const { yearsBySeries } = useContext(SeriesDataContext);
@@ -173,19 +174,7 @@ const InformationForm = () => {
 					</Form.Text>
 				</Form.Group>
 				{formErrors && (
-					<div className='m-0 alert alert-danger alert-dismissible overflow-auto custom-alert-maxheight text-start'>
-						{formErrors.map((message, index) => (
-							<div className='d-flex mb-2' key={index}>
-								<i className='bi bi-exclamation-triangle-fill fs-5 m-0 me-2'></i>
-								<strong className='ms-2 me-4'>{message}</strong>
-							</div>
-						))}
-						<button
-							type='button'
-							className='btn btn-close'
-							onClick={handleDismissAlert}
-						></button>
-					</div>
+					<ErrorMsg errors={formErrors} dismiss={handleDismissAlert} />
 				)}
 				{submitSuccess && (
 					<div className='d-flex m-0 mb-2 alert alert-success alert-dismissible overflow-auto custom-alert-maxheight text-start'>

@@ -8,6 +8,7 @@ import axios, { AxiosError } from 'axios';
 import LoadingBar from '../../components/LoadingBar';
 import { DrawerContext } from '../../hooks/DrawerContextProvider';
 import { SeriesDataContext } from '../../hooks/SeriesDataContextProvider';
+import ErrorMsg from '../../components/ErrorMsg';
 
 const FormulaSeries: NextPage = () => {
 	const { drawer } = useContext(DrawerContext);
@@ -239,19 +240,7 @@ const FormulaSeries: NextPage = () => {
 				{fetching ? (
 					<LoadingBar margin='5rem' />
 				) : fetchingErrors ? (
-					<div className='m-0 alert alert-danger alert-dismissible overflow-auto custom-alert-maxheight text-start'>
-						{fetchingErrors.map((message, index) => (
-							<div className='d-flex mb-2' key={index}>
-								<i className='bi bi-exclamation-triangle-fill fs-4 m-0 me-2'></i>
-								<strong className='ms-2 me-5'>{message}</strong>
-							</div>
-						))}
-						<button
-							type='button'
-							className='btn btn-close'
-							onClick={handleDismissAlert}
-						></button>
-					</div>
+					<ErrorMsg errors={fetchingErrors} dismiss={handleDismissAlert} />
 				) : penaltiesDocsData ? (
 					renderGroupedByGrandPrix(
 						groupByGrandPrix(penaltiesDocsData),

@@ -5,6 +5,7 @@ import { LoginFormValues } from '../../types/myTypes';
 import axios, { AxiosError } from 'axios';
 import LoadingBar from '../LoadingBar';
 import { useRouter } from 'next/router';
+import ErrorMsg from '../ErrorMsg';
 
 const SignInForm = () => {
 	const [formData, setFormData] = useState<LoginFormValues>(
@@ -105,19 +106,7 @@ const SignInForm = () => {
 				)}
 			</Form.Group>
 			{formErrors && (
-				<div className='m-0 alert alert-danger alert-dismissible overflow-auto custom-alert-maxheight text-start'>
-					{formErrors.map((message, index) => (
-						<div className='d-flex mb-2' key={index}>
-							<i className='bi bi-exclamation-triangle-fill fs-5 m-0 me-2'></i>
-							<strong className='ms-2 me-4'>{message}</strong>
-						</div>
-					))}
-					<button
-						type='button'
-						className='btn btn-close'
-						onClick={handleDismissAlert}
-					></button>
-				</div>
+				<ErrorMsg errors={formErrors} dismiss={handleDismissAlert} />
 			)}
 			{fetching && <LoadingBar margin='1rem 0' width='50%' />}
 			<Button

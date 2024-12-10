@@ -22,6 +22,7 @@ import ContactDocWrapper from '../../components/wrappers/ContactDocWrapper';
 import SeriesDataForm from '../../components/forms/SeriesDataForm';
 import { SeriesDataContext } from '../../hooks/SeriesDataContextProvider';
 import UpdatePenaltiesForm from '../../components/forms/UpdatePenaltiesForm';
+import ErrorMsg from '../../components/ErrorMsg';
 
 interface Props {
 	signedIn: boolean;
@@ -502,20 +503,7 @@ const Dashboard: NextPage<Props> = ({ signedIn }) => {
 				</div>
 			</div>
 			{fetchingErrors && (
-				<div className='m-0 my-2 mx-sm-auto alert alert-danger alert-dismissible overflow-auto custom-alert-maxheight text-start'>
-					{fetchingErrors.map((message, index) => (
-						<div className='d-flex mb-2' key={index}>
-							<i className='bi bi-exclamation-triangle-fill fs-5 m-0 me-2'></i>
-							<strong className='ms-2 me-4'>{message}</strong>
-						</div>
-					))}
-					<button
-						type='button'
-						className='btn btn-close p-2'
-						id='live-alert'
-						onClick={handleDismissAlert}
-					></button>
-				</div>
+				<ErrorMsg errors={fetchingErrors} dismiss={handleDismissAlert} />
 			)}
 			{!fetching ? (
 				selectedDocuments && documentsData ? (
