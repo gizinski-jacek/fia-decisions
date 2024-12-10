@@ -1,4 +1,5 @@
-const { PdfReader } = require('pdfreader');
+// @ts-ignore
+import { PdfReader } from 'pdfreader';
 
 // Parsing PDF buffer data and returning document strings in array.
 export const readPDFPages = (buffer: Buffer): Promise<string[]> => {
