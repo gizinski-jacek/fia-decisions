@@ -68,7 +68,7 @@ const handler = async (
 							console.log('got error on part ' + error);
 						});
 						if (!part) {
-							return res.status(422).json('Must select a file.');
+							return res.status(422).json('Must provide a PDF file.');
 						}
 						if (part.headers['content-type'] !== 'application/pdf') {
 							return res.status(422).json('Only PDF files are allowed.');
