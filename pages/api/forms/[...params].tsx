@@ -73,8 +73,8 @@ const handler = async (
 						if (part.headers['content-type'] !== 'application/pdf') {
 							return res.status(422).json('Only PDF files are allowed.');
 						}
-						if (part.byteCount > 1000000) {
-							return res.status(422).json('File is too big, max size 1MB.');
+						if (part.byteCount > 2000000) {
+							return res.status(422).json('File is too big, max size 2MB.');
 						}
 						const fileBuffer = await streamToBuffer(part);
 						const pdfData = await readPDFPages(fileBuffer);

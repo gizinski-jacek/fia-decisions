@@ -27,12 +27,12 @@ const FileForm = () => {
 		handleDismissAlert();
 		const target = e.target;
 		const file = (target.files as FileList)[0];
-		if (file.size > 1000000) {
-			setFormErrors(['File is too big.']);
-			return;
-		}
 		if (file.type !== 'application/pdf') {
 			setFormErrors(['Only PDF files are allowed.']);
+			return;
+		}
+		if (file.size > 2000000) {
+			setFormErrors(['File is too big, max size 2MB.']);
 			return;
 		}
 		setFormData((prevState) => ({ ...prevState, file: file }));
@@ -158,7 +158,7 @@ const FileForm = () => {
 						aria-describedby='fileSelectHelpText'
 					/>
 					<Form.Text muted id='fileSelectHelpText'>
-						Only PDF files, max size 1MB.
+						Only PDF files, max size 2MB.
 					</Form.Text>
 				</Form.Group>
 				{formErrors && (
