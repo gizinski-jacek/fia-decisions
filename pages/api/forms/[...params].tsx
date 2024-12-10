@@ -102,6 +102,7 @@ const handler = async (
 				});
 				// Parse req
 				form.parse(req);
+				return res.status(202);
 			} catch (error: any) {
 				return res
 					.status(500)
