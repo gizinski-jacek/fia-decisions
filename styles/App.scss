@@ -193,7 +193,8 @@ table {
 
 .custom-container {
 	:first-child {
-		min-width: 160px !important;
+		min-width: 180px !important;
+		max-width: 180px !important;
 	}
 
 	:nth-child(2) {
@@ -203,6 +204,7 @@ table {
 
 	:nth-child(3) {
 		min-width: 200px !important;
+		max-width: 200px !important;
 	}
 
 	:nth-child(4) {

@@ -108,7 +108,7 @@ const F1DocWrapper = ({ data, cmsProps }: Props) => {
 			<Accordion id={data._id}>
 				<Accordion.Item eventKey='0'>
 					<Accordion.Header>
-						<div className='d-flex flex-column w-100 flex-sm-row align-items-center gap-1 gap-sm-1 me-3 custom-container'>
+						<div className='d-flex flex-column w-100 flex-sm-row align-items-center gap-2 me-3 custom-container'>
 							<div
 								className='rounded-pill border border-dark p-1 text-capitalize text-center text-nowrap fw-bold'
 								style={{
