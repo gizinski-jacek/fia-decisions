@@ -9,6 +9,7 @@ import LoadingBar from '../../components/LoadingBar';
 import { DrawerContext } from '../../hooks/DrawerContextProvider';
 import { SeriesDataContext } from '../../hooks/SeriesDataContextProvider';
 import ErrorMsg from '../../components/ErrorMsg';
+import { supportedSeries } from '../../lib/myData';
 
 const FormulaSeries: NextPage = () => {
 	const { drawer } = useContext(DrawerContext);
@@ -114,6 +115,9 @@ const FormulaSeries: NextPage = () => {
 
 	useEffect(() => {
 		const { series, year } = router.query as { series: string; year: string };
+		if (!supportedSeries.find((s) => s === series)) {
+			router.push('/');
+		}
 		setSearchInput('');
 		if (series && yearsBySeries) {
 			if (year && yearsBySeries[series]?.includes(parseInt(year))) {
@@ -182,7 +186,6 @@ const FormulaSeries: NextPage = () => {
 						</Form.Group>
 					</Form>
 				</div>
-
 				<div
 					className={`position-absolute top-0 end-0 d-flex align-items-center gap-2 custom-select 
 					${drawer.isHidden && screenIsSmall ? 'me-5' : ''} `}
