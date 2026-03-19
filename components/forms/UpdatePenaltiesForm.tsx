@@ -26,11 +26,11 @@ const UpdatePenaltiesForm = () => {
 	const handleInputChange = async (e: React.ChangeEvent<HTMLElement>) => {
 		handleDismissAlert();
 		const { name, value } = e.target as HTMLSelectElement | HTMLInputElement;
-		if (name === 'series') {
+		if (!formData.series) {
 			setFormData((prevState) => ({
 				...prevState,
 				[name]: value,
-				year: '',
+				year: new Date().getFullYear().toString(),
 			}));
 		} else {
 			setFormData((prevState) => ({ ...prevState, [name]: value }));
